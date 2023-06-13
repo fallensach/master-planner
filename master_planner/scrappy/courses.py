@@ -3,9 +3,11 @@ from bs4 import BeautifulSoup
 
 
 
-def course_info(code: str, lang: str='') -> dict[str, any]:
+def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
     """
     
+
+
     return format -- {
                 "examination": [{"code": 
                                  "name": 
@@ -20,11 +22,14 @@ def course_info(code: str, lang: str='') -> dict[str, any]:
 
     arguments:
     code: str -- course code
-    lang: str -- en for english, leave empty for swedish
+    lang: str -- 'en' for english, leave empty for swedish
     """
-
-    url = f"https://studieinfo.liu.se/{lang}/kurs/{code}"
+    
+    if en: url = f"https://studieinfo.liu.se/en/kurs/{code}"
+    else: url = f"https://studieinfo.liu.se/kurs/{code}"
+    
     r = requests.get(url)
+
     if r.status_code == 200:
         
         soup = BeautifulSoup(r.content, "html.parser")
@@ -44,26 +49,26 @@ def get_examination(soup: BeautifulSoup) -> list[dict[str, str]]:
         temp = row.find_all("td") 
         examinations.append({"code": temp[0].text, 
                              "name": temp[1].text, 
-                             "scope": temp[2].text.strip().replace('\r\n', ''), 
+                             "hp": temp[2].text.strip().replace('\r\n', '').split()[0], 
                              "grading": temp[3].text})
-        return examinations
+    return examinations
 
-def get_level(soup):
+def get_level(soup: BeautifulSoup) -> str:
     return soup.find("section", {"class": "overview-content f-col"}).text.split('\r\n')[3].strip()
 
-def get_examinator(soup):
+def get_examinator(soup: BeautifulSoup) -> str:
     return soup.find("section", {"class": "overview-content f-col"}).text.split('\r\n')[7].strip()
 
-def get_location(soup):
-    pass
+def get_location(soup: BeautifulSoup) -> str:
+    return soup.find("table", {"class": "table table-striped study-guide-table"}).find_all("tr")[1].find_all("td")[-2].text
 
-def get_main_field(soup):
+def get_main_field(soup: BeautifulSoup) -> list[str]:
     for tag in soup.find("section", {"class": "syllabus f-2col"}).find_all("h2"):
     
-        if tag.text in ['Huvudområde']:
+        if tag.text in ['Huvudområde', 'Main field of study']:
             return tag.next_sibling.strip().split(', ')
             
 
 if __name__ == "__main__":
     
-    course_info('TDDE01')
+    fetch_course_info('TDDE01', en=False)
