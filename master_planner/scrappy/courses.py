@@ -34,13 +34,13 @@ def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
         
         soup = BeautifulSoup(r.content, "html.parser")
 
-        print({"examination": get_examination(soup),
+        return {"examination": get_examination(soup),
                 "level": get_level(soup),
                 "examinator": get_examinator(soup),
                 "location": get_location(soup),
                 "main_field": get_main_field(soup), 
-                })
-        return True
+                }
+        
     raise ValueError(f'status_code {r.status_code}, probably wrong course code')
 
 def get_examination(soup: BeautifulSoup) -> list[dict[str, str]]:
