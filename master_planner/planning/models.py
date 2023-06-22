@@ -27,16 +27,23 @@ class Profile(models.Model):
     
 class Program(models.Model):
     program_code = models.CharField(max_length=10, primary_key=True)
+    program_name = models.CharField(max_length=100)
     program_profiles = models.ManyToManyField(Profile)
     program_courses = models.ManyToManyField(Course)
-    
+
+
 def register_program(program_code: str):
     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
     if not program_exists:
         program = ProgramPlan(program_code.upper())
+        if program is None:
+            return False
         courses = register_courses(program)
         register_profiles(program)
         add_courses(program, courses)
+    
+    return True
+
 
 def register_courses(program: ProgramPlan) -> list[Course]:
     general_courses = program.courses()
@@ -71,7 +78,7 @@ def register_profiles(program: ProgramPlan):
             courses.append(profile_course)
             
         profile = Profile(name, code)
-        new_program = Program(program.program_code)
+        new_program = Program(program.program_code, program.program_name)
         new_program.save()
         profile.save()
         profile.profile_courses.add(*courses)
@@ -84,8 +91,19 @@ def add_courses(program: ProgramPlan, courses: list[Course]):
     program_add.program_courses.add(*courses)
     program_add.save()
         
-        
-        
+def get_courses(program_code: str):
+    kurser = Program.objects.get(program_code=program_code.upper()).program_courses.all()
+    courses = []
+    for course in kurser:
+        temp_course = { 
+                    "course_code": course.course_code, 
+                    "course_name": course.course_name,
+                    "level": course.level,
+                    "vof": course.vof
+                    }
+        courses.append(temp_course)
+    return courses
     
+
     
     
