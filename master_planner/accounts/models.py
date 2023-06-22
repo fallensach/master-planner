@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from planning.models import Program, Schedule
 
@@ -8,9 +8,28 @@ class Account(models.Model):
     choices = models.ManyToManyField(Schedule, blank=True)
 
 def register_account(username: str, email: str, password: str):
-    user = User.objects.create_user(username=username, password=password, email=email)
-    account = Account(user=user)
+    try:
+        user = User.objects.create_user(username=username, password=password, email=email)
+        account = Account(user=user)
+        account.save()
+        return True
     
-    account.save()
-    return account
+    except IntegrityError:
+        return False
     
+def get_user(username: str) -> Account | None:
+    """Retrieves user object from Account based on session.
+
+    Args:
+        request (_type_): _description_
+
+    Returns:
+        Account | None: Account object or None
+    """
+    try:
+        user = User.objects.get(username=username)
+        account = Account.objects.get(user=user)
+        return account.user
+    
+    except IntegrityError:
+        return None
