@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content%}
+    <p class="text-2xl"> {{ program_name }} </p>
+        {% for course in courses %}
+        <div class="mr-5 ml-5 flex space-x-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white">
+        {% for key, value in course.items %} 
+            <div class="p-2">{{ value }}</div>
+        {% endfor %}
+        </div>
+        <br>
+    {% endfor %}
+{% endblock content %}
+

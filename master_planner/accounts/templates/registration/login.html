@@ -1,0 +1,22 @@
+{% extends 'base_logged_out.html' %}
+{% block content %}
+    <div class="flex h-full justify-center items-center">
+        <div class="flex justify-center bg-white items-center h-3/6 w-3/5 mx-96 rounded-lg overflow-clip shadow-box">
+            <div class="flex flex-col w-full">
+                <form class="flex flex-col p-12 space-y-2" method="post">
+                    {% csrf_token %}
+                    {{ form }}
+                    <button class="bg-sky-500 text-white mt-5 p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" type="submit">Log in</button>
+                    <a class="mt-4" href={% url 'register' %}>No account yet?</a>
+                </form>
+                
+            </div>
+
+            <div class="flex justify-center flex-col items-center h-full w-full bg-gradient-to-tr from-sky-500 to-fuchsia-500 text-3xl">
+                <p class="text-right text-white font-comfortaa pr-4 pl-10"> Login to Master Planner </p>
+                
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}
