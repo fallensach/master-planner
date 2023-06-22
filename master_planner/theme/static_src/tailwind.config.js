@@ -42,7 +42,16 @@ module.exports = {
         // '../../**/*.py'
     ],
     theme: {
-        extend: {},
+        extend: {
+            boxShadow: {
+                "box": "0px 1px 10px 0px #00000040"
+            },
+            fontFamily: {
+                sans: ["Roboto"],
+                serif: ["Open Sans"],
+                "comfortaa": "Comfortaa"
+            }
+        },
     },
     plugins: [
         /**
