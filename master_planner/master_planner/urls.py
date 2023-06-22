@@ -16,16 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-import accounts.views as views
-from django.views.generic.base import TemplateView
+import accounts.views as account
+import planning.views as planning
 
 urlpatterns = [
-    path('', views.index),
-    path('account/', include("django.contrib.auth.urls")),
-    path('register/', views.register, name="register"),
-    path('logged_in/', views.logged_in),
-    path('home/', views.home, name="home"),
+    path('', planning.home),
+    path('setup/', planning.setup, name="setup"),
+    path('', include("django.contrib.auth.urls")),
+    path('register/', account.register, name="register"),
+    path('home/', planning.home, name="home"),
     path('admin/', admin.site.urls, name="admin"),
+    path('courses', planning.courses, name="courses"),
+    path("__reload__/", include("django_browser_reload.urls")),
     
-
 ]
