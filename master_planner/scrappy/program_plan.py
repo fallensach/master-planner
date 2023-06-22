@@ -17,13 +17,16 @@ class ProgramPlan:
     """
     def __init__(self, program_code: str):
         self.url = f"https://studieinfo.liu.se/program/{program_code}"
-        self.program_code = program_code
+        
         r = requests.get(self.url)
         if r.status_code == 200:
             self.soup = BeautifulSoup(r.content, "html.parser")
         else:
             raise requests.exceptions.HTTPError(f"Given program {program_code} does not exist.")
-
+        
+        self.program_code = program_code
+        self.program_name = self.program_n()
+        
     def format_course_scrape(self, courses_raw: ResultSet[any]) -> list[dict[str, any]]:
         """Parses and formats a soup object containing the tags "tr", {"class": "main-row"}.
         This tag will contain courses in raw soup format.
@@ -158,10 +161,17 @@ class ProgramPlan:
         profiles = list(zip(profile_names[1:], profile_id[1:]))
         return dict(profiles)
 
+    def program_n(self) -> str:
+        headers = self.soup.find_all("header", {"class": ""})
+        for header in headers:
+            title = header.find("h1")
+            return title.text.split(",")[0]
+
 
 def main():
     plan = ProgramPlan("6CMJU")
-    pprint.pprint(plan.courses())
+    #pprint.pprint(plan.courses())
+    plan.program_name()
 
 if __name__ == "__main__":
     main()
