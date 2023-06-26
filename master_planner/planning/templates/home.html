@@ -9,22 +9,27 @@
             <p> Mina valda kurser </p>
         </div>
 
-        <div id="pickable-courses" class="flex flex-col">
-            <form method="POST" class="flex justify-center">
+        <div id="pickable-courses" class="flex flex-col w-full">
+            <form action="{% url 'profile_pick' %}" method="POST" class="flex justify-center">
                 {% csrf_token %}
                 {{ form.profiles }}
                 <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-br-lg rounded-tr-lg" type="submit">Välj profil</button>
             </form>
             {% if profile_picked %}
-                <p> {{ profile_name }} </p>
-                <div class="flex flex-col">
+                <div class="flex flex-col px-20 py-5 space-y-3">
+                <p class="text-3xl"> {{ profile_name }} </p>
                 {% for course in courses %}
-                    <div class="mr-5 ml-5 flex space-x-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white">
+                    <div class="flex space-x-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white">
                 {% for key, value in course.items %} 
-                    <div class="p-2">{{ value }}</div>
+                    {% if key == "course_name" %}
+                        <div class="p-2 w-2/5">{{ value }}</div>
+                    {% elif key == "course_code" %}
+                        <div class="p-2 font-mono">{{ value }}</div>
+                    {% else %}
+                        <div class="p-2">{{ value }}</div>
+                    {% endif %}
                 {% endfor %}
                 </div>
-                <br>
             {% endfor %}
             {% endif %}
         </div>
