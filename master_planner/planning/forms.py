@@ -14,11 +14,3 @@ class Profiles(forms.Form):
         if profiles:
             self.fields['profiles'].choices = profiles
             
-    """    
-    A = "A"
-    B = "B"
-    TYPES = [
-        (A, "A_X"),
-        (B, "B_X")
-    ]
-    """
