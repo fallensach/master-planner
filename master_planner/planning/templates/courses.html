@@ -1,10 +1,28 @@
 {% extends 'base.html' %}
-{% block content%}
+{% block content %}
     <p class="text-2xl"> {{ program_name }} </p>
-        {% for course in courses %}
-        <div class="mr-5 ml-5 flex space-x-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white">
-        {% for key, value in course.items %} 
-            <div class="p-2">{{ value }}</div>
+    <form method="POST">
+        {% csrf_token %}
+        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t7" value="Termin 7" type="submit">Termin 7</button>
+        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t8" value="Termin 8" type="submit">Termin 8</button>
+        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t9" value="Termin 9" type="submit">Termin 9</button>
+    </form>
+        <p class="text-3xl"> {{ termin }} </p>
+        {% for period, courses in courses.items %}
+        <div class="flex flex-col space-y-5 mx-10">
+        <p class="text-2xl"> Period {{ period }} </p>
+        {% for course in courses %} 
+            <div class="flex space-x-2 p-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white justify-around">
+            {% for value, data in course.items %}
+                {% if value == "course_code" %}
+                    <p class="font-mono"> {{ data }} </p>
+                {% elif value == "course_name" %}
+                    <p class="w-2/5"> {{ data }} </p>
+                {% else %}
+                    <p class=""> {{ data }} </p>
+                {% endif %}
+            {% endfor %}
+            </div>
         {% endfor %}
         </div>
         <br>
