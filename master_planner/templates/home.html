@@ -16,7 +16,7 @@
                 <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
             </form>
         <div class="mx-48">
-            {% include 'courses.html' %}
+            {% include 'planning/courses.html' %}
             {% if profile_picked %}
                 <p class="text-3xl"> {{ profile_name }} </p>
                 {% for term, course in term_courses.items %}

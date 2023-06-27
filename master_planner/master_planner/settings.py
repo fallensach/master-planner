@@ -61,9 +61,8 @@ ROOT_URLCONF = 'master_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-                BASE_DIR / "Templates"
-            ],
+        "DIRS": ["./templates", "**/templates", str(BASE_DIR / "templates"), "./templates/accounts", "./templates/planning"],
+
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,6 +74,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'master_planner.wsgi.application'
 
