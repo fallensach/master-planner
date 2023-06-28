@@ -2,16 +2,13 @@ from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from planning.models import Program, Scheduler
 
-class Choice(models.Model):
-    choice_id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    scheduled_choices = models.ManyToManyField(Scheduler)
-
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     program_code = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True)
-    choices = models.ManyToManyField(Choice)
+    choices = models.ManyToManyField(Scheduler, blank=True)
 
+    def __str__(self):
+        return(str(self.user))
 
 def register_account(username: str, email: str, password: str):
     try:

@@ -1,50 +1,71 @@
 from django.db import models
-from management.scrappy.program_plan import ProgramPlan
+from planning.management.commands.scrappy.program_plan import ProgramPlan
 from pprint import pprint
     
 
 class Examination(models.Model):
-    examination_id = models.CharField(max_length=6, primary_key=True)
+    examination_id = models.IntegerField(primary_key=True)
     hp = models.CharField(max_length=5)
     name = models.CharField(max_length=50)
     grading = models.CharField(max_length=15)
     code = models.CharField(max_length=10)
 
+    def __str__(self):
+        return self.name
+
+class MainField(models.Model):
+    field_name = models.CharField(max_length=15, primary_key=True)
+
+    def __str__(self):
+        return self.field_name
+
 class Course(models.Model):
     course_code = models.CharField(max_length=6, primary_key=True)
     examinator = models.CharField(max_length=50, null=True, blank=True)
-    examination = models.ForeignKey(Examination, on_delete=models.CASCADE)
+    examination = models.ForeignKey(Examination, blank=True, null=True, on_delete=models.CASCADE)
     course_name = models.CharField(max_length=120)
     hp = models.CharField(max_length=5, default=1)
     level = models.CharField(max_length=20)
     vof = models.CharField(max_length=5)
     campus = models.CharField(max_length=20, blank=True, null=True)
+    main_fields = models.ManyToManyField(MainField)
 
-class MainField(models.Model):
-    field_name = models.CharField(max_length=15, primary_key=True)
-    course_code = models.ForeignKey(Course, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.course_code
 
 class Schedule(models.Model):
     schedule_id = models.IntegerField(primary_key=True)
-    course_code = models.ForeignKey(Course, on_delete=models.CASCADE)
     period = models.IntegerField()
     semester = models.CharField(max_length=10)
     block = models.CharField(max_length=10)
 
+    def __str__(self):
+        return f"sem: {self.semester}, per: {self.period}, block: {self.block}"
+
 class Profile(models.Model):
-    profile_name = models.CharField(max_length=50, primary_key=True)
-    profile_code = models.CharField(max_length=10)
+    profile_name = models.CharField(max_length=50)
+    profile_code = models.CharField(max_length=10, primary_key=True)
+
+    def __str__(self):
+        return self.profile_name
 
 class Program(models.Model):
     program_code = models.CharField(max_length=10, primary_key=True)
     program_name = models.CharField(max_length=100)
     profiles = models.ManyToManyField(Profile)
 
+    def __str__(self):
+        return self.program_name
+
 class Scheduler(models.Model):
     scheduler_id = models.IntegerField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course_code = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{str(self.course_code)}\n{str(self.program)}\n{str(self.profile)}\n{str(self.schedule)}"
 
 def register_program(program_code: str):
     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
