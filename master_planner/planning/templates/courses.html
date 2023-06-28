@@ -1,31 +1,45 @@
-{% extends 'base.html' %}
-{% block content %}
+{% block courses %}
     <p class="text-2xl"> {{ program_name }} </p>
-    <form method="POST">
+    {% if profile_picked %}
+        <form action={% url 'profile' %} method="POST">
+    {% else %}
+        <form action={% url 'courses' %} method="POST">
+    {% endif %}
         {% csrf_token %}
-        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t7" value="Termin 7" type="submit">Termin 7</button>
-        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t8" value="Termin 8" type="submit">Termin 8</button>
-        <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" name="t9" value="Termin 9" type="submit">Termin 9</button>
+        <input type="hidden" value="{{ profile_code }}" name="profile_code"/>
+        <input type="hidden" value="{{ profile_name }}" name="profile_name"/>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t7" value="Termin 7" type="submit">Termin 7</button>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t8" value="Termin 8" type="submit">Termin 8</button>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t9" value="Termin 9" type="submit">Termin 9</button>
     </form>
+    {% if not profile_picked %}
         <p class="text-3xl"> {{ termin }} </p>
-        {% for period, courses in courses.items %}
-        <div class="flex flex-col space-y-5 mx-10">
-        <p class="text-2xl"> Period {{ period }} </p>
-        {% for course in courses %} 
-            <div class="flex space-x-2 p-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white justify-around">
-            {% for value, data in course.items %}
-                {% if value == "course_code" %}
-                    <p class="font-mono"> {{ data }} </p>
-                {% elif value == "course_name" %}
-                    <p class="w-2/5"> {{ data }} </p>
-                {% else %}
-                    <p class=""> {{ data }} </p>
-                {% endif %}
+            {% for term, course in term_courses.items %}
+            <table class="table px-20 rounded-lg overflow-hidden mb-10">
+            <thead class="bg-sky-300 text-black/75 text-xl">
+                <tr>
+                    <th>Period {{term}}</th>
+                {% for tag, x in course_tags.items %}
+                    <th>
+                        {{ tag }}
+                    </th>
+                {% endfor %}
+                </tr>
+            </thead>
+                <tbody class="text-lg">
+                    {% for course_data in course %}
+                    <tr class="bg-white hover:bg-gray-200/75">
+                        <td>
+                            <input type="checkbox" class="checkbox checkbox-info">
+                        </td>
+                        {% for data in course_data.values %}
+                           <td> {{ data }} </td>
+                        {% endfor %}
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
             {% endfor %}
-            </div>
-        {% endfor %}
-        </div>
-        <br>
-    {% endfor %}
-{% endblock content %}
+    {% endif %}
+{% endblock %}
 
