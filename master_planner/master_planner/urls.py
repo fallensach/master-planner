@@ -26,7 +26,8 @@ urlpatterns = [
     path('register/', account.register, name="register"),
     path('home/', planning.home, name="home"),
     path('admin/', admin.site.urls, name="admin"),
-    path('courses', planning.courses, name="courses"),
+    path('home/courses', planning.courses, name="courses"),
+    path('home/profile', planning.profile, name="profile"),
     path("__reload__/", include("django_browser_reload.urls")),
     
 ]

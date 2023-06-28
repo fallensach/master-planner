@@ -1,13 +1,45 @@
-{% extends 'base.html' %}
-{% block content%}
+{% block courses %}
     <p class="text-2xl"> {{ program_name }} </p>
-        {% for course in courses %}
-        <div class="mr-5 ml-5 flex space-x-2 border-indigo-500 border-l-4 rounded-md shadow-box bg-white">
-        {% for key, value in course.items %} 
-            <div class="p-2">{{ value }}</div>
-        {% endfor %}
-        </div>
-        <br>
-    {% endfor %}
-{% endblock content %}
+    {% if profile_picked %}
+        <form action={% url 'profile' %} method="POST">
+    {% else %}
+        <form action={% url 'courses' %} method="POST">
+    {% endif %}
+        {% csrf_token %}
+        <input type="hidden" value="{{ profile_code }}" name="profile_code"/>
+        <input type="hidden" value="{{ profile_name }}" name="profile_name"/>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t7" value="Termin 7" type="submit">Termin 7</button>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t8" value="Termin 8" type="submit">Termin 8</button>
+        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t9" value="Termin 9" type="submit">Termin 9</button>
+    </form>
+    {% if not profile_picked %}
+        <p class="text-3xl"> {{ termin }} </p>
+            {% for term, course in term_courses.items %}
+            <table class="table px-20 rounded-lg overflow-hidden mb-10">
+            <thead class="bg-sky-300 text-black/75 text-xl">
+                <tr>
+                    <th>Period {{term}}</th>
+                {% for tag, x in course_tags.items %}
+                    <th>
+                        {{ tag }}
+                    </th>
+                {% endfor %}
+                </tr>
+            </thead>
+                <tbody class="text-lg">
+                    {% for course_data in course %}
+                    <tr class="bg-white hover:bg-gray-200/75">
+                        <td>
+                            <input type="checkbox" class="checkbox checkbox-info">
+                        </td>
+                        {% for data in course_data.values %}
+                           <td> {{ data }} </td>
+                        {% endfor %}
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+            {% endfor %}
+    {% endif %}
+{% endblock %}
 
