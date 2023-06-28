@@ -129,8 +129,8 @@ def get_courses(program_code: str):
 
 def get_courses_term(program: str, term: str, profile_courses=None):
     if profile_courses != None:
-        period_1 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=1).all()
-        period_2 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=2).all()
+        period_1 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=1, program_code=program)
+        period_2 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=2, program_code=program)
     
     else:
         period_1 = Schedule.objects.filter(program_code=program, semester=term, period=1).all()
@@ -145,12 +145,13 @@ def make_schedule(period_1, period_2):
     }
     
     for period in period_1:
-        scheduled_course = {
+        scheduled_course = {period.schedule_id: {
             "course_code": period.course_code.course_code,
             "course_name": period.course_code.course_name,
             "hp": period.course_code.hp,
             "block": period.block
-         }
+             }
+        }
         schedule[period.period].append(scheduled_course)
         
     for period in period_2:

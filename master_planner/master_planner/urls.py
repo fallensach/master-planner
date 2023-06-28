@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 import accounts.views as account
 import planning.views as planning
+from .api import api
 
 urlpatterns = [
     path('', planning.home),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
     path('home/courses', planning.courses, name="courses"),
     path('home/profile', planning.profile, name="profile"),
+    path('api/', api.urls),
     path("__reload__/", include("django_browser_reload.urls")),
     
 ]
