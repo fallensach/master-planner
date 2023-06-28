@@ -3,6 +3,7 @@
 {% block content %}
     <div id="home-container" class="flex bg-gray-200 flex-col justify-center items-center space-y-2">
         <h1 class="text-black">Hi {{ user.username }}! </h1>
+        <p id="hp">0</p>
         <a class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" href="{% url 'courses' %}"> Courses </a>
         <a class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" href="{% url 'logout' %}">Log Out</a>
 
@@ -16,7 +17,7 @@
                 <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
             </form>
         <div class="mx-48">
-            {% include 'courses.html' %}
+            {% include 'planning/courses.html' %}
             {% if profile_picked %}
                 <p class="text-3xl"> {{ profile_name }} </p>
                 {% for term, course in term_courses.items %}
@@ -33,12 +34,15 @@
                 </thead>
                     <tbody class="text-lg">
                         {% for course_data in course %}
-                        <tr class="bg-white hover:bg-gray-200/75">
-                            <td>
-                                <input type="checkbox" class="checkbox checkbox-info">
-                            </td>
-                            {% for data in course_data.values %}
-                               <td> {{ data }} </td>
+                        <tr class="bg-white hover:bg-sky-100">
+                            {% for schedule, schedule_data in course_data.items %}
+                                <td>
+                                    <input type="checkbox" onclick="get_schedule(this.value)" class="checkbox checkbox-info" value="{{schedule}}">
+                                </td>
+                            
+                                {% for data in schedule_data.values %}
+                                <td> {{ data }} </td>
+                                {% endfor %}
                             {% endfor %}
                         {% endfor %}
                         </tr>
@@ -48,7 +52,6 @@
             </div>
             {% endif %}
         </div>
-
     </div>
 {% endblock %}
 
