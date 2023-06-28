@@ -1,12 +1,13 @@
 from django.db import models
 from scrappy.program_plan import ProgramPlan
 from pprint import pprint
+
     
 class Course(models.Model):
     course_code = models.CharField(max_length=6, primary_key=True)
     examinator = models.CharField(max_length=50, null=True, blank=True)
     course_name = models.CharField(max_length=120)
-    hp = models.CharField(max_length=5)
+    hp = models.CharField(max_length=5, default=1)
     level = models.CharField(max_length=20)
     vof = models.CharField(max_length=5)
     campus = models.CharField(max_length=20, blank=True, null=True)
@@ -57,8 +58,8 @@ def register_courses(program: ProgramPlan) -> list[Course]:
         new_course = Course(
                     course_code = course["course_code"], 
                     course_name = course["course_name"],
-                    level = course["level"],
                     hp = course["hp"],
+                    level = course["level"],
                     vof = course["vof"],
                 )
         courses.append(new_course)
@@ -76,6 +77,7 @@ def register_profiles(program: ProgramPlan):
             profile_course = Course(
                 course_code = course["course_code"], 
                 course_name = course["course_name"],
+                hp = course["hp"],
                 level = course["level"],
                 vof = course["vof"],
             )
@@ -125,13 +127,18 @@ def get_courses(program_code: str):
         courses.append(temp_course)
     return courses
 
-def get_courses_term(program: str, term: str):
-    """
-    spagetti skriv om XD
-    """
-    period_1 = Schedule.objects.filter(program_code=program, semester=term, period=1).all()
-    period_2 = Schedule.objects.filter(program_code=program, semester=term, period=2).all()
+def get_courses_term(program: str, term: str, profile_courses=None):
+    if profile_courses != None:
+        period_1 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=1).all()
+        period_2 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=2).all()
     
+    else:
+        period_1 = Schedule.objects.filter(program_code=program, semester=term, period=1).all()
+        period_2 = Schedule.objects.filter(program_code=program, semester=term, period=2).all()
+    
+    return make_schedule(period_1, period_2)
+    
+def make_schedule(period_1, period_2):
     schedule = {
         1: [],
         2: []
@@ -156,7 +163,5 @@ def get_courses_term(program: str, term: str):
         schedule[period.period].append(scheduled_course)
     
     return schedule
-    
 
-    
     
