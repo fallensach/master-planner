@@ -49,6 +49,7 @@ class Scheduler(models.Model):
 def register_program(program_code: str):
     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
     if not program_exists:
+        
         program = ProgramPlan(program_code.upper())
         if program is None:
             return False
