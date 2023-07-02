@@ -5,6 +5,10 @@ from accounts.models import Account, get_user
 from django.contrib.auth.models import User
 
 
+# def get_data(profil):
+#     return {"semester": {"period1" : [{"course_code": "tata24", "details": []}]}}
+
+
 COURSE_TAGS = {
                 "Kurskod": "",
                 "Kursnamn": "",
@@ -76,7 +80,6 @@ def profile(request):
             profile_name = Profile.objects.get(profile_code=profile_code).profile_name
             form = Profiles(profiles)
             return render(request, "home.html", {"term_courses": courses, "program_name": user_program.program_name, "form": form, "profile_picked": True, "profile_code": profile_code, "profile_name": profile_name})
->>>>>>> 8775cbb (New database design is now implemented, works with views,)
         
         if "t7" in request.POST:
             semester = request.POST.get("t7")
@@ -134,8 +137,8 @@ def courses(request):
         print(f"data {str(term_courses)}")
         form = Profiles(profiles)
         return render(request, "home.html", {"term_courses": term_courses, 
-                                             "program_name": name, 
-                                             "termin": termin, 
+                                             "program_name": program_name, 
+                                             "termin": semester, 
                                              "form": form, 
                                              "course_tags": COURSE_TAGS}
                       )

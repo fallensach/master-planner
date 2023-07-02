@@ -21,11 +21,11 @@ class Course(models.Model):
     @property
     def to_dict(self):
         return { 
-                # "vof": self.vof,
-                "Kurskod": self.course_code,
-                "Kursnamn": self.course_name,
-                "Hp": self.hp,
-                "Nivå": self.level
+                "course_code": self.course_code,
+                "course_name": self.course_name,
+                "hp": self.hp,
+                "level": self.level,
+                "vof": self.vof,
                 # "examinator": self.examinator,
                 # "examination": self.examination,
                 # "campus": self.campus,
