@@ -8,7 +8,7 @@ class Account(models.Model):
     choices = models.ManyToManyField(Scheduler, blank=True)
 
     def __str__(self):
-        return(str(self.program))
+        return str(self.user)
 
 def register_account(username: str, email: str, password: str):
     try:

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import ProgramForm, Profiles
-from planning.models import register_program, get_profile_courses, get_program_courses, get_courses_term, Program, Profile, Schedule
+from planning.models import get_profile_courses, get_program_courses, get_courses_term, Program, Profile, Schedule
 from accounts.models import Account, get_user
 from django.contrib.auth.models import User
 
@@ -91,7 +91,7 @@ def profile(request):
         # profile_courses = Profile.objects.get(profile_code=profile_code).profile_courses.all()
         profile = Profile.objects.get(profile_code=profile_code)
         profile_name = profile.profile_name
-        semester_courses = get_courses_term(account.program, profile=profile, semester=semester)
+        semester_courses = get_courses_term(program=account.program, semester=semester, profile=profile)
         form = Profiles(profiles)
         return render(request, "home.html", {"term_courses": term_courses, 
                                              "program_name": name, 
@@ -130,7 +130,7 @@ def courses(request):
         elif "t9" in request.POST:
             semester = request.POST.get("t9")
         
-        term_courses = get_courses_term(user_program, semester, profile)
+        term_courses = get_courses_term(user_program, semester, "free")
         print(f"data {str(term_courses)}")
         form = Profiles(profiles)
         return render(request, "home.html", {"term_courses": term_courses, 
@@ -151,11 +151,12 @@ def setup(request):
         form = ProgramForm(request.POST)
         if form.is_valid():
             program_code = request.POST.get("program").upper()
-            if register_program(program_code):
+            program = Program.objects.filter(program_code=program_code)
+            if program:
                 user = User.objects.get(username=request.user.username)
                 account = Account.objects.get(user=user)
-                program = Program.objects.get(program_code=program_code)
-                account.program_code = program
+                program = program[0]
+                account.program = program
                 account.save()
             return redirect("home")
                 

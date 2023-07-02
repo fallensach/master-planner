@@ -24,11 +24,10 @@ class ProgramPlan:
             self.soup = BeautifulSoup(r.content, "html.parser")
         else:
             raise requests.exceptions.HTTPError(f"Given program {program_code} does not exist.")
-        
         self.program_code = program_code
         self.program_name = self.program_n()
         
-    def format_course_scrape(self, courses_raw: ResultSet[any]) -> list[dict[str, any]]:
+    def format_course_scrape(self, course_raw: ResultSet[any]) -> list[dict[str, any]]:
         """Parses and formats a soup object containing the tags "tr", {"class": "main-row"}.
         This tag will contain courses in raw soup format.
 
@@ -38,23 +37,21 @@ class ProgramPlan:
         Returns:
             list[dict[str, any]]: All the scraped courses
         """
-        courses = []
-        for course in courses_raw:
-            line = course.text.split()
-            temp = [line[0], ' '.join(line[1:-4])]
-            temp.extend(line[-4:])
-            course_map = {
-                "course_code": temp[0],
-                "course_name": temp[1],
-                "hp": temp[2],
-                "level": temp[3],
-                "block": temp[4],
-                "vof": temp[5]
-            }
-            # course_map = {**course_map, **fetch_course_info(course_map["course_code"])}
-            courses.append(course_map)
+        
+        
+        line = course_raw.text.split()
+        temp = [line[0], ' '.join(line[1:-4])]
+        temp.extend(line[-4:])
+        course_map = {
+            "course_code": temp[0],
+            "course_name": temp[1],
+            "hp": temp[2],
+            "level": temp[3],
+            "block": temp[4],
+            "vof": temp[5]
+        }
 
-        return courses
+        return course_map
            
     def planned_courses(self, profile_code: str = None) -> list[dict[str, list[dict[str, any]]]]:
         """Get all the courses for the whole program or a profile sorted by their semester and period.
@@ -93,34 +90,80 @@ class ProgramPlan:
         
         return program_courses
 
-    def courses(self, profile_code: str = None) -> list[dict[str, any]]:
-        """Get all courses of a program or profile in a list that is unordered.
-        Does not specify any semester or peroid just the courses.
-
-        Args:
-            profile_code (str, optional): _description_. Defaults to None.
-
-        Returns:
-            list[dict[str, any]]: _description_
-        """
-        if profile_code is not None: 
-            semesters = self.soup.find_all("div", {"data-specialization": {profile_code}})
-        else:
-            semesters = self.soup.select('div.specialization[data-specialization=""]')
+    def courses(self):
+        """return all courses sorte in a dict after profiles and program"""
         
-        if profile_code is None:
-            term_start = MASTER_TERM_START
-        else:
-            term_start = 0
+        # extracting code and adding an empty string for easier scraping
+        temp, profile_codes = zip(*self.profiles())
+        profile_codes = [*profile_codes, ""]        
+        courses = []
+        
+        for semester_section in self.soup.find_all("section", {"class": "accordion semester js-semester show-focus is-toggled"}):
+            semester = semester_section.find("h3").text[:8]
+            # ignore semester without valbara
+            if semester[-1:] not in ["7", "8", "9", None]:
+                continue
             
-        program_courses = []
-        for index, semester in enumerate(semesters, 1):
-            if index >= term_start:
-                courses = semester.find_all("tr", {"class": "main-row"})
-                program_courses.append(self.format_course_scrape(courses))
+            # add all non profile specific courses
+            for profile_code in profile_codes:
+                if not semester_section.find("div", {"data-specialization": profile_code}):
+                    continue
+                for period_sections in semester_section.find("div", {"data-specialization": profile_code}).find_all("tbody", {"class": "period"}):
+                    
+                    period = None
+                    for row in period_sections.find_all("tr"):
+                        if row.find("th"):
+                            period = row.find("th").text
+                            continue
+                        if "main-row" in row["class"]:
+                            course = self.format_course_scrape(row)
+                            if profile_code == "":
+                                course["profile_code"] = "free"
+                            else:
+                                course["profile_code"] = profile_code
 
-            
-        return sum(program_courses, [])
+                            course["period"] = period
+                            course["semester"] = semester
+                            courses.append(course)
+        return courses
+                         
+
+
+
+    # def course_helper(self, semester_section, profile=None):
+    #     courses = []
+    #     if profile == None:
+
+
+
+    # def courses(self, profile_code: str = None) -> list[dict[str, any]]:
+    #     """Get all courses of a program or profile in a list that is unordered.
+    #     Does not specify any semester or peroid just the courses.
+    #
+    #     Args:
+    #         profile_code (str, optional): _description_. Defaults to None.
+    #
+    #     Returns:
+    #         list[dict[str, any]]: _description_
+    #     """
+    #     if profile_code is not None: 
+    #         semesters = self.soup.find_all("div", {"data-specialization": {profile_code}})
+    #     else:
+    #         semesters = self.soup.select('div.specialization[data-specialization=""]')
+    #     
+    #     if profile_code is None:
+    #         term_start = MASTER_TERM_START
+    #     else:
+    #         term_start = 0
+    #         
+    #     program_courses = []
+    #     for index, semester in enumerate(semesters, 1):
+    #         if index >= term_start:
+    #             courses = semester.find_all("tr", {"class": "main-row"})
+    #             program_courses.append(self.format_course_scrape(courses))
+    #
+    #         
+    #     return sum(program_courses, [])
 
     def admission_years(self) -> dict[int, str]:
         """Get url paths to admission years.
@@ -147,7 +190,7 @@ class ProgramPlan:
             program_code (str): Code for the program to search for
 
         Returns:
-            tuple[str]: A tuple containing the profile name and its 
+            list[tuple[str, str]]: A tuple containing the profile name and its 
                         corresponding profile code
         """
         option_parent = self.soup.find("select", {"id": "specializations-filter"})
@@ -162,7 +205,8 @@ class ProgramPlan:
         
         profile_names = list(filter(lambda a: a != "", profile_names))
         profiles = list(zip(profile_names[1:], profile_id[1:]))
-        return dict(profiles)
+        profiles.append(("free", "free"))
+        return profiles
 
     def program_n(self) -> str:
         headers = self.soup.find_all("header", {"class": ""})
