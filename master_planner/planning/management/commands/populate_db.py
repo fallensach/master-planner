@@ -26,13 +26,13 @@ class Command(BaseCommand):
                                         is_staff=True)
         user.save()
 
-        account = Account(user=user, program_code=program)
+        account = Account(user=user, program=program)
         account.save()
 
         for semester in range(7, 10):
             for period in range(1, 3):
                 for block in range(1, 5):
-                    schedule = Schedule(semester=semester, period=period, block=block)
+                    schedule = Schedule(semester=f"Termin {semester}", period=period, block=block)
                     schedule.save()
 
         examination = Examination(examination_id=1,
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         course.save()
 
         scheduler = Scheduler(scheduler_id=1,
-                              course_code=course,
+                              course=course,
                               schedule=Schedule.objects.get(schedule_id=1),
                               program=program,
                               profile=profile

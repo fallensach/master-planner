@@ -21,14 +21,28 @@ class MainField(models.Model):
 
 class Course(models.Model):
     course_code = models.CharField(max_length=6, primary_key=True)
-    examinator = models.CharField(max_length=50, null=True, blank=True)
-    examination = models.ForeignKey(Examination, blank=True, null=True, on_delete=models.CASCADE)
+    examinator = models.CharField(max_length=50)
+    examination = models.ForeignKey(Examination,on_delete=models.CASCADE)
     course_name = models.CharField(max_length=120)
     hp = models.CharField(max_length=5, default=1)
     level = models.CharField(max_length=20)
     vof = models.CharField(max_length=5)
-    campus = models.CharField(max_length=20, blank=True, null=True)
+    campus = models.CharField(max_length=20)
     main_fields = models.ManyToManyField(MainField)
+    
+    @property
+    def to_dict(self):
+        return { 
+                # "vof": self.vof,
+                "Kurskod": self.course_code,
+                "Kursnamn": self.course_name,
+                "Hp": self.hp,
+                "Nivå": self.level
+                # "examinator": self.examinator,
+                # "examination": self.examination,
+                # "campus": self.campus,
+                # "main_fields": self.main_fields
+                }
 
     def __str__(self):
         return self.course_code
@@ -60,12 +74,12 @@ class Program(models.Model):
 class Scheduler(models.Model):
     scheduler_id = models.IntegerField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    course_code = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{str(self.course_code)}\n{str(self.program)}\n{str(self.profile)}\n{str(self.schedule)}"
+        return f"{str(self.course)}\n{str(self.program)}\n{str(self.profile)}\n{str(self.schedule)}"
 
 def register_program(program_code: str):
     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
@@ -147,29 +161,47 @@ def add_courses(program: ProgramPlan, courses: list[Course]):
     program_add.program_courses.add(*courses)
     program_add.save()
         
-def get_courses(program_code: str):
-    kurser = Program.objects.get(program_code=program_code.upper()).program_courses.all()
-    courses = []
-    for course in kurser:
-        temp_course = { 
-                    "course_code": course.course_code, 
-                    "course_name": course.course_name,
-                    "level": course.level,
-                    "vof": course.vof
-                    }
-        courses.append(temp_course)
-    return courses
+def get_program_courses(program: any):
+    return map(lambda row : row.course, Scheduler.objects.filter(program=program))
+    
+    return map(lambda course : course.to_dict, courses)
 
-def get_courses_term(program: str, term: str, profile_courses=None):
-    if profile_courses != None:
-        period_1 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=1, program_code=program)
-        period_2 = Schedule.objects.filter(course_code__in=profile_courses, semester=term, period=2, program_code=program)
+def get_profile_courses(profile: any): # TODO fix typing
+    courses = map(lambda row : row.course, Scheduler.objects.filter(profile=profile))
     
+    return map(lambda course : course.to_dict, courses)
+
+def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
+    print(f"semester: {semester}")
+    if profile != None:
+        period_1 = list(map(lambda row : row.course.to_dict, 
+                       Scheduler.objects.filter(program=program, 
+                                                schedule__semester=semester, 
+                                                schedule__period=1
+                                                )
+                                                
+                       ))
+        period_2 = list(map(lambda row : row.course.to_dict, 
+                       Scheduler.objects.filter(program=program, 
+                                                schedule__semester=semester, 
+                                                schedule__period=2
+                                                )
+                   ))
+
     else:
-        period_1 = Schedule.objects.filter(program_code=program, semester=term, period=1).all()
-        period_2 = Schedule.objects.filter(program_code=program, semester=term, period=2).all()
-    
-    return make_schedule(period_1, period_2)
+        period_1 = list(map(lambda row : row.course.to_dict, 
+                       Scheduler.objects.filter(program=program, 
+                                                profile=profile,
+                                                schedule__semester=semester, 
+                                                schedule__period=1)
+                       ))
+        period_2 = list(map(lambda row : row.course.to_dict, 
+                       Scheduler.objects.filter(program=program, 
+                                                profile=profile,
+                                                schedule__semester=semester, 
+                                                schedule__period=2)
+                   ))
+    return {1: period_1, 2: period_2}
     
 def make_schedule(period_1, period_2):
     schedule = {

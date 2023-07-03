@@ -4,11 +4,11 @@ from planning.models import Program, Scheduler
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    program_code = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True)
     choices = models.ManyToManyField(Scheduler, blank=True)
 
     def __str__(self):
-        return(str(self.user))
+        return(str(self.program))
 
 def register_account(username: str, email: str, password: str):
     try:
