@@ -231,22 +231,6 @@ def get_profile_courses(profile: any): # TODO fix typing
     return map(lambda course : course.to_dict, courses)
 
 def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
-    # if profile != None:
-    #     period_1 = list(map(lambda row : row.course.to_dict, 
-    #                    Scheduler.objects.filter(program=program, 
-    #                                             schedule__semester=semester, 
-    #                                             schedule__period=1
-    #                                             )
-    #                                             
-    #                    ))
-    #     period_2 = list(map(lambda row : row.course.to_dict, 
-    #                    Scheduler.objects.filter(program=program, 
-    #                                             schedule__semester=semester, 
-    #                                             schedule__period=2
-    #                                             )
-    #                ))
-
-    # else:
     period_1 = list(map(lambda row : row.course.to_dict, 
                    Scheduler.objects.filter(program=program, 
                                             profile=profile,
@@ -257,39 +241,6 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
                    Scheduler.objects.filter(program=program, 
                                             profile=profile,
                                             schedule__semester=semester, 
-                                            schedule__period="Period 1")
+                                            schedule__period="Period 2")
                ))
     return {1: period_1, 2: period_2}
-    
-def make_schedule(period_1, period_2):
-    schedule = {
-        1: [],
-        2: []
-    }
-    
-    for period in period_1:
-        scheduled_course = {period.schedule_id: {
-            "course_code": period.course_code.course_code,
-            "course_name": period.course_code.course_name,
-            "hp": period.course_code.hp,
-            "block": period.block,
-            "vof": period.course_code.vof
-             }
-        }
-        schedule[period.period].append(scheduled_course)
-        
-    for period in period_2:
-        scheduled_course = {period.schedule_id: {
-            "course_code": period.course_code.course_code,
-            "course_name": period.course_code.course_name,
-            "hp": period.course_code.hp,
-            "block": period.block,
-            "vof": period.course_code.vof
-             }
-        }
-        schedule[period.period].append(scheduled_course)
-    
-    return schedule
-
-
-    

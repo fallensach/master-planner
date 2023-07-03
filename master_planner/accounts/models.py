@@ -31,8 +31,8 @@ def get_user(username: str) -> Account | None:
     """
     try:
         user = User.objects.get(username=username)
-        account = Account.objects.get(user=user)
-        return account.user
+        #account = Account.objects.get(user=user)
+        return user
     
     except IntegrityError:
         return None
