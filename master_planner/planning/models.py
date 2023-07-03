@@ -149,18 +149,21 @@ def make_schedule(period_1, period_2):
             "course_code": period.course_code.course_code,
             "course_name": period.course_code.course_name,
             "hp": period.course_code.hp,
-            "block": period.block
+            "block": period.block,
+            "vof": period.course_code.vof
              }
         }
         schedule[period.period].append(scheduled_course)
         
     for period in period_2:
-        scheduled_course = {
+        scheduled_course = {period.schedule_id: {
             "course_code": period.course_code.course_code,
             "course_name": period.course_code.course_name,
             "hp": period.course_code.hp,
-            "block": period.block
-         }
+            "block": period.block,
+            "vof": period.course_code.vof
+             }
+        }
         schedule[period.period].append(scheduled_course)
     
     return schedule

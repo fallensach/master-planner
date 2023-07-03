@@ -4,6 +4,19 @@ from planning.models import register_program, get_courses, get_courses_term, Pro
 from accounts.models import Account, get_user
 from django.contrib.auth.models import User
 
+
+COURSE_TAGS = {
+                "Kurskod": "",
+                "Kursnamn": "",
+                "Hp": "",
+                "Nivå": "",
+                "Vof": "",
+                "": "",
+                }
+
+def test(request):
+    return render(request, "test.html")
+
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
@@ -22,12 +35,7 @@ def home(request):
     profile_picked = False
     profile_name = None
     courses = []
-    course_tags = {
-                "Kurskod": "",
-                "Kursnamn": "",
-                "Hp": "",
-                "Nivå": "",
-                }
+    
     if request.method == "POST":
         form = Profiles(profiles)
         profile_picked = True
@@ -40,13 +48,18 @@ def home(request):
                 "Kursnamn": course.course_name,
                 "Hp": course.hp,
                 "Nivå": course.level,
+                "Vof": course.vof
                 }
             )
     else:
         courses = [{}]
         form = Profiles(profiles)
     
-    return render(request, "home.html", {"form": form, "profile_picked": profile_picked, "profile_name": profile_name, "courses": courses, "course_tags": course_tags})
+    return render(request, "home.html", {"form": form, 
+                                         "profile_picked": profile_picked, 
+                                         "profile_name": profile_name, 
+                                         "courses": courses, 
+                                         "course_tags": COURSE_TAGS})
 
 def profile(request):
     user = User.objects.get(username=request.user.username)
@@ -54,12 +67,7 @@ def profile(request):
     kurser = get_courses(account.program_code.program_code)
     name = account.program_code.program_name
     user_program = Program.objects.get(program_code=account.program_code.program_code)
-    course_tags = {
-                "Kurskod": "",
-                "Kursnamn": "",
-                "Hp": "",
-                "Nivå": "",
-                }
+
     profiles = []
     for profile in user_program.program_profiles.all():
         profiles.append((profile.profile_code, profile.profile_name))
@@ -69,7 +77,13 @@ def profile(request):
             profile_code = request.POST["profiles"]
             profile_name = Profile.objects.get(profile_code=profile_code).profile_name
             form = Profiles(profiles)
-            return render(request, "home.html", {"term_courses": kurser, "program_name": name, "form": form, "profile_picked": True, "profile_code": profile_code, "profile_name": profile_name})
+            return render(request, "home.html", {"term_courses": kurser, 
+                                                 "program_name": name, 
+                                                 "form": form, 
+                                                 "profile_picked": True, 
+                                                 "profile_code": profile_code, 
+                                                 "profile_name": profile_name}
+                          )
         
         if "t7" in request.POST:
             termin = request.POST.get("t7")
@@ -85,7 +99,15 @@ def profile(request):
         profile_name = Profile.objects.get(profile_code=profile_code).profile_name
         term_courses = get_courses_term(account.program_code, termin, profile_courses=profile_courses)
         form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": term_courses, "program_name": name, "termin": termin, "form": form, "profile_picked": True, "profile_code": profile_code, "profile_name": profile_name, "course_tags": course_tags})
+        return render(request, "home.html", {"term_courses": term_courses, 
+                                             "program_name": name, 
+                                             "termin": termin, 
+                                             "form": form, 
+                                             "profile_picked": True, 
+                                             "profile_code": profile_code, 
+                                             "profile_name": profile_name, 
+                                             "course_tags": COURSE_TAGS}
+                      )
     else:
         form = Profiles(profiles)
         return render(request, "home.html", {"term_courses": kurser, "program_name": name, "form": form})
@@ -100,12 +122,6 @@ def courses(request):
     name = account.program_code.program_name
     user_program = Program.objects.get(program_code=account.program_code.program_code)
     
-    course_tags = {
-                "Kurskod": "",
-                "Kursnamn": "",
-                "Hp": "",
-                "Nivå": "",
-                }
     profiles = []
     for profile in user_program.program_profiles.all():
         profiles.append((profile.profile_code, profile.profile_name))
@@ -122,7 +138,12 @@ def courses(request):
         
         term_courses = get_courses_term(account.program_code, termin)
         form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": term_courses, "program_name": name, "termin": termin, "form": form, "course_tags": course_tags})
+        return render(request, "home.html", {"term_courses": term_courses, 
+                                             "program_name": name, 
+                                             "termin": termin, 
+                                             "form": form, 
+                                             "course_tags": COURSE_TAGS}
+                      )
     else:
         form = Profiles(profiles)
         return render(request, "home.html", {"term_courses": kurser, "program_name": name, "form": form})
