@@ -18,6 +18,7 @@ def test(request):
     return render(request, "test.html")
 
 def home(request):
+    
     if not request.user.is_authenticated:
         return redirect("login")
     

@@ -1,7 +1,7 @@
 from ninja import NinjaAPI, ModelSchema
 from django.http.response import JsonResponse
 from planning.models import Schedule, Course
-from scrappy.courses import fetch_course_info
+from planning.management.commands.scrappy import fetch_course_info
 
 api = NinjaAPI()
 

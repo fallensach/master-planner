@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup, ResultSet
 import pprint
 from datetime import date
+# from .courses import fetch_course_info
 
 MASTER_TERM_START = 7
 
@@ -50,6 +51,7 @@ class ProgramPlan:
                 "block": temp[4],
                 "vof": temp[5]
             }
+            # course_map = {**course_map, **fetch_course_info(course_map["course_code"])}
             courses.append(course_map)
 
         return courses
@@ -116,6 +118,7 @@ class ProgramPlan:
             if index >= term_start:
                 courses = semester.find_all("tr", {"class": "main-row"})
                 program_courses.append(self.format_course_scrape(courses))
+
             
         return sum(program_courses, [])
 
