@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import ProgramForm, Profiles
-from planning.models import get_profile_courses, get_program_courses, get_courses_term, Program, Profile, Schedule
+from planning.models import get_profile_courses, get_program_courses, get_courses_term, Program, Profile, Schedule, Scheduler
 from accounts.models import Account, get_user
 from django.contrib.auth.models import User
 
@@ -64,12 +64,6 @@ def profile(request):
     account = Account.objects.get(user=user)
     courses = get_program_courses(account.program)
     user_program = account.program
-    course_tags = {
-                "Kurskod": "",
-                "Kursnamn": "",
-                "Hp": "",
-                "Nivå": "",
-                }
     profiles = map(lambda profile : (profile.profile_code, profile.profile_name), 
                    user_program.profiles.all()
                    )
@@ -96,9 +90,9 @@ def profile(request):
         profile_name = profile.profile_name
         semester_courses = get_courses_term(program=account.program, semester=semester, profile=profile)
         form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": term_courses, 
-                                             "program_name": name, 
-                                             "termin": termin, 
+        return render(request, "home.html", {"term_courses": semester_courses, 
+                                             "program_name": user_program, 
+                                             "termin": semester, 
                                              "form": form, 
                                              "profile_picked": True, 
                                              "profile_code": profile_code, 
@@ -107,7 +101,7 @@ def profile(request):
                      )
     else:
         form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": courses, "program_name": program_name, "form": form})
+        return render(request, "home.html", {"term_courses": courses, "program_name": user_program, "form": form})
 
 def courses(request):
     if not request.user.is_authenticated:
