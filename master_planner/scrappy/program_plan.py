@@ -170,7 +170,7 @@ class ProgramPlan:
 
 def main():
     plan = ProgramPlan("6CMJU")
-    pprint.pprint(plan.planned_courses()[-1])
+    pprint.pprint(plan.courses())
     #plan.program_name()
 
 if __name__ == "__main__":
