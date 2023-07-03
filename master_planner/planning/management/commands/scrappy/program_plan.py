@@ -115,7 +115,7 @@ class ProgramPlan:
                         if row.find("th"):
                             period = row.find("th").text
                             continue
-                        if "main-row" in row["class"]:
+                        if "main-row" in row["class"] and "inactive" not in row["class"]:
                             course = self.format_course_scrape(row)
                             if profile_code == "":
                                 course["profile_code"] = "free"
@@ -204,8 +204,8 @@ class ProgramPlan:
             profile_names.append(option.get_text(strip=True))
         
         profile_names = list(filter(lambda a: a != "", profile_names))
-        profiles = list(zip(profile_names[1:], profile_id[1:]))
-        profiles.append(("free", "free"))
+        profiles = [("Ingen profil", "free"), *zip(profile_names[1:], profile_id[1:])]
+        
         return profiles
 
     def program_n(self) -> str:
