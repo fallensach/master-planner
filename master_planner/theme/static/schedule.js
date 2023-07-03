@@ -34,13 +34,33 @@ function get_course(course_code) {
     }
 }
 
-function check(schedule_id) {
-    var checkbox = document.getElementById(schedule_id);
+function check(course_code) {
+    var checkbox = $("#check-" + course_code);
+    var my_courses = $("#my-courses");
+    const url = "/api/get_course/" + course_code;
 
-    if (checkbox.checked) {
-        get_schedule(schedule_id)["program_code"]
+    if (checkbox.is(":checked")) {
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (response) {
+                console.log(response);
+                my_courses.append($("<tr>", {
+                    id: "my-course-" + course_code,
+                    append: [
+                        $("<td>", {text: response.course_code}),
+                        $("<td>", {text: response.course_name}),
+                        $("<td>", {text: response.hp}),
+                        $("<td>", {text: response.level}),
+                        $("<td>", {text: response.vof})
+                    ]
+                })
+                )
+            }
+        })
+
     } else {
-        console.log("Removed course");
+        $("#my-course-" + course_code).remove();
     }
 }
 
