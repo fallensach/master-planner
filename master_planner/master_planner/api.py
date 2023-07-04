@@ -13,10 +13,44 @@ def get_schedule(request, schedule_id):
     schedule = Schedule.objects.get(schedule_id=schedule_id)
     return schedule
 
-# @api.post('account/{choice}')
-# def choice(request, scheduler_id):
-#     account = Account.objects.get(user=request.user)
-# @api.get('') 
+@api.get('account/overview')
+def overview(request):
+    pass
+
+@api.post('account/choice', response={200: int, 404: Error})
+def choice(request, data: ChoiceSchema):
+    print(data.scheduler_id)
+    account = Account.objects.get(user__username="admin")
+    
+    # input()
+    try:
+        scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
+    except Scheduler.DoesNotExist:
+        return 404, {"message": "no matching object"}
+
+    account.choices.add(scheduler)
+    account.save()
+                
+    return 200
+
+@api.delete('account/choice', response={200: int, 404: Error})
+def choice(request, data: ChoiceSchema):
+    
+    account = Account.objects.get(user__username="admin")
+    
+    try:
+        scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
+    except Scheduler.DoesNotExist:
+        return 404, {"message": "no matching object"}
+
+    account.choices.remove(scheduler)
+    account.save()
+                
+    return 200
+
+@api.get('account/')
+def choice(request, scheduler_id):
+    account = Account.objects.get(user=request.user)
 
 @api.get('get_course/{course_code}', response=CourseSchema)
 def get_course(request, course_code):

@@ -37,3 +37,11 @@ class SemesterCourses(Schema):
     period_1: List[SchedulerSchema]
     period_2: List[SchedulerSchema]
 
+class ChoiceSchema(Schema):
+    scheduler_id: int
+
+class Error(Schema):
+    message: str 
+
+# class Success(Schema):
+#     int 
