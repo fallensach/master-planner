@@ -43,5 +43,5 @@ class ChoiceSchema(Schema):
 class Error(Schema):
     message: str 
 
-# class Success(Schema):
-#     int 
+class NoContent(Schema):
+    message: str

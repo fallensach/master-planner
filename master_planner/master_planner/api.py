@@ -17,7 +17,7 @@ def get_schedule(request, schedule_id):
 def overview(request):
     pass
 
-@api.post('account/choice', response={200: int, 404: Error})
+@api.post('account/choice', response={200: NoContent, 404: Error})
 def choice(request, data: ChoiceSchema):
     print(data.scheduler_id)
     account = Account.objects.get(user__username="admin")
@@ -26,14 +26,14 @@ def choice(request, data: ChoiceSchema):
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": "no matching object"}
+        return 404, {"message": "no scheduler object matching scheduler_id"}
 
     account.choices.add(scheduler)
     account.save()
                 
-    return 200
+    return 200, {"message": "all well"}
 
-@api.delete('account/choice', response={200: int, 404: Error})
+@api.delete('account/choice', response={200: NoContent, 404: Error})
 def choice(request, data: ChoiceSchema):
     
     account = Account.objects.get(user__username="admin")
@@ -41,12 +41,18 @@ def choice(request, data: ChoiceSchema):
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": "no matching object"}
-
+        return 404, {"message": "Scheduler object doesnt exist in scheduler table"}
+    #   fix error handling when there exists no matching choice
+    #
+    # try:
+    #     choice = Account.objects.get(account=account)
+    # except Scheduler.DoesNotExist:
+    #     return 404, {"message": "User has no choice matching scheduler_id"}
+    
     account.choices.remove(scheduler)
     account.save()
                 
-    return 200
+    return 200, {"message": "all well"}
 
 @api.get('account/')
 def choice(request, scheduler_id):
