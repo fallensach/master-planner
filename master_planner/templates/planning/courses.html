@@ -1,67 +1,85 @@
 {% block courses %}
-    <p class="text-2xl"> {{ program_name }} </p>
-    {% if profile_picked %}
-        <form action={% url 'profile' %} method="POST">
-    {% else %}
-        <form action={% url 'courses' %} method="POST">
-    {% endif %}
-        {% csrf_token %}
-        <input type="hidden" value="{{ profile_code }}" name="profile_code"/>
-        <input type="hidden" value="{{ profile_name }}" name="profile_name"/>
-        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t7" value="Termin 7" type="submit">Termin 7</button>
-        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t8" value="Termin 8" type="submit">Termin 8</button>
-        <button class="btn btn-primary bg-sky-500 border-none text-white" name="t9" value="Termin 9" type="submit">Termin 9</button>
-    </form>
-    {% if not profile_picked %}
-        <p class="text-3xl"> {{ termin }} </p>
-        {% for term, course in term_courses.items %}
-        <table class="table px-20 rounded-lg overflow-hidden mb-10">
-        <thead class="bg-sky-300 text-black/75 text-xl">
-            <tr>
-                <th>Period {{term}}</th>
-            {% for tag, x in course_tags.items %}
-                <th>
-                    {{ tag }}
-                </th>
-            {% endfor %}
-            </tr>
-        </thead>
-            <tbody class="text-lg">
-                {% for course_data in course %}
-                <tr class="bg-white hover:bg-sky-100">
-                        <td>
-                            <input type="checkbox" onclick="get_schedule(this.value)" class="checkbox checkbox-info" value="{{schedule}}">
+<p class="text-2xl"> {{ program_name }} </p>
+    <div id="courses-main-container" class="w-full px-48">
+        <div id="pickable-courses" class="flex flex-row justify-between mb-3">
+            <form action="{% url 'home' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" value="{{ profile_code }}" name="profile_code"/>
+                <input type="hidden" value="{{ profile_name }}" name="profile_name"/>
+                <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
+                    <button class="bg-slate-800 p-3 text-white transition ease-in-out" name="t7" value="Termin 7" type="submit">Termin 7</button>
+                    <button class="bg-slate-200 p-3 text-black/75 transition border-x-2 border-black/10 ease-in-out hover:bg-slate-500 hover:text-white" name="t8" value="Termin 8" type="submit">Termin 8</button>
+                    <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" name="t9" value="Termin 9" type="submit">Termin 9</button>
+                </div>
+            </form>
+            
+            <form action="{% url 'home' %}" method="POST" class="flex justify-center">
+                {% csrf_token %}
+                {{ form.profiles }}
+                <button class="bg-slate-600 text-white p-3 transition ease-in-out duration-300 hover:bg-slate-900 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
+            </form>
+
+            <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
+                <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white border-r-2 border-black/10" type="submit">Period 1</button>
+                <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" type="submit">Period 2</button>
+            </div>
+        </div>
+        <p class="text-3xl"> {{ profile_name }} </p>
+        <div class="flex flex-col">
+            {% for term, course in term_courses.items %}
+            <table class="table rounded-md overflow-hidden mb-10">
+            <thead class="bg-slate-600 text-white text-xl">
+                <tr>
+                    <th>Period {{term}}</th>
+                {% for tag, x in course_tags.items %}
+                    {% if tag == "Detaljer" %}
+                        <th class="flex justify-center">
+                            {{ tag }}
+                        </th>
+                    {% else %}
+                        <th>
+                            {{ tag }}
+                        </th>
+                    {% endif %}
+
+                {% endfor %}
+                </tr>
+            </thead>
+                <tbody class="text-lg" >
+                    {% for course_data in course %}
+                    <tr class="bg-white transition ease-in-out hover:bg-slate-100">
+                        <td class="">
+                            <input type="checkbox" onclick="check(this.value)" class="checkbox checkbox-warning border-none shadow-md bg-slate-300 focus:ring-transparent" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
                         </td>
                     
                         {% for schedule_data in course_data.values %}
-                            <td> {{ schedule_data }} </td>
+                            <td class=""> {{ schedule_data }} </td>
 
                         {% endfor %}
-                        <td>
-                            <label class="swap bg-sky-200 rounded-md transition ease-in-out drop-shadow-sm hover:bg-sky-500 hover:text-white">
+                        <td class="flex justify-center">
+                            <label class="swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-slate-500 hover:text-white">
                                 <input class="hidden" type="checkbox" onclick="load_course_info(this.id)" id="{{course_data.course_code}}"/>
-                                    <span class="material-symbols-outlined swap-on rounded-lg bg-sky-500 text-white">
-                                        keyboard_arrow_up
-                                    </span>
-                                
-                                    <span class="material-symbols-outlined swap-off ">
-                                        expand_more
-                                    </span>
-                              </label>
-
+                                <span class="material-symbols-outlined swap-on rounded-lg bg-slate-500 text-white">
+                                    keyboard_arrow_up
+                                </span>
+                            
+                                <span class="material-symbols-outlined swap-off ">
+                                    expand_more
+                                </span>
+                            </label>
                         </td>
-                </tr>
+                    </tr>
                         <tr id="dropdown-{{course_data.course_code}}">
                             <td class="overflow-hidden p-0" colspan="7" id="insert-{{course_data.course_code}}">
-                                <div id="course-info-container-{{course_data.course_code}}" class="hidden overflow-hidden shadow-box">
-                                    <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 bg-white mb-5 rounded-b-lg">
+                                <div id="course-info-container-{{course_data.course_code}}" class="hidden overflow-hidden">
+                                    <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg">
                                         <span id="courses-loader-{{course_data.course_code}}" class"hidden">
                                             <button class="btn">
                                                 <span class="loading loading-spinner"></span>
                                                     Laddar
-                                              </button>
+                                                </button>
                                         </span>
-                                        <div id="info-container-{{course_data.course_code}}" class="flex flex-col p-5 border-r-2 border-black/25">
+                                        <div id="info-container-{{course_data.course_code}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
                                         </div>
 
                                         <div id="examination-container-{{course_data.course_code}}" class="flex flex-col p-5">
@@ -70,10 +88,13 @@
                                 </div>
                             </td>
                         </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endfor %}
-    {% endif %}
-{% endblock %}
+                    {% endfor %}
 
+                </tbody>
+            </table>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
