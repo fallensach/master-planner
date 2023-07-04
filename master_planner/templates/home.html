@@ -7,107 +7,11 @@
             <p>Total hp vald: </p>
             <p id="hp">0</p>
         </div>
-        <a class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" href="{% url 'courses' %}"> Courses </a>
         <a class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-lg" href="{% url 'logout' %}">Log Out</a>
         <div id="chosen-courses" class="flex w-full px-48 flex-col">
             <p class="text-3xl my-2"> Mina kurser </p>
             {% include 'my_courses.html' %}
         </div>
-        <div id="pickable-courses" class="flex flex-col w-full">
-            <form action="{% url 'profile' %}" method="POST" class="flex justify-center">
-                {% csrf_token %}
-                {{ form.profiles }}
-                <button class="bg-sky-500 text-white p-3 transition ease-in-out duration-300 hover:bg-sky-700 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
-            </form>
-        <div class="mx-48">
-            {% include 'planning/courses.html' %}
-            {% if profile_picked %}
-                <p class="text-3xl"> {{ profile_name }} </p>
-                {% for term, course in term_courses.items %}
-                <table class="table px-20 rounded-md overflow-hidden mb-10">
-                <thead class="bg-slate-600 text-white text-xl">
-                    <tr>
-                        <th>Period {{term}}</th>
-                    {% for tag, x in course_tags.items %}
-                        <th>
-                            {{ tag }}
-                        </th>
-                    {% endfor %}
-                    </tr>
-                </thead>
-                    <tbody class="text-lg" >
-                        {% for course_data in course %}
-                        <tr class="bg-white transition ease-in-out hover:bg-slate-100">
-                            <td>
-                                <input type="checkbox" onclick="check(this.value)" class="checkbox checkbox-info" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
-                            </td>
-                        
-                            {% for schedule_data in course_data.values %}
-                                <td> {{ schedule_data }} </td>
-    
-                            {% endfor %}
-                            <td>
-                                <label class="swap bg-sky-200 rounded-md transition ease-in-out drop-shadow-sm hover:bg-sky-500 hover:text-white">
-                                    <input class="hidden" type="checkbox" onclick="load_course_info(this.id)" id="{{course_data.course_code}}"/>
-                                    <span class="material-symbols-outlined swap-on rounded-lg bg-sky-500 text-white">
-                                        keyboard_arrow_up
-                                    </span>
-                                
-                                    <span class="material-symbols-outlined swap-off ">
-                                        expand_more
-                                    </span>
-                                </label>
-                            </td>
-                        </tr>
-                                <tr id="dropdown-{{course_data.course_code}}">
-                                    <td class="overflow-hidden p-0" colspan="7" id="insert-{{course_data.course_code}}">
-                                        <div id="course-info-container-{{course_data.course_code}}" class="hidden overflow-hidden shadow-box">
-                                            <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 bg-white mb-5 rounded-b-lg">
-                                                <span id="courses-loader-{{course_data.course_code}}" class"hidden">
-                                                    <button class="btn">
-                                                        <span class="loading loading-spinner"></span>
-                                                            Laddar
-                                                      </button>
-                                                </span>
-                                                <div id="info-container-{{course_data.course_code}}" class="flex flex-col p-5 border-r-2 border-black/25">
-                                                </div>
-        
-                                                <div id="examination-container-{{course_data.course_code}}" class="flex flex-col p-5">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                        {% endfor %}
-                        </tr>
 
-                    </tbody>
-                </table>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
+            {% include 'courses.html' %}
 {% endblock %}
-
-<div class="flex space-x-2">
-    <p class="text-xl font-bold"> Examinationsmoment </p>
-</div>
-
-<div class="">
-    <table>
-        <thead>
-            <tr>
-                <th>Kod</th>
-                <th>Tpy</th>
-                <th>Hp</th>
-                <th>Betygsskala</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{list.examination}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
