@@ -15,14 +15,11 @@ COURSE_TAGS = {
                 "Hp": "",
                 "Nivå": "",
                 "Vof": "",
-                "": "",
+                "Detaljer": "",
                 }
 
-def test(request):
-    return render(request, "test.html")
 
 def home(request):
-    
     if not request.user.is_authenticated:
         return redirect("login")
     
@@ -34,46 +31,15 @@ def home(request):
     user_program = account.program
     profiles = [(profile.profile_code, profile.profile_name) for profile in user_program.profiles.all()]
     profiles_dict = dict(profiles) 
-    profile_picked = False
-    profile_name = None
-    courses = []
     
     if request.method == "POST":
-        form = Profiles(profiles)
-        profile_picked = True
-        profile_code = request.POST.get("profiles")
-        profile_name = profiles_dict[request.POST.get("profiles")]
-        profile = Profile.objects.get(profile_code=profile_code)
-
-        scheduler = Scheduler.objects.filter(profile=profile.profile_code)
-        for row in scheduler:
-            courses.append(row.course.to_dict)
-            
-    else:
-        courses = [{}]
-        form = Profiles(profiles)
-    
-    return render(request, "home.html", {"form": form, 
-                                         "profile_picked": profile_picked, 
-                                         "profile_name": profile_name, 
-                                         "courses": courses, 
-                                         "course_tags": COURSE_TAGS})
-
-def profile(request):
-    user = User.objects.get(username=request.user.username)
-    account = Account.objects.get(user=user)
-    courses = get_program_courses(account.program)
-    user_program = account.program
-    profiles = map(lambda profile : (profile.profile_code, profile.profile_name), 
-                   user_program.profiles.all()
-                   )
-    
-    if request.method == "POST":
-        if "pick_profile" in request.POST: #TODO shuldnt this be a GET?
-            profile_code = request.POST["profiles"] #TODO maybe rename to profile_code
+        if "pick_profile" in request.POST:
+            profile_code = request.POST["profiles"]
             profile_name = Profile.objects.get(profile_code=profile_code).profile_name
             form = Profiles(profiles)
-            return render(request, "home.html", {"term_courses": courses, "program_name": user_program.program_name, "form": form, "profile_picked": True, "profile_code": profile_code, "profile_name": profile_name})
+            semester = "Termin 7"
+        else:
+            profile_code = request.POST.get("profile_code")
         
         if "t7" in request.POST:
             semester = request.POST.get("t7")
@@ -83,62 +49,29 @@ def profile(request):
         
         elif "t9" in request.POST:
             semester = request.POST.get("t9")
-
-        profile_code = request.POST.get("profile_code")
-        # profile_courses = Profile.objects.get(profile_code=profile_code).profile_courses.all()
+            
+        form = Profiles(profiles)
+        profile_name = profiles_dict[profile_code]
+        profile = Profile.objects.get(profile_code=profile_code)
+        semester_courses = get_courses_term(program=account.program, semester=semester, profile=profile)
+            
+    else:
+        profile_code = "free"
         profile = Profile.objects.get(profile_code=profile_code)
         profile_name = profile.profile_name
-        semester_courses = get_courses_term(program=account.program, semester=semester, profile=profile)
+        semester_courses = get_courses_term(program=account.program, semester="Termin 7", profile=profile)
         form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": semester_courses, 
+
+    
+    return render(request, "home.html", {"term_courses": semester_courses, 
                                              "program_name": user_program, 
-                                             "termin": semester, 
+                                             "termin": "Termin 7", 
                                              "form": form, 
                                              "profile_picked": True, 
                                              "profile_code": profile_code, 
                                              "profile_name": profile_name, 
                                              "course_tags": COURSE_TAGS}
-                     )
-    else:
-        form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": courses, "program_name": user_program, "form": form})
-
-def courses(request):
-    if not request.user.is_authenticated:
-        return redirect("login")
-    
-    user = User.objects.get(username=request.user.username)
-    account = Account.objects.get(user=user)
-    courses = get_program_courses(account.program)
-    user_program = account.program
-    program_name = user_program.program_name
-    
-    profiles = []
-    for profile in user_program.profiles.all():
-        profiles.append((profile.profile_code, profile.profile_name))
-    
-    if request.method == "POST":
-        if "t7" in request.POST:
-            semester = request.POST.get("t7")
-        
-        elif "t8" in request.POST:
-            semester = request.POST.get("t8")
-        
-        elif "t9" in request.POST:
-            semester = request.POST.get("t9")
-        
-        term_courses = get_courses_term(user_program, semester, "free")
-        print(f"data {str(term_courses)}")
-        form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": term_courses, 
-                                             "program_name": program_name, 
-                                             "termin": semester, 
-                                             "form": form, 
-                                             "course_tags": COURSE_TAGS}
-                      )
-    else:
-        form = Profiles(profiles)
-        return render(request, "home.html", {"term_courses": courses, "program_name": program_name, "form": form})
+                                         )
 
 def setup(request):
     if not request.user.is_authenticated:
