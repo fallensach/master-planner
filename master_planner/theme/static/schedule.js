@@ -44,15 +44,21 @@ function check(course_code) {
             type: "GET",
             url: url,
             success: function (response) {
-                console.log(response);
+                remove_course_btn = $("<span>", {
+                                                text: "delete", 
+                                                class: "material-symbols-outlined cursor-pointer font-2xl",
+                                                
+                                                })
                 my_courses.append($("<tr>", {
                     id: "my-course-" + course_code,
+                    class: "bg-white",
                     append: [
                         $("<td>", {text: response.course_code}),
                         $("<td>", {text: response.course_name}),
                         $("<td>", {text: response.hp}),
                         $("<td>", {text: response.level}),
-                        $("<td>", {text: response.vof})
+                        $("<td>", {text: response.vof}),
+                        $("<td>", {append: [remove_course_btn] })
                     ]
                 })
                 )
