@@ -1,58 +1,44 @@
-from ninja import NinjaAPI, ModelSchema
+from ninja import NinjaAPI, ModelSchema, Schema
 from django.http.response import JsonResponse
-from planning.models import Schedule, Course, Scheduler, get_courses_term
+from planning.models import Schedule, Course, Scheduler, Examination
 from planning.management.commands.scrappy.courses import fetch_course_info
 from accounts.models import get_user, Account
-from typing import List, Dict
+from typing import List
+from .schemas import *
 
 api = NinjaAPI()
-
-class SchedulerSchema(ModelSchema):
-    class Config:
-        model = Scheduler
-        model_fields = ["program", "course", "schedule"]
-
-class ScheduleSchema(ModelSchema):
-    class Config:
-        model = Schedule 
-        model_fields = ["semester", "period", "block"]
-
-class CourseSchema(ModelSchema):
-    class Config:
-        model = Course
-        model_fields = ["course_code", "course_name", "hp", "level", "vof"]
 
 @api.get('get_schedule/{schedule_id}', response=ScheduleSchema)
 def get_schedule(request, schedule_id):
     schedule = Schedule.objects.get(schedule_id=schedule_id)
     return schedule
 
+# @api.post('account/{choice}')
+# def choice(request, scheduler_id):
+#     account = Account.objects.get(user=request.user)
+# @api.get('') 
+
 @api.get('get_course/{course_code}', response=CourseSchema)
 def get_course(request, course_code):
     course_info = Course.objects.get(course_code=course_code)
     return course_info
 
-@api.get('get_courses/{profile}/{semester}')
+@api.get('get_courses/{profile}/{semester}', response=SemesterCourses)
 def get_semester_courses(request, profile, semester):
-    program = Account.objects.get(user__username=request.user).program
+    program = Account.objects.get(user=request.user).program
     
-#    period1 = Scheduler.objects.filter(program=program, 
-#                                       profile=profile, 
-#                                       schedule__semester=f"Termin {semester}",
-#                                       schedule__period="Period 1")
-#    period2 = Scheduler.objects.filter(program=program, 
-#                                       profile=profile, 
-#                                       schedule__semester=f"Termin {semester}",
-#                                       schedule__period="Period 2")
+    period1 = Scheduler.objects.filter(program=program, 
+                                       profile=profile, 
+                                       schedule__semester=f"Termin {semester}",
+                                       schedule__period="Period 1")
+    period2 = Scheduler.objects.filter(program=program, 
+                                       profile=profile, 
+                                       schedule__semester=f"Termin {semester}",
+                                       schedule__period="Period 2")
+        
+    data = {"period_1": list(period1),
+            "period_2": list(period2)}
     
-    data = get_courses_term(program, f"Termin {semester}", profile)
-
-    """    
-    print(period1)
-
-    data = {"period 1": period1,
-            "period 2": period2}
-    """
     return data
 
 
