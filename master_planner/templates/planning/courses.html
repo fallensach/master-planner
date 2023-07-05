@@ -2,16 +2,11 @@
 <p class="text-2xl"> {{ program_name }} </p>
     <div id="courses-main-container" class="w-full px-48">
         <div id="pickable-courses" class="flex flex-row justify-between mb-3">
-            <form action="{% url 'home' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" value="{{ profile_code }}" name="profile_code"/>
-                <input type="hidden" value="{{ profile_name }}" name="profile_name"/>
-                <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
-                    <button class="bg-slate-800 p-3 text-white transition ease-in-out" name="t7" value="Termin 7" type="submit">Termin 7</button>
-                    <button class="bg-slate-200 p-3 text-black/75 transition border-x-2 border-black/10 ease-in-out hover:bg-slate-500 hover:text-white" name="t8" value="Termin 8" type="submit">Termin 8</button>
-                    <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" name="t9" value="Termin 9" type="submit">Termin 9</button>
-                </div>
-            </form>
+            <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
+                <button id="semester-btn-7-{{profile_code}}" onclick="get_courses_semester(this.value, this.name)" class="bg-slate-800 p-3 text-white transition ease-in-out" name="{{ profile_code }}" value="7" type="submit">Termin 7</button>
+                <button id="semester-btn-8-{{profile_code}}" onclick="get_courses_semester(this.value, this.name)" class="bg-slate-200 p-3 text-black/75 transition border-x-2 border-black/10 ease-in-out hover:bg-slate-500 hover:text-white" name="{{ profile_code }}" value="8" type="submit">Termin 8</button>
+                <button id="semester-btn-9-{{profile_code}}" onclick="get_courses_semester(this.value, this.name)" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" name="{{ profile_code }}" value="9" type="submit">Termin 9</button>
+            </div>
             
             <form action="{% url 'home' %}" method="POST" class="flex justify-center">
                 {% csrf_token %}
@@ -30,10 +25,10 @@
             <table class="table rounded-md overflow-hidden mb-10">
             <thead class="bg-slate-600 text-white text-xl">
                 <tr>
-                    <th>Period {{term}}</th>
+                    <th class="text-center">Välj</th>
                 {% for tag, x in course_tags.items %}
-                    {% if tag == "Detaljer" %}
-                        <th class="flex justify-center">
+                    {% if tag != "Kursnamn" %}
+                        <th class="text-center">
                             {{ tag }}
                         </th>
                     {% else %}
@@ -45,15 +40,21 @@
                 {% endfor %}
                 </tr>
             </thead>
-                <tbody class="text-lg" >
+                <tbody id="table-{{term}}" class="text-lg" >
                     {% for course_data in course %}
                     <tr class="bg-white transition ease-in-out hover:bg-slate-100">
-                        <td class="">
-                            <input type="checkbox" onclick="add_course(this.value)" class="checkbox checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
+                        <td class="flex justify-center">
+                            <input type="checkbox" onclick="add_course(this.value)" class="checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
                         </td>
                     
-                        {% for schedule_data in course_data.values %}
-                            <td class=""> {{ schedule_data }} </td>
+                        {% for key, schedule_data in course_data.items %}
+                            {% if key != "course_name" %}
+                                <td class="text-center"> {{ schedule_data }} </td>
+                                
+                            {% else %}
+                                <td class=""> {{ schedule_data }} </td>
+
+                            {% endif %}
 
                         {% endfor %}
                         <td class="flex justify-center">

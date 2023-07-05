@@ -60,7 +60,7 @@ function add_course_table(response, my_courses) {
 
     remove_course_btn = $("<span>", {
         text: "delete", 
-        class: "material-symbols-outlined cursor-pointer font-2xl",
+        class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
         
         })
     my_courses.append($("<tr>", {
@@ -72,7 +72,7 @@ function add_course_table(response, my_courses) {
             $("<td>", {text: response.hp}),
             $("<td>", {text: response.level}),
             $("<td>", {text: response.vof}),
-            $("<td>", {append: [remove_course_btn] })
+            $("<td>", {append: [remove_course_btn], class: "flex items-center"})
             ]
         })
     )
@@ -226,4 +226,75 @@ function delete_course_db(scheduler_id) {
     });
 }
 
+function get_courses_semester(semester, profile_code) {
+    var semester_btn = $("#semester-btn-" + semester + "-" + profile_code);
+    const url = "/api/get_courses/" + profile_code + "/" + semester;
 
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (semester_data) {
+            highlight_semester(semester, profile_code); 
+            replace_period_table(1, semester_data);
+        }
+    });
+}
+
+function replace_period_table(period, semester_data) {
+    var table_body = $("#table-" + period);
+
+    table_body.empty();
+    $.each(semester_data["period_1"], function(key, value) {
+        var course_row = $('<tr>').appendTo(table_body);
+        course_row.append(
+            $("<td>", {text: value["course"]["course_code"]}),
+            $("<td>", {text: value["course"]["course_name"]}),
+            $("<td>", {text: value["course"]["hp"]}),
+            $("<td>", {text: value["course"]["level"]}),
+            $("<td>", {text: value["course"]["vof"]}),
+            make_expand_btn(value["course"]["course_code"]),
+        )
+        table_body.append(course_row);
+    })
+}
+
+function make_expand_btn(course_code) {
+    var courseData = { "course_code": course_code };
+
+    var tdElement = $('<td>').attr('id', 'expand-' + courseData["course_code"]).addClass('flex justify-center');
+
+    var labelElement = $('<label>').addClass('swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500');
+
+    var inputElement = $('<input>').attr({
+        'type': 'checkbox',
+        'id': courseData["course_code"],
+        'class': 'hidden'
+    }).on('click', function() {
+        load_course_info(this.id);
+    });
+
+    var spanElementUp = $('<span>').addClass('material-symbols-outlined swap-on rounded-lg bg-yellow-500').text('keyboard_arrow_up');
+    var spanElementDown = $('<span>').addClass('material-symbols-outlined swap-off').text('expand_more');
+
+    labelElement.append(inputElement, spanElementUp, spanElementDown);
+    tdElement.append(labelElement);
+
+    return tdElement;
+}
+
+function highlight_semester(semester, profile_code) {
+    var current_semester = $("#semester-btn-" + semester + "-" + profile_code);
+    var semester_7 = $("#semester-btn-" + "7" + "-" + profile_code);
+    var semester_8 = $("#semester-btn-" + "8" + "-" + profile_code);
+    var semester_9 = $("#semester-btn-" + "9" + "-" + profile_code);
+    var semesters = [semester_7, semester_8, semester_9];
+
+    $.each(semesters, function(index, semester) {
+        semester.removeAttr("class");
+        semester.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
+
+    });
+    
+    current_semester.removeAttr("class")
+    current_semester.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+}
