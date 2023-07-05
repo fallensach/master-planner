@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload'
-]
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,7 +61,7 @@ ROOT_URLCONF = 'master_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": ["./templates", "**/templates", str(BASE_DIR / "templates"), "./templates/accounts", "./templates/planning"],
+        "DIRS": ["./templates", "/templates", str(BASE_DIR / "templates"), "./templates/accounts", "./templates/planning"],
 
         'APP_DIRS': True,
         'OPTIONS': {

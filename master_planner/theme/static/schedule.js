@@ -34,37 +34,48 @@ function get_course(course_code) {
     }
 }
 
-function check(schedule_id) {
-    var checkbox = document.getElementById(schedule_id);
+function add_course(course_code) {
+    var checkbox = $("#check-" + course_code);
+    var my_courses = $("#my-courses");
+    const url = "/api/get_course/" + course_code;
 
-    if (checkbox.checked) {
-        get_schedule(schedule_id)["program_code"]
+    if (checkbox.is(":checked")) {
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (response) {
+                add_course_table(response, my_courses);
+                add_course_db(1);
+            }
+        })
+
     } else {
-        console.log("Removed course");
+        $("#my-course-" + course_code).remove();
+        delete_course_db(1);
     }
 }
 
-function test2(course_code) {
-    var url = "/api/get_extra_course_info/" + course_code;
-    var dropdown = $("#dropdown-" + course_code);
 
-    dropdown.slideDown();
+function add_course_table(response, my_courses) {
 
-
-    $.ajax({
-        url: url,
-        method: "GET",
-        success: function(response) {
-            var info = $('<div></div>');
-            info.html(response.course_code);
-            info.removeClass();
-            var block = $("#insert-" + course_code);
-            block.append(info);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            // Handle error if needed
-        }
-    });
+    remove_course_btn = $("<span>", {
+        text: "delete", 
+        class: "material-symbols-outlined cursor-pointer font-2xl",
+        
+        })
+    my_courses.append($("<tr>", {
+    id: "my-course-" + response.course_code,
+    class: "bg-white",
+    append: [
+            $("<td>", {text: response.course_code}),
+            $("<td>", {text: response.course_name}),
+            $("<td>", {text: response.hp}),
+            $("<td>", {text: response.level}),
+            $("<td>", {text: response.vof}),
+            $("<td>", {append: [remove_course_btn] })
+            ]
+        })
+    )
 }
 
 function load_course_info(course_code) {
@@ -151,7 +162,7 @@ function course_info_div(response) {
 function course_examination(response) {
     var examination = response.examination
     var courseCode = response.course_code;
-    var container = $('<div>').addClass('');
+    var container = $("#examination-container-" + courseCode);
     container.append($('<p>', { text: "Examinationsmoment", class: "font-bold font-xl"}));
     var table = $('<table>').appendTo(container);
     var thead = $('<thead>', {class: "text-xl text-black"}).appendTo(table);
@@ -172,11 +183,11 @@ function course_examination(response) {
     }
 
     container.append($('<div>', { 
-        class: "font-bold font-xl",
+        class: "flex font-bold font-xl",
         append: [
             $("<a>", {
                 href: "http://www.gamlatentor.se/LIU/" + courseCode,
-                class: "btn bg-sky-500",
+                class: "bg-yellow-500 p-3 rounded-lg hover:bg-yellow-300 transition ease-in-out",
                 text: "Gamla tentor"
             })
         ]
@@ -187,5 +198,32 @@ function course_examination(response) {
     return container
 }
 
+function add_course_db(scheduler_id) {
+    var payload = JSON.stringify({"scheduler_id": scheduler_id});
+    const url = "/api/account/choice";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: payload,
+        success: function (response) {
+            console.log(response);
+        }
+    });
+}
+
+function delete_course_db(scheduler_id) {
+    var payload = JSON.stringify({"scheduler_id": scheduler_id});
+    const url = "/api/account/choice";
+
+    $.ajax({
+        type: "DELETE",
+        url: url,
+        data: payload,
+        success: function (response) {
+            console.log(response);
+        }
+    });
+}
 
 

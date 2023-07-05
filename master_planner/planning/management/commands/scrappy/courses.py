@@ -1,6 +1,27 @@
 import requests
 from bs4 import BeautifulSoup
 
+def fetch_programs():
+
+    # profiles = ["Civilingenjörsprogrammet i Datateknik", "Civilingenjörsprogrammet i Design och produktutveckling", "Civilingenjörsprogrammet i Elektronikdesign", "Civilingenjörsprogrammet i Energi - Miljö - Management", "Civilingenjörsprogrammet i Industriell ekonomi", "Civilingenjörsprogrammet i Industriell ekonomi- internationell franska, tyska, spanska, kinesiska och japanska", "Civilingenjörsprogrammet i Informationsteknologi", "Civilingenjörsprogrammet i Kemisk biologi", "Civilingenjörsprogrammet i Kommunikation, transport och samhälle", "Civilingenjörsprogrammet i Maskinteknik", "Civilingenjörsprogrammet i Medicinsk teknik", "Civilingenjörsprogrammet i Medieteknik", "Civilingenjörsprogrammet i Mjukvaruteknik", "Civilingenjörsprogrammet i Teknisk biologi", "Civilingenjörsprogrammet i Teknisk matematik", "Civilingenjörsprogrammet i Teknisk fysik och elektroteknik", "Civilingenjörsprogrammet i Teknisk fysik och elektroteknik- internationell franska, tyska, spanska, kinesiska och japanska"]  
+
+    url = "https://studieinfo.liu.se/?Term=civilingenj%C3%B6r&Type=all&MainFieldOfStudy="
+    r = requests.get(url)
+    programs = []
+    if r.status_code == 200:
+        
+        program_data = []
+
+        soup = BeautifulSoup(r.content, "html.parser")
+        for string in soup.find_all("a", {"class": "pseudo-h3"} ):
+            name = string.text[:string.text.find("(")]
+            code = string.text[string.text.find("6"):string.text.find(")")]
+            program_data.append((code, name))
+            
+        return program_data
+
+
+
 
 
 def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
@@ -14,7 +35,6 @@ def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
                                  "scope":
                                  "grading"
                                  }],
-                "level": str,
                 "examinator": str,
                 "location": str,
                 "main_field": list[str]
@@ -35,7 +55,6 @@ def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
         soup = BeautifulSoup(r.content, "html.parser")
 
         return {"examination": get_examination(soup),
-                "level": get_level(soup),
                 "examinator": get_examinator(soup),
                 "location": get_location(soup),
                 "main_field": get_main_field(soup), 
