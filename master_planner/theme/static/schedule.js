@@ -227,8 +227,7 @@ function delete_course_db(scheduler_id) {
 }
 
 function get_courses_semester(semester, profile_code) {
-    var semester_btn = $("#semester-btn-" + semester + "-" + profile_code);
-    const url = "/api/get_courses/" + profile_code + "/" + semester;
+    const url = "/api/courses/" + profile_code + "/" + semester;
 
     $.ajax({
         type: "GET",
@@ -245,17 +244,54 @@ function replace_period_table(period, semester_data) {
 
     table_body.empty();
     $.each(semester_data["period_1"], function(key, value) {
-        var course_row = $('<tr>').appendTo(table_body);
+        var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
-            $("<td>", {text: value["course"]["course_code"]}),
+            course_checkbox(value["course"]["course_code"]),
+            $("<td>", {text: value["course"]["course_code"], class: "text-center"}),
             $("<td>", {text: value["course"]["course_name"]}),
-            $("<td>", {text: value["course"]["hp"]}),
-            $("<td>", {text: value["course"]["level"]}),
-            $("<td>", {text: value["course"]["vof"]}),
+            $("<td>", {text: value["course"]["hp"], class: "text-center"}),
+            $("<td>", {text: value["course"]["level"], class: "text-center"}),
+            $("<td>", {text: value["course"]["vof"], class: "text-center"}),
             make_expand_btn(value["course"]["course_code"]),
-        )
+        );
         table_body.append(course_row);
+        table_body.append(expand_div(value["course"]["course_code"]));
     })
+}
+
+function expand_div(courseCode) {
+    var dropdown = $('<tr>').attr('id', 'dropdown-' + courseCode);
+    var td = $('<td>').addClass('overflow-hidden p-0').attr('colspan', '7').attr('id', 'insert-' + courseCode);
+    var courseInfoContainer = $('<div>').attr('id', 'course-info-container-' + courseCode).addClass('hidden overflow-hidden');
+    var infoContainer = $('<div>').attr('id', 'info-container-' + courseCode).addClass('flex flex-col p-5 border-r-2 w-1/2 border-black/25');
+    var examinationContainer = $('<div>').attr('id', 'examination-container-' + courseCode).addClass('flex flex-col p-5 space-y-2');
+    
+    var loadingButton = $('<button>').addClass('btn');
+    var loadingSpinner = $('<span>').addClass('loading loading-spinner');
+    var loadingText = $('<span>').text('Laddar');
+    var coursesLoader = $('<span>').attr('id', 'courses-loader-' + courseCode).addClass('hidden').append(loadingButton.append(loadingSpinner).append(loadingText));
+    
+    var courseInfo = courseInfoContainer.append($('<div>').addClass('flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg').append(coursesLoader).append(infoContainer).append(examinationContainer));
+    
+    var finalRow = td.append(courseInfo);
+    dropdown.append(finalRow);
+    
+    return dropdown
+}
+
+function course_checkbox(courseCode) {
+    var td = $('<td>').addClass('flex justify-center');
+    var checkbox = $('<input>').attr({
+    'type': 'checkbox',
+    'onclick': 'add_course(this.value)',
+    'class': 'checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent',
+    'id': 'check-' + courseCode,
+    'value': courseCode
+    });
+
+    td.append(checkbox);
+
+    return td
 }
 
 function make_expand_btn(course_code) {
@@ -292,9 +328,10 @@ function highlight_semester(semester, profile_code) {
     $.each(semesters, function(index, semester) {
         semester.removeAttr("class");
         semester.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
-
+        semester.prop("disabled", false);
     });
     
     current_semester.removeAttr("class")
     current_semester.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+    current_semester.prop("disabled", true);
 }
