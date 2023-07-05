@@ -61,7 +61,7 @@ ROOT_URLCONF = 'master_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": ["./templates", "**/templates", str(BASE_DIR / "templates"), "./templates/accounts", "./templates/planning"],
+        "DIRS": ["./templates", "/templates", str(BASE_DIR / "templates"), "./templates/accounts", "./templates/planning"],
 
         'APP_DIRS': True,
         'OPTIONS': {
