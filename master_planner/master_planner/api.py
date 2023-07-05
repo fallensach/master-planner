@@ -19,54 +19,48 @@ def overview(request):
 
 @api.post('account/choice', response={200: NoContent, 404: Error})
 def choice(request, data: ChoiceSchema):
-    print(data.scheduler_id)
-    account = Account.objects.get(user__username="admin")
+    account = Account.objects.get(user=request.user)
     
-    # input()
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": "no scheduler object matching scheduler_id"}
+        return 404, {"message": "Could not find scheduler object: {data.scheduler_id} in scheduler table"}
 
     account.choices.add(scheduler)
     account.save()
                 
-    return 200, {"message": "all well"}
+    return 200, {"message": "choice: {data.scheduler_id} has been added to account: {account.user.username}"}
 
 @api.delete('account/choice', response={200: NoContent, 404: Error})
 def choice(request, data: ChoiceSchema):
     
-    account = Account.objects.get(user__username="admin")
+    account = Account.objects.get(user=request.user)
     
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": "Scheduler object doesnt exist in scheduler table"}
-    #   fix error handling when there exists no matching choice
-    #
-    # try:
-    #     choice = Account.objects.get(account=account)
-    # except Scheduler.DoesNotExist:
-    #     return 404, {"message": "User has no choice matching scheduler_id"}
+        return 404, {"message": "Could not find scheduler object: {data.scheduler_id} in scheduler table"}
     
     account.choices.remove(scheduler)
     account.save()
                 
-    return 200, {"message": "all well"}
+    return 200, {"message": "choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
 
-@api.get('account/')
-def choice(request, scheduler_id):
+@api.get('account/choice', response=List[SchedulerSchema])
+def choice(request):
     account = Account.objects.get(user=request.user)
+    return account.choices.all()
 
 @api.get('get_course/{course_code}', response=CourseSchema)
 def get_course(request, course_code):
     course_info = Course.objects.get(course_code=course_code)
     return course_info
 
-@api.get('get_courses/{profile}/{semester}', response=SemesterCourses)
+@api.get('courses/{profile}/{semester}', response=SemesterCourses)
 def get_semester_courses(request, profile, semester):
     program = Account.objects.get(user=request.user).program
     
+
     period1 = Scheduler.objects.filter(program=program, 
                                        profile=profile, 
                                        schedule__semester=f"Termin {semester}",
