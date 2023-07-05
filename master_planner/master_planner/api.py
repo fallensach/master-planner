@@ -63,12 +63,12 @@ def get_semester_courses(request, profile, semester):
 
     period1 = Scheduler.objects.filter(program=program, 
                                        profile=profile, 
-                                       schedule__semester=f"Termin {semester}",
-                                       schedule__period="Period 1")
+                                       schedule__semester=semester,
+                                       schedule__period=1)
     period2 = Scheduler.objects.filter(program=program, 
                                        profile=profile, 
-                                       schedule__semester=f"Termin {semester}",
-                                       schedule__period="Period 2")
+                                       schedule__semester=semester,
+                                       schedule__period=2)
         
     data = {"period_1": list(period1),
             "period_2": list(period2)}
