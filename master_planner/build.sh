@@ -3,9 +3,7 @@
 set -o errexit  # exit on error
 
 pip install -r requirements.txt
-cd theme/static_source
-npm install 
-cd ../..
+npm install theme/static_src/
 
 python manage.py tailwind build
 python manage.py collectstatic --no-input
