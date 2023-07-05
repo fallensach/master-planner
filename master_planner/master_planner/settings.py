@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import os
+from sys import platform
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -138,3 +138,7 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 TAILWIND_APP_NAME = 'theme'
+
+# Node for windows, python sometimes cant find the path
+if platform == "win32":
+    NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd"
