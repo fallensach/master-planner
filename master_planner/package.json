@@ -1,4 +1,8 @@
 {
+  "scripts":{ 
+    "tailwindcss": "node ./node_modules/tailwindcss/lib/cli.js",
+    "rimraf": "./node_modules/rimraf/bin.js"
+  },
   "dependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.3",
