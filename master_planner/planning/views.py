@@ -59,7 +59,7 @@ def home(request):
         profile_code = "free"
         profile = Profile.objects.get(profile_code=profile_code)
         profile_name = profile.profile_name
-        semester_courses = get_courses_term(program=account.program, semester="Termin 7", profile=profile)
+        semester_courses = get_courses_term(program=account.program, semester=7, profile=profile)
         form = Profiles(profiles)
 
     
