@@ -61,6 +61,7 @@ def home(request):
         profile_name = profile.profile_name
         semester_courses = get_courses_term(program=account.program, semester=7, profile=profile)
         form = Profiles(profiles)
+        print(semester_courses)
 
     
     return render(request, "home.html", {"term_courses": semester_courses, 
