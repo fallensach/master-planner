@@ -69,7 +69,7 @@ class Command(BaseCommand):
 
     def scrape_data(self):
         # fill Schedule
-        register_schedule()
+        # register_schedule()
 
         user = User.objects.create_user(username="admin",  
                                         password="123",

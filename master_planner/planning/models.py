@@ -48,8 +48,8 @@ class Examination(models.Model):
 
 class Schedule(models.Model):
     schedule_id = models.IntegerField(primary_key=True)
-    period = models.CharField(max_length=10)
-    semester = models.CharField(max_length=10)
+    period = models.IntegerField()
+    semester = models.IntegerField()
     block = models.CharField(max_length=10)
 
     def __str__(self):

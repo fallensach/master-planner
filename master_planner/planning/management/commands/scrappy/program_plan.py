@@ -100,8 +100,9 @@ class ProgramPlan:
         
         for semester_section in self.soup.find_all("section", {"class": "accordion semester js-semester show-focus is-toggled"}):
             semester = semester_section.find("h3").text[:8]
-            # ignore semester without valbara
-            if semester[-1:] not in ["7", "8", "9", None]:
+            semester = int(semester[-1:])
+            # ignore semester without valbara courses
+            if semester not in [7, 8, 9, None]:
                 continue
             
             # add all non profile specific courses
@@ -113,7 +114,7 @@ class ProgramPlan:
                     period = None
                     for row in period_sections.find_all("tr"):
                         if row.find("th"):
-                            period = row.find("th").text
+                            period = row.find("th").text[-1:]
                             continue
                         if "main-row" in row["class"] and "inactive" not in row["class"]:
                             course = self.format_course_scrape(row)
