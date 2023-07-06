@@ -235,15 +235,15 @@ function get_courses_semester(semester, profile_code) {
         success: function (semester_data) {
             highlight_semester(semester, profile_code); 
             replace_period_table(1, semester_data);
+            replace_period_table(2, semester_data);
         }
     });
 }
 
 function replace_period_table(period, semester_data) {
     var table_body = $("#table-" + period);
-
     table_body.empty();
-    $.each(semester_data["period_1"], function(key, value) {
+    $.each(semester_data[`period_${period}`], function(key, value) {
         var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["course"]["course_code"]),
@@ -334,4 +334,33 @@ function highlight_semester(semester, profile_code) {
     current_semester.removeAttr("class")
     current_semester.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
     current_semester.prop("disabled", true);
+}
+
+function toggle_period(period) {
+    var period_table = $("#period-" + period);
+    var period_btn = $("#period-" + period + "-btn");
+    var period_1_toggled = $("#period-" + 1 + "-btn").data("toggled");
+    var period_2_toggled = $("#period-" + 2 + "-btn").data("toggled");
+
+    var toggled = period_btn.data("toggled");
+
+    if (period_1_toggled && period_2_toggled) {
+        // Close the table
+        period_table.slideToggle();
+        period_btn.data("toggled", false);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
+
+    } else if (period == 1 && period_2_toggled && !toggled) {
+        period_table.slideToggle();
+        period_btn.data("toggled", true);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+
+    } else if (period == 2 && period_1_toggled && !toggled) {
+        period_table.slideToggle();
+        period_btn.data("toggled", true);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+    }
 }
