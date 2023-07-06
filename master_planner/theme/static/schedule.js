@@ -60,7 +60,7 @@ function add_course_table(response, my_courses) {
 
     remove_course_btn = $("<span>", {
         text: "delete", 
-        class: "material-symbols-outlined cursor-pointer font-2xl",
+        class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
         
         })
     my_courses.append($("<tr>", {
@@ -72,7 +72,7 @@ function add_course_table(response, my_courses) {
             $("<td>", {text: response.hp}),
             $("<td>", {text: response.level}),
             $("<td>", {text: response.vof}),
-            $("<td>", {append: [remove_course_btn] })
+            $("<td>", {append: [remove_course_btn], class: "flex items-center"})
             ]
         })
     )
@@ -226,4 +226,141 @@ function delete_course_db(scheduler_id) {
     });
 }
 
+function get_courses_semester(semester, profile_code) {
+    const url = "/api/courses/" + profile_code + "/" + semester;
 
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (semester_data) {
+            highlight_semester(semester, profile_code); 
+            replace_period_table(1, semester_data);
+            replace_period_table(2, semester_data);
+        }
+    });
+}
+
+function replace_period_table(period, semester_data) {
+    var table_body = $("#table-" + period);
+    table_body.empty();
+    $.each(semester_data[`period_${period}`], function(key, value) {
+        var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
+        course_row.append(
+            course_checkbox(value["course"]["course_code"]),
+            $("<td>", {text: value["course"]["course_code"], class: "text-center"}),
+            $("<td>", {text: value["course"]["course_name"]}),
+            $("<td>", {text: value["course"]["hp"], class: "text-center"}),
+            $("<td>", {text: value["course"]["level"], class: "text-center"}),
+            $("<td>", {text: value["course"]["vof"], class: "text-center"}),
+            make_expand_btn(value["course"]["course_code"]),
+        );
+        table_body.append(course_row);
+        table_body.append(expand_div(value["course"]["course_code"]));
+    })
+}
+
+function expand_div(courseCode) {
+    var dropdown = $('<tr>').attr('id', 'dropdown-' + courseCode);
+    var td = $('<td>').addClass('overflow-hidden p-0').attr('colspan', '7').attr('id', 'insert-' + courseCode);
+    var courseInfoContainer = $('<div>').attr('id', 'course-info-container-' + courseCode).addClass('hidden overflow-hidden');
+    var infoContainer = $('<div>').attr('id', 'info-container-' + courseCode).addClass('flex flex-col p-5 border-r-2 w-1/2 border-black/25');
+    var examinationContainer = $('<div>').attr('id', 'examination-container-' + courseCode).addClass('flex flex-col p-5 space-y-2');
+    
+    var loadingButton = $('<button>').addClass('btn');
+    var loadingSpinner = $('<span>').addClass('loading loading-spinner');
+    var loadingText = $('<span>').text('Laddar');
+    var coursesLoader = $('<span>').attr('id', 'courses-loader-' + courseCode).addClass('hidden').append(loadingButton.append(loadingSpinner).append(loadingText));
+    
+    var courseInfo = courseInfoContainer.append($('<div>').addClass('flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg').append(coursesLoader).append(infoContainer).append(examinationContainer));
+    
+    var finalRow = td.append(courseInfo);
+    dropdown.append(finalRow);
+    
+    return dropdown
+}
+
+function course_checkbox(courseCode) {
+    var td = $('<td>').addClass('flex justify-center');
+    var checkbox = $('<input>').attr({
+    'type': 'checkbox',
+    'onclick': 'add_course(this.value)',
+    'class': 'checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent',
+    'id': 'check-' + courseCode,
+    'value': courseCode
+    });
+
+    td.append(checkbox);
+
+    return td
+}
+
+function make_expand_btn(course_code) {
+    var courseData = { "course_code": course_code };
+
+    var tdElement = $('<td>').attr('id', 'expand-' + courseData["course_code"]).addClass('flex justify-center');
+
+    var labelElement = $('<label>').addClass('swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500');
+
+    var inputElement = $('<input>').attr({
+        'type': 'checkbox',
+        'id': courseData["course_code"],
+        'class': 'hidden'
+    }).on('click', function() {
+        load_course_info(this.id);
+    });
+
+    var spanElementUp = $('<span>').addClass('material-symbols-outlined swap-on rounded-lg bg-yellow-500').text('keyboard_arrow_up');
+    var spanElementDown = $('<span>').addClass('material-symbols-outlined swap-off').text('expand_more');
+
+    labelElement.append(inputElement, spanElementUp, spanElementDown);
+    tdElement.append(labelElement);
+
+    return tdElement;
+}
+
+function highlight_semester(semester, profile_code) {
+    var current_semester = $("#semester-btn-" + semester + "-" + profile_code);
+    var semester_7 = $("#semester-btn-" + "7" + "-" + profile_code);
+    var semester_8 = $("#semester-btn-" + "8" + "-" + profile_code);
+    var semester_9 = $("#semester-btn-" + "9" + "-" + profile_code);
+    var semesters = [semester_7, semester_8, semester_9];
+
+    $.each(semesters, function(index, semester) {
+        semester.removeAttr("class");
+        semester.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
+        semester.prop("disabled", false);
+    });
+    
+    current_semester.removeAttr("class")
+    current_semester.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+    current_semester.prop("disabled", true);
+}
+
+function toggle_period(period) {
+    var period_table = $("#period-" + period);
+    var period_btn = $("#period-" + period + "-btn");
+    var period_1_toggled = $("#period-" + 1 + "-btn").data("toggled");
+    var period_2_toggled = $("#period-" + 2 + "-btn").data("toggled");
+
+    var toggled = period_btn.data("toggled");
+
+    if (period_1_toggled && period_2_toggled) {
+        // Close the table
+        period_table.slideToggle();
+        period_btn.data("toggled", false);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
+
+    } else if (period == 1 && period_2_toggled && !toggled) {
+        period_table.slideToggle();
+        period_btn.data("toggled", true);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+
+    } else if (period == 2 && period_1_toggled && !toggled) {
+        period_table.slideToggle();
+        period_btn.data("toggled", true);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+    }
+}

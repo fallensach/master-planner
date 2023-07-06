@@ -31,7 +31,7 @@ class SchedulerSchema(ModelSchema):
     schedule: ScheduleSchema
     class Config:
         model = Scheduler
-        model_fields = ["program", "schedule"]
+        model_fields = ["scheduler_id", "program", "schedule"]
 
 class SemesterCourses(Schema):
     period_1: List[SchedulerSchema]

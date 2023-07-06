@@ -37,18 +37,18 @@ def home(request):
             profile_code = request.POST["profiles"]
             profile_name = Profile.objects.get(profile_code=profile_code).profile_name
             form = Profiles(profiles)
-            semester = "Termin 7"
+            semester = 7
         else:
             profile_code = request.POST.get("profile_code")
         
         if "t7" in request.POST:
-            semester = request.POST.get("t7")
+            semester = int(request.POST.get("t7")[-1:])
         
         elif "t8" in request.POST:
-            semester = request.POST.get("t8")
+            semester = int(request.POST.get("t8")[-1:])
         
         elif "t9" in request.POST:
-            semester = request.POST.get("t9")
+            semester = int(request.POST.get("t9")[-1:])
             
         form = Profiles(profiles)
         profile_name = profiles_dict[profile_code]
@@ -59,7 +59,7 @@ def home(request):
         profile_code = "free"
         profile = Profile.objects.get(profile_code=profile_code)
         profile_name = profile.profile_name
-        semester_courses = get_courses_term(program=account.program, semester="Termin 7", profile=profile)
+        semester_courses = get_courses_term(program=account.program, semester=7, profile=profile)
         form = Profiles(profiles)
 
     

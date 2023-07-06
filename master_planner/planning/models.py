@@ -48,8 +48,8 @@ class Examination(models.Model):
 
 class Schedule(models.Model):
     schedule_id = models.IntegerField(primary_key=True)
-    period = models.CharField(max_length=10)
-    semester = models.CharField(max_length=10)
+    period = models.IntegerField()
+    semester = models.IntegerField()
     block = models.CharField(max_length=10)
 
     def __str__(self):
@@ -235,12 +235,12 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
                    Scheduler.objects.filter(program=program, 
                                             profile=profile,
                                             schedule__semester=semester, 
-                                            schedule__period="Period 1")
+                                            schedule__period=1)
                    ))
     period_2 = list(map(lambda row : row.course.to_dict, 
                    Scheduler.objects.filter(program=program, 
                                             profile=profile,
                                             schedule__semester=semester, 
-                                            schedule__period="Period 2")
+                                            schedule__period=2)
                ))
     return {1: period_1, 2: period_2}
