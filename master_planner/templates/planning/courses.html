@@ -15,84 +15,87 @@
             </form>
 
             <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
-                <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white border-r-2 border-black/10" type="submit">Period 1</button>
-                <button class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" type="submit">Period 2</button>
+                <button id="period-1-btn" onclick="toggle_period(this.value)" value="1" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 1</button>
+                <button id="period-2-btn" onclick="toggle_period(this.value)" value="2" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 2</button>
             </div>
         </div>
         <p class="text-3xl"> {{ profile_name }} </p>
         <div class="flex flex-col">
             {% for term, course in term_courses.items %}
-            <table class="table rounded-md overflow-hidden mb-10">
-            <thead class="bg-slate-600 text-white text-xl">
-                <tr>
-                    <th class="text-center">Välj</th>
-                {% for tag, x in course_tags.items %}
-                    {% if tag != "Kursnamn" %}
-                        <th class="text-center">
-                            {{ tag }}
-                        </th>
-                    {% else %}
-                        <th>
-                            {{ tag }}
-                        </th>
-                    {% endif %}
+            <div id="period-{{term}}">
+                <p> Period {{term}} </p>
+                <table class="table rounded-md overflow-hidden mb-10">
+                <thead class="bg-slate-600 text-white text-xl">
+                    <tr>
+                        <th class="text-center">Välj</th>
+                    {% for tag, x in course_tags.items %}
+                        {% if tag != "Kursnamn" %}
+                            <th class="text-center">
+                                {{ tag }}
+                            </th>
+                        {% else %}
+                            <th>
+                                {{ tag }}
+                            </th>
+                        {% endif %}
 
-                {% endfor %}
-                </tr>
-            </thead>
-                <tbody id="table-{{term}}" class="text-lg" >
-                    {% for course_data in course %}
-                    <tr class="bg-white transition ease-in-out hover:bg-slate-200/75">
-                        <td class="flex justify-center">
-                            <input type="checkbox" onclick="add_course(this.value)" class="checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
-                        </td>
-                    
-                        {% for key, schedule_data in course_data.items %}
-                            {% if key != "course_name" %}
-                                <td class="text-center"> {{ schedule_data }} </td>
-                                
-                            {% else %}
-                                <td class=""> {{ schedule_data }} </td>
-
-                            {% endif %}
-
-                        {% endfor %}
-                        <td class="flex justify-center">
-                            <label class="swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500 ">
-                                <input class="hidden" type="checkbox" onclick="load_course_info(this.id)" id="{{course_data.course_code}}"/>
-                                <span class="material-symbols-outlined swap-on rounded-lg bg-yellow-500 ">
-                                    keyboard_arrow_up
-                                </span>
-                            
-                                <span class="material-symbols-outlined swap-off ">
-                                    expand_more
-                                </span>
-                            </label>
-                        </td>
+                    {% endfor %}
                     </tr>
-                        <tr id="dropdown-{{course_data.course_code}}">
-                            <td class="overflow-hidden p-0" colspan="7" id="insert-{{course_data.course_code}}">
-                                <div id="course-info-container-{{course_data.course_code}}" class="hidden overflow-hidden">
-                                    <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg">
-                                        <span id="courses-loader-{{course_data.course_code}}" class"hidden">
-                                            <button class="btn">
-                                                <span class="loading loading-spinner"></span>
-                                                    Laddar
-                                                </button>
-                                        </span>
-                                        <div id="info-container-{{course_data.course_code}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
-                                        </div>
+                </thead>
+                    <tbody id="table-{{term}}" class="text-lg" >
+                        {% for course_data in course %}
+                        <tr class="bg-white transition ease-in-out hover:bg-slate-200/75">
+                            <td class="flex justify-center">
+                                <input type="checkbox" onclick="add_course(this.value)" class="checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" id="check-{{course_data.course_code}}" value="{{course_data.course_code}}">
+                            </td>
+                        
+                            {% for key, schedule_data in course_data.items %}
+                                {% if key != "course_name" %}
+                                    <td class="text-center"> {{ schedule_data }} </td>
+                                    
+                                {% else %}
+                                    <td class=""> {{ schedule_data }} </td>
 
-                                        <div id="examination-container-{{course_data.course_code}}" class="flex flex-col p-5 space-y-2">
-                                        </div>
-                                    </div>
-                                </div>
+                                {% endif %}
+
+                            {% endfor %}
+                            <td class="flex justify-center">
+                                <label class="swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500 ">
+                                    <input class="hidden" type="checkbox" onclick="load_course_info(this.id)" id="{{course_data.course_code}}"/>
+                                    <span class="material-symbols-outlined swap-on rounded-lg bg-yellow-500 ">
+                                        keyboard_arrow_up
+                                    </span>
+                                
+                                    <span class="material-symbols-outlined swap-off ">
+                                        expand_more
+                                    </span>
+                                </label>
                             </td>
                         </tr>
-                    {% endfor %}
+                            <tr id="dropdown-{{course_data.course_code}}">
+                                <td class="overflow-hidden p-0" colspan="7" id="insert-{{course_data.course_code}}">
+                                    <div id="course-info-container-{{course_data.course_code}}" class="hidden overflow-hidden">
+                                        <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg">
+                                            <span id="courses-loader-{{course_data.course_code}}" class"hidden">
+                                                <button class="btn">
+                                                    <span class="loading loading-spinner"></span>
+                                                        Laddar
+                                                    </button>
+                                            </span>
+                                            <div id="info-container-{{course_data.course_code}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
+                                            </div>
 
-                </tbody>
-            </table>
+                                            <div id="examination-container-{{course_data.course_code}}" class="flex flex-col p-5 space-y-2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
             {% endfor %}
         </div>
         </div>
