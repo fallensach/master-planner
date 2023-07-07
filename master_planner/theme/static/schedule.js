@@ -257,8 +257,9 @@ function replace_period_table(period, semester_data) {
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-center"}),
-            $("<td>", {text: value["course"]["course_name"]}),
+            $("<td>", {text: value["course"]["course_name"], class: "w-2/5"}),
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
+            $("<td>", {text: value["schedule"]["block"], class: "text-center"}),
             $("<td>", {text: value["course"]["level"], class: "text-center"}),
             $("<td>", {text: value["course"]["vof"], class: "text-center"}),
             make_expand_btn(value["scheduler_id"]),
@@ -289,7 +290,7 @@ function expand_div(courseCode) {
 }
 
 function course_checkbox(scheduler_id) {
-    var td = $('<td>').addClass('flex justify-center');
+    var td = $('<td>', {align: "center"});
     var checkbox = $('<input>').attr({
     'type': 'checkbox',
     'onclick': 'add_course(this.value)',
