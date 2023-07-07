@@ -58,7 +58,7 @@
 
                             <td class="flex justify-center">
                                 <label class="swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500 ">
-                                    <input class="hidden" type="checkbox" onclick="load_course_info(this.name)" name="{{scheduler.course.course_code}}" id="scheduler-{{scheduler.schedule.schedule_id}}"/>
+                                    <input class="hidden" type="checkbox" onclick="load_course_info(this.name, this.value)" value="{{scheduler.scheduler_id}}" name="{{scheduler.course.course_code}}" id="scheduler-{{scheduler.scheduler_id}}"/>
                                     <span class="material-symbols-outlined swap-on rounded-lg bg-yellow-500 ">
                                         keyboard_arrow_up
                                     </span>
@@ -71,18 +71,18 @@
                         </tr>
                             <tr id="dropdown-{{scheduler.course.course_code}}">
                                 <td class="overflow-hidden p-0" colspan="8" id="insert-{{scheduler.course.course_code}}">
-                                    <div id="course-info-container-{{scheduler.course.course_code}}" class="hidden overflow-hidden">
+                                    <div id="course-info-container-{{scheduler.scheduler_id}}" class="hidden overflow-hidden">
                                         <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg">
-                                            <span id="courses-loader-{{scheduler.course.course_code}}" class"hidden">
+                                            <span id="courses-loader-{{scheduler.scheduler_id}}" class"hidden">
                                                 <button class="btn">
                                                     <span class="loading loading-spinner"></span>
                                                         Laddar
                                                     </button>
                                             </span>
-                                            <div id="info-container-{{scheduler.course.course_code}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
+                                            <div id="info-container-{{scheduler.scheduler_id}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
                                             </div>
 
-                                            <div id="examination-container-{{scheduler.course.course_code}}" class="flex flex-col p-5 space-y-2">
+                                            <div id="examination-container-{{scheduler.scheduler_id}}" class="flex flex-col p-5 space-y-2">
                                             </div>
                                         </div>
                                     </div>

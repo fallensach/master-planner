@@ -34,10 +34,10 @@ function get_course(course_code) {
     }
 }
 
-function add_course(course_code) {
-    var checkbox = $("#check-" + course_code);
+function add_course(scheduler_id) {
+    var checkbox = $("#check-" + scheduler_id);
     var my_courses = $("#my-courses");
-    const url = "/api/get_course/" + course_code;
+    const url = "/api/get_course/" + scheduler_id;
 
     if (checkbox.is(":checked")) {
         $.ajax({
@@ -80,11 +80,11 @@ function add_course_table(response, my_courses) {
     )
 }
 
-function load_course_info(course_code) {
-    var course_container = $("#course-info-container-" + course_code);
-    var info_container = $("#info-container-" + course_code);
-    var examination_container = $("#examination-container-" + course_code);
-    var loading = $("#courses-loader-" + course_code);
+function load_course_info(course_code, scheduler_id) {
+    var course_container = $("#course-info-container-" + scheduler_id);
+    var info_container = $("#info-container-" + scheduler_id);
+    var examination_container = $("#examination-container-" + scheduler_id);
+    var loading = $("#courses-loader-" + scheduler_id);
     
     if (info_container.children().length == 0) {
         $.ajax({
@@ -95,7 +95,7 @@ function load_course_info(course_code) {
                 console.log(response)
                 // The success callback function to handle the response
                 info_container.append(course_info_div(response));
-                examination_container.append(course_examination(response));
+                examination_container.append(course_examination(response, scheduler_id));
 
                 loading.remove();
             },
@@ -161,10 +161,10 @@ function course_info_div(response) {
 
 }
 
-function course_examination(response) {
+function course_examination(response, scheduler_id) {
     var examination = response.examination
     var courseCode = response.course_code;
-    var container = $("#examination-container-" + courseCode);
+    var container = $("#examination-container-" + scheduler_id);
     container.append($('<p>', { text: "Examinationsmoment", class: "font-bold font-xl"}));
     var table = $('<table>').appendTo(container);
     var thead = $('<thead>', {class: "text-xl text-black"}).appendTo(table);
