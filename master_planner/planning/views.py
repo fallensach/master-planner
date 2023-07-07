@@ -13,6 +13,7 @@ COURSE_TAGS = {
                 "Kurskod": "",
                 "Kursnamn": "",
                 "Hp": "",
+                "Block": "",
                 "Nivå": "",
                 "Vof": "",
                 "Detaljer": "",
@@ -40,15 +41,6 @@ def home(request):
             semester = 7
         else:
             profile_code = request.POST.get("profile_code")
-        
-        if "t7" in request.POST:
-            semester = int(request.POST.get("t7")[-1:])
-        
-        elif "t8" in request.POST:
-            semester = int(request.POST.get("t8")[-1:])
-        
-        elif "t9" in request.POST:
-            semester = int(request.POST.get("t9")[-1:])
             
         form = Profiles(profiles)
         profile_name = profiles_dict[profile_code]
@@ -61,10 +53,8 @@ def home(request):
         profile_name = profile.profile_name
         semester_courses = get_courses_term(program=account.program, semester=7, profile=profile)
         form = Profiles(profiles)
-        print(semester_courses)
-
     
-    return render(request, "home.html", {"term_courses": semester_courses, 
+    return render(request, "home.html", {"period_scheduler": semester_courses, 
                                              "program_name": user_program, 
                                              "termin": "Termin 7", 
                                              "form": form, 
