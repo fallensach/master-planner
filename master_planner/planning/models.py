@@ -54,7 +54,7 @@ class Schedule(models.Model):
         return f"sem: {self.semester}, per: {self.period}, block: {self.block}"
 
 class Profile(models.Model):
-    profile_name = models.CharField(max_length=50)
+    profile_name = models.CharField(max_length=120)
     profile_code = models.CharField(max_length=10, primary_key=True)
 
     def __str__(self):
