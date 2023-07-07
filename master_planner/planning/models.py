@@ -47,7 +47,6 @@ class Examination(models.Model):
         return self.name, self.course
 
 class Schedule(models.Model):
-    schedule_id = models.IntegerField(primary_key=True)
     period = models.IntegerField()
     semester = models.IntegerField()
     block = models.CharField(max_length=10)
