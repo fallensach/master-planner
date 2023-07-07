@@ -103,10 +103,7 @@ WSGI_APPLICATION = 'master_planner.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-      "NAME": os.environ.get('DATABASE_URL'),
-      "ENGINE": "django.db.backends.postgresql"
-               }
+   'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
 }
 
 # Password validation
