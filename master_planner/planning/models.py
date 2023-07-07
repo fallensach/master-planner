@@ -139,10 +139,6 @@ def register_courses(program: any, data: any):
                                         semester=course_data["semester"],
                                         period=course_data["period"]
                                         )
-        if created:
-            schedule = Schedule.objects.get(block=course_data["block"],
-                                            semester=course_data["semester"],
-                                            period=course_data["period"])
 
         profile = Profile.objects.get(profile_code=course_data["profile_code"])
         # create instance of course in Scheduler
