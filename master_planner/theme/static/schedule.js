@@ -38,7 +38,10 @@ function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
     var my_courses = $("#my-courses");
     const url = "/api/get_course/" + scheduler_id;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 09b6876 (Change api call)
     if (checkbox.is(":checked")) {
         $.ajax({
             type: "GET",
@@ -52,7 +55,11 @@ function add_course(scheduler_id) {
 
     } else {
         $("#my-course-" + scheduler_id).remove();
+<<<<<<< HEAD
         delete_course_db(scheduler_id);
+=======
+        delete_course_db(1);
+>>>>>>> 09b6876 (Change api call)
     }
 }
 
@@ -96,7 +103,6 @@ function load_course_info(course_code, scheduler_id) {
                 // The success callback function to handle the response
                 info_container.append(course_info_div(response));
                 examination_container.append(course_examination(response, scheduler_id));
-
                 loading.remove();
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -245,10 +251,11 @@ function get_courses_semester(semester, profile_code) {
 function replace_period_table(period, semester_data) {
     var table_body = $("#table-" + period);
     table_body.empty();
+
     $.each(semester_data[`period_${period}`], function(key, value) {
         var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
-            course_checkbox(value["course"]["course_code"]),
+            course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-center"}),
             $("<td>", {text: value["course"]["course_name"]}),
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
@@ -281,14 +288,14 @@ function expand_div(courseCode) {
     return dropdown
 }
 
-function course_checkbox(courseCode) {
+function course_checkbox(scheduler_id) {
     var td = $('<td>').addClass('flex justify-center');
     var checkbox = $('<input>').attr({
     'type': 'checkbox',
     'onclick': 'add_course(this.value)',
     'class': 'checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent',
-    'id': 'check-' + courseCode,
-    'value': courseCode
+    'id': 'check-' + scheduler_id,
+    'value': scheduler_id
     });
 
     td.append(checkbox);
