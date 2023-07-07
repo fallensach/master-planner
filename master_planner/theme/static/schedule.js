@@ -38,10 +38,6 @@ function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
     var my_courses = $("#my-courses");
     const url = "/api/get_course/" + scheduler_id;
-<<<<<<< HEAD
-
-=======
->>>>>>> 09b6876 (Change api call)
     if (checkbox.is(":checked")) {
         $.ajax({
             type: "GET",
@@ -55,11 +51,7 @@ function add_course(scheduler_id) {
 
     } else {
         $("#my-course-" + scheduler_id).remove();
-<<<<<<< HEAD
         delete_course_db(scheduler_id);
-=======
-        delete_course_db(1);
->>>>>>> 09b6876 (Change api call)
     }
 }
 
@@ -101,6 +93,7 @@ function load_course_info(course_code, scheduler_id) {
             success: function(response) {
                 console.log(response)
                 // The success callback function to handle the response
+                
                 info_container.append(course_info_div(response));
                 examination_container.append(course_examination(response, scheduler_id));
                 loading.remove();

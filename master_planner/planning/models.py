@@ -237,12 +237,12 @@ def get_profile_courses(profile: any): # TODO fix typing
 
 def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
     period_1 = list(Scheduler.objects.filter(program=program, 
-                                             profile=profile,
+                                             profiles=profile,
                                              schedule__semester=semester, 
                                              schedule__period=1))
     
     period_2 = list(Scheduler.objects.filter(program=program, 
-                                             profile=profile,
-                                             schedule__semester=semester, 
+                                             profiles=profile,
+                                             schedule__semester=semester))
 
     return {1: period_1, 2: period_2}
