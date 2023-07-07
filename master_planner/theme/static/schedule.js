@@ -34,24 +34,25 @@ function get_course(course_code) {
     }
 }
 
-function add_course(course_code) {
-    var checkbox = $("#check-" + course_code);
+function add_course(scheduler_id) {
+    var checkbox = $("#check-" + scheduler_id);
     var my_courses = $("#my-courses");
-    const url = "/api/get_course/" + course_code;
+    const url = "/api/get_course/" + scheduler_id;
 
     if (checkbox.is(":checked")) {
         $.ajax({
             type: "GET",
             url: url,
             success: function (response) {
+                console.log(response)
                 add_course_table(response, my_courses);
-                add_course_db(1);
+                add_course_db(scheduler_id);
             }
         })
 
     } else {
-        $("#my-course-" + course_code).remove();
-        delete_course_db(1);
+        $("#my-course-" + scheduler_id).remove();
+        delete_course_db(scheduler_id);
     }
 }
 
@@ -64,25 +65,26 @@ function add_course_table(response, my_courses) {
         
         })
     my_courses.append($("<tr>", {
-    id: "my-course-" + response.course_code,
+    id: "my-course-" + response["scheduler_id"],
     class: "bg-white",
     append: [
-            $("<td>", {text: response.course_code}),
-            $("<td>", {text: response.course_name}),
-            $("<td>", {text: response.hp}),
-            $("<td>", {text: response.level}),
-            $("<td>", {text: response.vof}),
+            $("<td>", {text: response["course"]["course_code"], class: "text-center"}),
+            $("<td>", {text: response["course"]["course_name"], class: "w-2/5"}),
+            $("<td>", {text: response["course"]["hp"], class: "text-center"}),
+            $("<td>", {text: response["schedule"]["block"], class: "text-center"}),
+            $("<td>", {text: response["course"]["level"], class: "text-center"}),
+            $("<td>", {text: response["course"]["vof"], class: "text-center"}),
             $("<td>", {append: [remove_course_btn], class: "flex items-center"})
             ]
         })
     )
 }
 
-function load_course_info(course_code) {
-    var course_container = $("#course-info-container-" + course_code);
-    var info_container = $("#info-container-" + course_code);
-    var examination_container = $("#examination-container-" + course_code);
-    var loading = $("#courses-loader-" + course_code);
+function load_course_info(course_code, scheduler_id) {
+    var course_container = $("#course-info-container-" + scheduler_id);
+    var info_container = $("#info-container-" + scheduler_id);
+    var examination_container = $("#examination-container-" + scheduler_id);
+    var loading = $("#courses-loader-" + scheduler_id);
     
     if (info_container.children().length == 0) {
         $.ajax({
@@ -90,16 +92,16 @@ function load_course_info(course_code) {
             method: "GET", // The HTTP method (GET, POST, PUT, DELETE, etc.)
             dataType: "json", // The expected data type of the response
             success: function(response) {
-              // The success callback function to handle the response
-              info_container.append(course_info_div(response));
-              examination_container.append(course_examination(response));
+                console.log(response)
+                // The success callback function to handle the response
+                info_container.append(course_info_div(response));
+                examination_container.append(course_examination(response, scheduler_id));
 
-              loading.remove();
-              console.log(response);
+                loading.remove();
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              // The error callback function to handle any errors
-              console.log("AJAX request failed: " + textStatus, errorThrown);
+                // The error callback function to handle any errors
+                console.log("AJAX request failed: " + textStatus, errorThrown);
             }
           });
     }
@@ -159,10 +161,10 @@ function course_info_div(response) {
 
 }
 
-function course_examination(response) {
+function course_examination(response, scheduler_id) {
     var examination = response.examination
     var courseCode = response.course_code;
-    var container = $("#examination-container-" + courseCode);
+    var container = $("#examination-container-" + scheduler_id);
     container.append($('<p>', { text: "Examinationsmoment", class: "font-bold font-xl"}));
     var table = $('<table>').appendTo(container);
     var thead = $('<thead>', {class: "text-xl text-black"}).appendTo(table);
@@ -252,7 +254,7 @@ function replace_period_table(period, semester_data) {
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
             $("<td>", {text: value["course"]["level"], class: "text-center"}),
             $("<td>", {text: value["course"]["vof"], class: "text-center"}),
-            make_expand_btn(value["course"]["course_code"]),
+            make_expand_btn(value["scheduler_id"]),
         );
         table_body.append(course_row);
         table_body.append(expand_div(value["course"]["course_code"]));
@@ -294,16 +296,16 @@ function course_checkbox(courseCode) {
     return td
 }
 
-function make_expand_btn(course_code) {
-    var courseData = { "course_code": course_code };
+function make_expand_btn(scheduler_id) {
+    var schedulerId = { "scheduler_id": scheduler_id };
 
-    var tdElement = $('<td>').attr('id', 'expand-' + courseData["course_code"]).addClass('flex justify-center');
+    var tdElement = $('<td>').attr('id', 'expand-' + schedulerId["scheduler_id"]).addClass('flex justify-center');
 
     var labelElement = $('<label>').addClass('swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500');
 
     var inputElement = $('<input>').attr({
         'type': 'checkbox',
-        'id': courseData["course_code"],
+        'id': schedulerId["scheduler_id"],
         'class': 'hidden'
     }).on('click', function() {
         load_course_info(this.id);
