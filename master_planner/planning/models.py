@@ -69,6 +69,7 @@ class Program(models.Model):
         return self.program_name
 
 class Scheduler(models.Model):
+    scheduler_id = models.CharField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
