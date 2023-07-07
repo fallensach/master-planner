@@ -36,6 +36,7 @@ class Course(models.Model):
         return self.course_code
 
 class Examination(models.Model):
+    id = models.AutoField(primary_key=True)
     hp = models.CharField(max_length=5)
     name = models.CharField(max_length=50)
     grading = models.CharField(max_length=15)
@@ -46,6 +47,7 @@ class Examination(models.Model):
         return self.name, self.course
 
 class Schedule(models.Model):
+    id = models.AutoField(primary_key=True)
     period = models.IntegerField()
     semester = models.IntegerField()
     block = models.CharField(max_length=10)
