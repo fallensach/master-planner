@@ -71,13 +71,6 @@ class Command(BaseCommand):
         # fill Schedule
         # register_schedule()
 
-        user = User.objects.create_user(username="admin",  
-                                        password="123",
-                                        is_superuser=True,
-                                        is_staff=True)
-        user.save()
-
-        account = Account.objects.create(user=user)
 
         # fetch data and insert programs in db
         program_data = fetch_programs()
