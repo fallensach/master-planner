@@ -243,6 +243,7 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
     
     period_2 = list(Scheduler.objects.filter(program=program, 
                                              profiles=profile,
-                                             schedule__semester=semester))
+                                             schedule__semester=semester,
+                                             schedule__period=2))
 
     return {1: period_1, 2: period_2}
