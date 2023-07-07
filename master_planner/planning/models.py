@@ -36,7 +36,6 @@ class Course(models.Model):
         return self.course_code
 
 class Examination(models.Model):
-    examination_id = models.IntegerField(primary_key=True)
     hp = models.CharField(max_length=5)
     name = models.CharField(max_length=50)
     grading = models.CharField(max_length=15)
@@ -70,7 +69,6 @@ class Program(models.Model):
         return self.program_name
 
 class Scheduler(models.Model):
-    scheduler_id = models.IntegerField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
