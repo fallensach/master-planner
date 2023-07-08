@@ -32,21 +32,21 @@
                     <ul class="menu-links mt-10 text-[17px] flex flex-col space-y-3 justify-between h-full text-gray-200">
                         <div class="flex flex-col space-y-3">
                             <li class=" hover:bg-slate-500 hover:text-white mx-4 rounded-lg transition ease-linear {{ home_bg }}">
-                                <a class="flex items-center {{setup_p}} space-x-4" href="{% url 'home' %}">
-                                    <i class="{{home_highlight}} icon bx bx-home-alt icon text-[20px]" ></i>
+                                <a class="flex items-center" href="{% url 'home' %}">
+                                    <i class="{{home_highlight}} {{setup_p}} icon bx bx-home-alt icon text-[20px]" ></i>
                                     <span class="text nav-text">Kurser</span>
                                 </a>
                             </li>
-                            <li class="nav-link hover:bg-slate-500 hover:text-white {{home_p}} mx-4 rounded-lg transition ease-linear {{ setup_bg }}">
-                                <a class="flex items-center space-x-4" href="{% url 'setup' %}">
-                                    <i class="{{ setup_highlight }} icon bx bxs-user-account icon text-[20px]" ></i>
+                            <li class="nav-link hover:bg-slate-500 hover:text-white mx-4 rounded-lg transition ease-linear {{ setup_bg }}">
+                                <a class="flex items-center" href="{% url 'setup' %}">
+                                    <i class="{{ setup_highlight }} {{ home_p }} icon bx bxs-user-account icon text-[20px]" ></i>
                                     <span class="text nav-text">Mitt konto</span>
                                 </a>
                             </li>
                         </div>
                 <div class="bottom-content">
                     <li class="nav-link hover:bg-slate-500 hover:text-white p-3 mx-4 mb-10 rounded-lg transition ease-linear">
-                        <a class="flex items-center space-x-4" href="#">
+                        <a class="flex items-center space-x-3" href="{% url 'logout' %}">
                             <i class='icon bx bx-log-out icon text-[20px]' ></i>
                             <span class="text nav-text">Logga ut</span>
                         </a>
