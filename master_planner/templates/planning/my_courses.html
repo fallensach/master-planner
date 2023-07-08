@@ -2,9 +2,9 @@
 <p>Termin 7</p>
 <table class="table px-20 bg-slate-600 rounded-lg overflow-hidden mb-10 shadow-md">
     <thead>
-        <tr class="text-white text-xl">
+        <tr class="text-white text-lg text-center">
             <td>Kurskod</td>
-            <td>Kursnamn</td>
+            <td class="text-left">Kursnamn</td>
             <td>Hp</td>
             <td>Block</td>
             <td>Nivå</td>
@@ -12,8 +12,10 @@
             <td></td>
         </tr>
     </thead>
-    <tbody id="my-courses" class="text-lg">
-
+    <tbody id="my-courses" class="text-sm">
+        <tr>
+            <td class="bg-white p-10" colspan="8"> Inga kurser valda </td>
+        </tr>
     </tbody>
 </table>
 {% endblock %}

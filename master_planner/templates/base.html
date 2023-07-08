@@ -1,8 +1,8 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html class="" lang="en">
 	<head>
-    <title>fuckall</title>
+    <title>Master planner</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -16,12 +16,21 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
 	</head>
-    <body class="h-screen w-screen bg-gray-100">
-        <nav class="h-20 w-full bg-white border-b-2 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="text-xl text-black/70 p-5 transition ease-in-out duration-300 hover:text-black"> Master Planner </a>
-            <a href="{% url 'setup' %}" class="text-xl text-black/70 p-5 transition ease-in-out duration-300 hover:text-black"> My account </a>
-        </nav>
-        {% block content %}
-        {% endblock %}
+    <body class=" bg-gray-100">
+        <div id="site-container" class="flex h-screen">
+            <nav class="rounded-r-[20px] text-white border-none overflow-hidden bg-slate-600 border-b-2">
+                <div class="flex h-full flex-col justify-between mt-20">
+                    <div class="flex flex-col">
+                        <div class="bg-slate-400/75 p-5">
+                            <a href="{% url 'home' %}" class="text-xl transition ease-in-out duration-300 "> Kurser </a>
+                        </div>
+                        <a href="{% url 'setup' %}" class="text-xl p-5 transition ease-in-out duration-300 "> Mitt konto </a>
+                    </div>
+                    <a href="{% url 'logout' %}" class="text-xl p-5 transition ease-in-out duration-300 "> Logga ut </a>
+                </div>
+            </nav>
+            {% block content %}
+            {% endblock %}
+        </div>
 	</body>
 </html>
