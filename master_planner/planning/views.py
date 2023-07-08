@@ -61,7 +61,10 @@ def home(request):
                                              "profile_picked": True, 
                                              "profile_code": profile_code, 
                                              "profile_name": profile_name, 
-                                             "course_tags": COURSE_TAGS}
+                                             "course_tags": COURSE_TAGS,
+                                             "home_p": "p-3",
+                                             "home_bg": "bg-white/25",
+                                             "home_highlight": "bg-white/25 p-3 rounded-lg"}
                                          )
 
 def setup(request):
@@ -84,4 +87,9 @@ def setup(request):
     else:
         form = ProgramForm()
 
-    return render(request, "setup.html", {"form": form})
+    return render(request, "setup.html", {"form": form, 
+                                          "view": request.path,
+                                          "setup_highlight": "bg-white/25 p-3 rounded-lg",
+                                          "setup_p": "p-3",
+                                          "setup_bg": "bg-white/25"
+                                          })
