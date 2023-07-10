@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import forms
 
 class ProgramForm(forms.Form):
-    program = forms.CharField(label="", widget=forms.TextInput(attrs={"placeholder": "Programkod"}))
+    program = forms.CharField(label="", widget=forms.TextInput(attrs={"placeholder": "Sök efter programnamn"}))
     
 class ProfileCourses(forms.Form):
     profile = forms.CharField()
