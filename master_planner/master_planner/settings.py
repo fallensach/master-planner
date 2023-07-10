@@ -18,33 +18,26 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 #deploy
 load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-$ae^hek6-$&d1i(64@2876p$l!5hsw#y0gqobn5#-ti#4ns^=s'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = 'RENDER' not in os.environ
-
-
-
                                              
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
 PRODUCTION = os.getenv("PRODUCTION")
 
 if PRODUCTION:
     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+    DEBUG = os.getenv('DEBUG')
 else:
     ALLOWED_HOSTS = []
+    DEBUG = True
 
 # Application definition
 
