@@ -26,3 +26,27 @@
     color: white;
     background: none;
 }
+
+.ui-helper-hidden-accessible {
+    display: none;
+}
+
+.ui-menu {
+    position: absolute;
+    background: rgb(231, 231, 231);
+    width: 100px;
+    max-height: 300px;
+    overflow-y: scroll;
+    border-radius: 0px 0px 5px 5px;
+}
+
+.ui-menu-item {
+    padding: 10px;
+    transition: background 300ms;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.144);
+}
+
+.ui-menu-item:hover {
+    background-color: rgb(247, 247, 247);
+    cursor: pointer;
+}

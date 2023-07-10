@@ -1,3 +1,15 @@
+$(document).ready(function () {
+    var programs = JSON.parse($("#programs").text());
+    $("#id_program").autocomplete({
+        source: programs,
+        delay: 100,
+        messages: {
+            noResults: "Inga resultat",
+
+        }
+    });
+});
+
 function get_schedule(schedule_id) {
     const httpRequest = new XMLHttpRequest();
     const url = "/api/get_schedule/".concat(schedule_id);
