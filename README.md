@@ -8,8 +8,8 @@ To install the projects dependencies run:
 > bash install_dependencies.sh
 
 ## Tailwind
-> Tailwind is included in the development version. To use it you need npm installed.
->
+Tailwind is included in the development version. To use it you need npm installed.
+
 > To use tailwind use:
 >
 > **python ./manage.py tailwind start**
@@ -22,7 +22,9 @@ There is currently 1 script to help with development.
 Before deploying the application:
 
 > python manage.py makemigrations
+> 
 > Commit migration files
+> 
 > Push the migration files to deployment repo
 
 Whenever you change models in development you have to make the new migration files and push them into the production repo.
