@@ -13,3 +13,18 @@ To install the projects dependencies run:
 > To use tailwind use:
 >
 > **python ./manage.py tailwind start**
+
+## Development scripts
+There is currently 1 script to help with development.
+> reset_db.sh - This script deletes the migration files and remigrates the whole database.
+
+## Deployment migrations
+Before deploying the application:
+
+> python manage.py makemigrations
+> Commit migration files
+> Push the migration files to deployment repo
+
+Whenever you change models in development you have to make the new migration files and push them into the production repo.
+When you have the new migration files you can run the command:
+> bash make_db.sh
