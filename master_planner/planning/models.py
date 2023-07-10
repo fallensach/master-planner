@@ -36,7 +36,7 @@ class Course(models.Model):
         return self.course_code
 
 class Examination(models.Model):
-    examination_id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     hp = models.CharField(max_length=5)
     name = models.CharField(max_length=50)
     grading = models.CharField(max_length=15)
@@ -47,7 +47,7 @@ class Examination(models.Model):
         return self.name, self.course
 
 class Schedule(models.Model):
-    schedule_id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     period = models.IntegerField()
     semester = models.IntegerField()
     block = models.CharField(max_length=10)
@@ -56,7 +56,7 @@ class Schedule(models.Model):
         return f"sem: {self.semester}, per: {self.period}, block: {self.block}"
 
 class Profile(models.Model):
-    profile_name = models.CharField(max_length=50)
+    profile_name = models.CharField(max_length=120)
     profile_code = models.CharField(max_length=10, primary_key=True)
 
     def __str__(self):
@@ -71,7 +71,7 @@ class Program(models.Model):
         return self.program_name
 
 class Scheduler(models.Model):
-    scheduler_id = models.IntegerField(primary_key=True)
+    scheduler_id = models.AutoField(primary_key=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
