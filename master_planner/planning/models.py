@@ -75,10 +75,10 @@ class Scheduler(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profiles = models.ManyToManyField(Profile)
 
     def __str__(self):
-        return f"{str(self.course)}\n{str(self.program)}\n{str(self.profile)}\n{str(self.schedule)}"
+        return f"{str(self.course)}\n{str(self.program)}\n{str(self.profiles)}\n{str(self.schedule)}"
 
 # def register_program(program_code: str):
 #     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
@@ -138,15 +138,24 @@ def register_courses(program: any, data: any):
         schedule, created = Schedule.objects.get_or_create(block=course_data["block"],
                                         semester=course_data["semester"],
                                         period=course_data["period"]
-                                        )
+                                                           )
+        if created:
+            schedule = Schedule.objects.get(block=course_data["block"],
+                                            semester=course_data["semester"],
+                                            period=course_data["period"])
 
         profile = Profile.objects.get(profile_code=course_data["profile_code"])
         # create instance of course in Scheduler
-        scheduler = Scheduler.objects.create(course=course,
+        scheduler, created = Scheduler.objects.get_or_create(course=course,
                               program=program, 
-                              profile=profile,
                               schedule=schedule,
                               )
+        if created:
+            scheduler = Scheduler.objects.get(course=course,
+                                               program=program,
+                                               schedule=schedule)
+        scheduler.profiles.add(profile)
+        scheduler.save()
 
 # def register_profiles(program: ProgramPlan):
 #     profiles = program.profiles()
@@ -227,16 +236,14 @@ def get_profile_courses(profile: any): # TODO fix typing
     return map(lambda course : course.to_dict, courses)
 
 def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
-    period_1 = list(map(lambda row : row.course.to_dict, 
-                   Scheduler.objects.filter(program=program, 
-                                            profile=profile,
-                                            schedule__semester=semester, 
-                                            schedule__period=1)
-                   ))
-    period_2 = list(map(lambda row : row.course.to_dict, 
-                   Scheduler.objects.filter(program=program, 
-                                            profile=profile,
-                                            schedule__semester=semester, 
-                                            schedule__period=2)
-               ))
+    period_1 = list(Scheduler.objects.filter(program=program, 
+                                             profiles=profile,
+                                             schedule__semester=semester, 
+                                             schedule__period=1))
+    
+    period_2 = list(Scheduler.objects.filter(program=program, 
+                                             profiles=profile,
+                                             schedule__semester=semester,
+                                             schedule__period=2))
+
     return {1: period_1, 2: period_2}
