@@ -14,7 +14,7 @@ def fetch_programs():
 
         soup = BeautifulSoup(r.content, "html.parser")
         for string in soup.find_all("a", {"class": "pseudo-h3"} ):
-            name = string.text[:string.text.find("(")]
+            name = string.text[:string.text.find(" (")]
             code = string.text[string.text.find("6"):string.text.find(")")]
             program_data.append((code, name))
             
