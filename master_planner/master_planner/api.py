@@ -1,6 +1,7 @@
-from ninja import NinjaAPI, ModelSchema, Schema
-from django.http.response import JsonResponse
-from planning.models import Schedule, Course, Scheduler, Examination
+from ninja import NinjaAPI
+from planning.models import Schedule, Course, Scheduler
+from django.db.models import Sum, F, ExpressionWrapper, Case, When, Value, IntegerField
+from django.db.models.functions import Cast, Replace
 from planning.management.commands.scrappy.courses import fetch_course_info
 from accounts.models import get_user, Account
 from typing import List
@@ -46,14 +47,36 @@ def choice(request, data: ChoiceSchema):
                 
     return 200, {"message": f"choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
 
-@api.get('account/choice', response=List[SchedulerSchema])
+@api.get('account/choices', response=Semesters)
 def choice(request):
     account = Account.objects.get(user=request.user)
-    return account.choices.all()
+    
+    x = account.choices.filter(schedule__semester=7, schedule__period=1)
+
+    result = x.aggregate(
+        total_hp=Sum(
+            Case(
+                When(course__hp__endswith='*', then=Cast(F('course__hp'), IntegerField()) / 2),
+                default=Cast(F('course__hp'), IntegerField()),
+                output_field=IntegerField()
+                ),
+            output_field=IntegerField()
+            )
+    )
+    
+    course_choices = {}
+
+    for semester in range(7, 10):
+        periods = {}
+        for period in range(1, 3):
+            periods[f"period_{period}"] = list(account.choices.filter(schedule__semester=semester, schedule__period=period))
+            
+        course_choices[f"semester_{semester}"] = periods
+
+    return course_choices
 
 @api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})
 def get_course(request, scheduler_id):
-
     try:
         course_instance = Scheduler.objects.get(scheduler_id=scheduler_id)
     except Scheduler.DoesNotExist:

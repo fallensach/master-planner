@@ -1,9 +1,7 @@
-from ninja import NinjaAPI, ModelSchema, Schema
-from django.http.response import JsonResponse
+from ninja import ModelSchema, Schema
 from planning.models import Schedule, Course, Scheduler, Examination
 from planning.management.commands.scrappy.courses import fetch_course_info
-from accounts.models import get_user, Account
-from typing import List
+from typing import List, Dict
 
 class ScheduleSchema(ModelSchema):
     class Config:
@@ -14,18 +12,6 @@ class CourseSchema(ModelSchema):
     class Config:
         model = Course
         model_fields = ["course_code", "course_name", "hp", "level", "vof"]
-
-class ExaminationSchema:
-    class Config:
-        model = Examination
-        model_fields = []
-
-# class CourseDetailSchema(ModelSchema):
-#     examination: ExaminationSchema
-#     class Config:
-#         model = Course
-#         model_fields = []
-
 class SchedulerSchema(ModelSchema):
     course: CourseSchema
     schedule: ScheduleSchema
@@ -36,7 +22,16 @@ class SchedulerSchema(ModelSchema):
 class SemesterCourses(Schema):
     period_1: List[SchedulerSchema]
     period_2: List[SchedulerSchema]
+    
+class Semesters(Schema):
+    semester_7: dict[str, List[SchedulerSchema]]
+    semester_8: dict[str, List[SchedulerSchema]]
+    semester_9: dict[str, List[SchedulerSchema]]
 
+class ExaminationSchema:
+    class Config:
+        model = Examination
+        model_fields = []
 class ChoiceSchema(Schema):
     scheduler_id: int
 
