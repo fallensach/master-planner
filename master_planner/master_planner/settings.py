@@ -37,7 +37,8 @@ if PRODUCTION:
     DEBUG = os.getenv('DEBUG')
 else:
     ALLOWED_HOSTS = []
-    DEBUG = True
+ 
+DEBUG = True
 
 # Application definition
 
