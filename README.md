@@ -20,12 +20,13 @@ There is currently 1 script to help with development.
 
 ## Deployment migrations
 Before deploying the application:
+```python
+python manage.py makemigrations
+ 
+Commit migration files
 
-> python manage.py makemigrations
-> 
-> Commit migration files
-> 
-> Push the migration files to deployment repo
+Push the migration files to deployment repo
+```
 
 Whenever you change models in development you have to make the new migration files and push them into the production repo.
 When you have the new migration files you can run the command:
