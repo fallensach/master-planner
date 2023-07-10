@@ -1,27 +1,60 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html class="" lang="en">
 	<head>
-    <title>fuckall</title>
+    <title>Master planner</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
 		{% tailwind_css %}
-
+        {% load static %}
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         {# Alpine and app scripts #}
         <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script src="{% static 'schedule.js' %}"></script>
-
+        <link rel="stylesheet" href="{% static 'stylesheet.css' %}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
 
 	</head>
-    <body class="h-screen w-screen bg-gray-100">
-        <nav class="h-20 w-full bg-white border-b-2 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="text-xl text-black/70 p-5 transition ease-in-out duration-300 hover:text-black"> Master Planner </a>
-            <a href="{% url 'setup' %}" class="text-xl text-black/70 p-5 transition ease-in-out duration-300 hover:text-black"> My account </a>
-        </nav>
-        {% block content %}
-        {% endblock %}
+    <body class=" bg-gray-100">
+        <div id="site-container" class="flex h-screen">
+            <nav class="flex flex-col w-[80px] bg-slate-800 whitespace-nowrap text-white transition-all duration-300 ease-in-out hover:w-[200px] shadow-box h-full sidebar">
+                <ul>
+                    <div>
+                        <li class="flex items-center text-gray-200 p-3 mx-4 space-x-4 mt-10">
+                            <i class='icon bx bx-happy text-[20px]'></i>
+                            <span class="text font-bold text-xl">{{user.username}}</span>
+                        </li>
+                    </div>
+                </ul>
+                <div class="menu-bar flex flex-col justify-between h-full">
+                    <ul class="menu-links mt-10 text-[17px] flex flex-col space-y-3 justify-between h-full text-gray-200">
+                        <div class="flex flex-col space-y-3">
+                            <li class=" hover:bg-slate-500 hover:text-white mx-4 rounded-lg transition ease-linear {{ home_bg }}">
+                                <a class="flex items-center" href="{% url 'home' %}">
+                                    <i class="{{home_highlight}} {{setup_p}} icon bx bx-home-alt icon text-[20px]" ></i>
+                                    <span class="text nav-text">Kurser</span>
+                                </a>
+                            </li>
+                            <li class="nav-link hover:bg-slate-500 hover:text-white mx-4 rounded-lg transition ease-linear {{ setup_bg }}">
+                                <a class="flex items-center" href="{% url 'setup' %}">
+                                    <i class="{{ setup_highlight }} {{ home_p }} icon bx bxs-user-account icon text-[20px]" ></i>
+                                    <span class="text nav-text">Mitt konto</span>
+                                </a>
+                            </li>
+                        </div>
+                <div class="bottom-content">
+                    <li class="nav-link hover:bg-slate-500 hover:text-white p-3 mx-4 mb-10 rounded-lg transition ease-linear">
+                        <a class="flex items-center space-x-3" href="{% url 'logout' %}">
+                            <i class='icon bx bx-log-out icon text-[20px]' ></i>
+                            <span class="text nav-text">Logga ut</span>
+                        </a>
+                    </li>
+                </div>
+            </nav>
+            {% block content %}
+            {% endblock %}
+        </div>
 	</body>
 </html>

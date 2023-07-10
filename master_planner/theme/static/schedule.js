@@ -43,7 +43,6 @@ function add_course(scheduler_id) {
             type: "GET",
             url: url,
             success: function (response) {
-                console.log(response)
                 add_course_table(response, my_courses);
                 add_course_db(scheduler_id);
             }
@@ -57,7 +56,6 @@ function add_course(scheduler_id) {
 
 
 function add_course_table(response, my_courses) {
-
     remove_course_btn = $("<span>", {
         text: "delete", 
         class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
@@ -65,9 +63,9 @@ function add_course_table(response, my_courses) {
         })
     my_courses.append($("<tr>", {
     id: "my-course-" + response["scheduler_id"],
-    class: "bg-white",
+    class: "bg-white font-bold",
     append: [
-            $("<td>", {text: response["course"]["course_code"], class: "text-center"}),
+            $("<td>", {text: response["course"]["course_code"], class: "text-center font-mono"}),
             $("<td>", {text: response["course"]["course_name"], class: "w-2/5"}),
             $("<td>", {text: response["course"]["hp"], class: "text-center"}),
             $("<td>", {text: response["schedule"]["block"], class: "text-center"}),
@@ -249,30 +247,30 @@ function replace_period_table(period, semester_data) {
         var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["scheduler_id"]),
-            $("<td>", {text: value["course"]["course_code"], class: "text-center"}),
+            $("<td>", {text: value["course"]["course_code"], class: "text-center font-mono"}),
             $("<td>", {text: value["course"]["course_name"], class: "w-2/5"}),
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
             $("<td>", {text: value["schedule"]["block"], class: "text-center"}),
             $("<td>", {text: value["course"]["level"], class: "text-center"}),
             $("<td>", {text: value["course"]["vof"], class: "text-center"}),
-            make_expand_btn(value["scheduler_id"]),
+            make_expand_btn(value["course"]["course_code"], value["scheduler_id"]),
         );
         table_body.append(course_row);
-        table_body.append(expand_div(value["course"]["course_code"]));
+        table_body.append(expand_div(value["scheduler_id"]));
     })
 }
 
-function expand_div(courseCode) {
-    var dropdown = $('<tr>').attr('id', 'dropdown-' + courseCode);
-    var td = $('<td>').addClass('overflow-hidden p-0').attr('colspan', '7').attr('id', 'insert-' + courseCode);
-    var courseInfoContainer = $('<div>').attr('id', 'course-info-container-' + courseCode).addClass('hidden overflow-hidden');
-    var infoContainer = $('<div>').attr('id', 'info-container-' + courseCode).addClass('flex flex-col p-5 border-r-2 w-1/2 border-black/25');
-    var examinationContainer = $('<div>').attr('id', 'examination-container-' + courseCode).addClass('flex flex-col p-5 space-y-2');
+function expand_div(scheduler_id) {
+    var dropdown = $('<tr>').attr('id', 'dropdown-' + scheduler_id);
+    var td = $('<td>').addClass('overflow-hidden p-0').attr('colspan', '8').attr('id', 'insert-' + scheduler_id);
+    var courseInfoContainer = $('<div>').attr('id', 'course-info-container-' + scheduler_id).addClass('hidden overflow-hidden');
+    var infoContainer = $('<div>').attr('id', 'info-container-' + scheduler_id).addClass('flex flex-col p-5 border-r-2 w-1/2 border-black/25');
+    var examinationContainer = $('<div>').attr('id', 'examination-container-' + scheduler_id).addClass('flex flex-col p-5 space-y-2');
     
     var loadingButton = $('<button>').addClass('btn');
     var loadingSpinner = $('<span>').addClass('loading loading-spinner');
     var loadingText = $('<span>').text('Laddar');
-    var coursesLoader = $('<span>').attr('id', 'courses-loader-' + courseCode).addClass('hidden').append(loadingButton.append(loadingSpinner).append(loadingText));
+    var coursesLoader = $('<span>').attr('id', 'courses-loader-' + scheduler_id).addClass('hidden').append(loadingButton.append(loadingSpinner).append(loadingText));
     
     var courseInfo = courseInfoContainer.append($('<div>').addClass('flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg').append(coursesLoader).append(infoContainer).append(examinationContainer));
     
@@ -297,19 +295,19 @@ function course_checkbox(scheduler_id) {
     return td
 }
 
-function make_expand_btn(scheduler_id) {
-    var schedulerId = { "scheduler_id": scheduler_id };
+function make_expand_btn(course_code, scheduler_id) {
 
-    var tdElement = $('<td>').attr('id', 'expand-' + schedulerId["scheduler_id"]).addClass('flex justify-center');
+    var tdElement = $('<td>').attr('id', 'expand-' + scheduler_id).addClass('flex justify-center');
 
     var labelElement = $('<label>').addClass('swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500');
 
     var inputElement = $('<input>').attr({
         'type': 'checkbox',
-        'id': schedulerId["scheduler_id"],
+        'value': scheduler_id,
+        'name': course_code,
         'class': 'hidden'
     }).on('click', function() {
-        load_course_info(this.id);
+        load_course_info(this.name, this.value);
     });
 
     var spanElementUp = $('<span>').addClass('material-symbols-outlined swap-on rounded-lg bg-yellow-500').text('keyboard_arrow_up');
