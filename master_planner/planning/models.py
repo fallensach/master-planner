@@ -157,6 +157,25 @@ def register_courses(program: any, data: any):
         scheduler.profiles.add(profile)
         scheduler.save()
 
+        if "*" in course.hp and schedule.period == 2:
+            first_part = Scheduler.objects.get(course=course,
+                                               program=program,
+                                               profiles=profile,
+                                               schedule__period=1,
+                                               schedule__semester=schedule.semester
+                                               )
+            
+            second_part = Scheduler.objects.get(course=course,
+                                                program=program,
+                                                profiles=profile,
+                                                schedule__period=2,
+                                                schedule__semester=schedule.semester
+                                                )
+            first_part.linked = second_part
+            second_part.linked = first_part
+            first_part.save()
+            second_part.save()
+
 # def register_profiles(program: ProgramPlan):
 #     profiles = program.profiles()
 #     

@@ -21,7 +21,6 @@ def overview(request):
 @api.post('account/choice', response={200: NoContent, 404: Error})
 def choice(request, data: ChoiceSchema):
     account = Account.objects.get(user=request.user)
-    
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
@@ -29,6 +28,12 @@ def choice(request, data: ChoiceSchema):
 
     account.choices.add(scheduler)
     account.save()
+    
+    if scheduler.linked:
+        account.choices.add(scheduler.linked)
+        account.save()
+        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked} has been added to account: {account.user.username}"}
+    
                 
     return 200, {"message": f"choice: {data.scheduler_id} has been added to account: {account.user.username}"}
 
@@ -44,9 +49,13 @@ def choice(request, data: ChoiceSchema):
     
     account.choices.remove(scheduler)
     account.save()
+
+    if scheduler.linked:
+        account.choices.remove(scheduler.linked)
+        account.save()
+        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked} has been removed from account: {account.user.username}"}
                 
     return 200, {"message": f"choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
-
 
 @api.get('account/choices', response=Semesters)
 def choice(request):
