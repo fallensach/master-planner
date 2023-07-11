@@ -1,6 +1,7 @@
-from ninja import NinjaAPI, ModelSchema, Schema
-from django.http.response import JsonResponse
-from planning.models import Schedule, Course, Scheduler, Examination
+from ninja import NinjaAPI
+from planning.models import Schedule, Course, Scheduler
+from django.db.models import Sum, F, ExpressionWrapper, Case, When, Value, IntegerField
+from django.db.models.functions import Cast, Replace
 from planning.management.commands.scrappy.courses import fetch_course_info
 from accounts.models import get_user, Account
 from typing import List
@@ -46,14 +47,42 @@ def choice(request, data: ChoiceSchema):
                 
     return 200, {"message": f"choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
 
-@api.get('account/choice', response=List[SchedulerSchema])
+
+@api.get('account/choices', response=Semesters)
 def choice(request):
     account = Account.objects.get(user=request.user)
-    return account.choices.all()
+    course_choices = {}
+    total_hp = 0
+    
+    for semester in range(7, 10):
+        semester_hp = 0
+        periods = {}
+        for period in range(1, 3):
+            semester_period = account.choices.filter(schedule__semester=semester, schedule__period=period)
+            period_hp = semester_period.aggregate(
+                hp=Sum(
+                    Case(
+                        When(course__hp__endswith='*', then=Cast(F('course__hp'), IntegerField()) / 2),
+                        default=Cast(F('course__hp'), IntegerField()),
+                        output_field=IntegerField()
+                        ),
+                    output_field=IntegerField()
+                    )
+                )
+            if period_hp["hp"] == None:
+                period_hp["hp"] = 0
+                
+            periods[f"period_{period}"] = {"hp": period_hp["hp"], "courses": list(semester_period)}
+            semester_hp += period_hp["hp"]
+            
+        total_hp += semester_hp
+        course_choices[f"semester_{semester}"] = {"hp": semester_hp, "periods": periods}
+    
+    course_choices["hp"] = total_hp
+    return course_choices
 
 @api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})
 def get_course(request, scheduler_id):
-
     try:
         course_instance = Scheduler.objects.get(scheduler_id=scheduler_id)
     except Scheduler.DoesNotExist:
