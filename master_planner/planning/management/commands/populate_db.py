@@ -8,8 +8,18 @@ from planning.management.commands.scrappy.program_plan import ProgramPlan
 
 
 class Command(BaseCommand):
-    args = '<foo bar ...>'
     help = 'our help string comes here'
+
+    def add_arguments(self, parser):
+        # Positional arguments
+        #parser.add_argument("poll_ids", nargs="+", type=int)
+
+        # Named (optional) arguments
+        parser.add_argument(
+            "--debug",
+            action="store_true",
+            help="only scrapes datateknik, mjukvaruteknik, tekniskt fysik",
+        )
 
     def add_data(self):
         program = Program(program_name="mjukvaruteknik", 
@@ -67,13 +77,25 @@ class Command(BaseCommand):
                               )        
         scheduler.save()
 
-    def scrape_data(self):
+    def scrape_data(self, options):
         # fill Schedule
         # register_schedule()
 
+        user = User.objects.create_user(username="admin",  
+                                        password="123",
+                                        is_superuser=True,
+                                        is_staff=True)
+        user.save()
+
+        account = Account.objects.create(user=user)
 
         # fetch data and insert programs in db
-        program_data = fetch_programs()
+        if options['debug']:
+            program_data = [('6CMJU', 'Civilingenjörsprogram i mjukvaruteknik'), 
+                            ('6CDDD', 'Civilingenjörsprogram i datateknik'),
+                            ('6CYYY', 'Civilingenjörsprogram i teknisk fysik och elektroteknik')]
+        else:
+            program_data = fetch_programs()
         programs = register_programs(program_data)
         
         # scrape program data, add courses and profiles
@@ -82,7 +104,7 @@ class Command(BaseCommand):
 
             profiles = register_profiles(program, prog_scraper.profiles())
             register_courses(program, prog_scraper.courses())
-
+        
 
     def handle(self, *args, **options):
-        self.scrape_data()
+        self.scrape_data(options)
