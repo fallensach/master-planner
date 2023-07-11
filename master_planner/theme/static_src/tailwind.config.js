@@ -51,6 +51,9 @@ module.exports = {
                 sans: ["Roboto"],
                 serif: ["Open Sans"],
                 "comfortaa": "Comfortaa"
+            },
+            colors : {
+                "yellow-accent": "#fab21b"
             }
         },
     },
