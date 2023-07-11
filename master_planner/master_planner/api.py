@@ -62,7 +62,9 @@ def choice(request):
     account = Account.objects.get(user=request.user)
     course_choices = {}
     total_hp = 0
-    
+    level_hp = account.level_hp
+   
+    # sum hp for periods and semesters
     for semester in range(7, 10):
         semester_hp = 0
         periods = {}
@@ -80,14 +82,25 @@ def choice(request):
                 )
             if period_hp["hp"] == None:
                 period_hp["hp"] = 0
-                
-            periods[f"period_{period}"] = {"hp": period_hp["hp"], "courses": list(semester_period)}
+
+            periods[f"period_{period}"] = {"hp": {"total": period_hp["hp"], 
+                                                  "a_level": level_hp[semester, period, "a_level"], 
+                                                  "g_level": level_hp[semester, period, "g_level"]}, 
+                                           "courses": list(semester_period)}
+
             semester_hp += period_hp["hp"]
-            
+
         total_hp += semester_hp
-        course_choices[f"semester_{semester}"] = {"hp": semester_hp, "periods": periods}
+        course_choices[f"semester_{semester}"] = {"hp": {"total": semester_hp,
+                                                         "a_level": level_hp[semester, "a_level"], 
+                                                         "g_level": level_hp[semester, "g_level"]}, 
+                                                  "periods": periods}
     
-    course_choices["hp"] = total_hp
+    course_choices["hp"] = {"total": total_hp,
+                            "a_level": level_hp["a_level"],
+                            "g_level": level_hp["g_level"]
+                            }
+    print(course_choices)
     return course_choices
 
 @api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})

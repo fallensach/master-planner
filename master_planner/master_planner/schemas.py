@@ -32,8 +32,13 @@ class MySchedulerSchema(ModelSchema):
         model = Scheduler
         model_fields = ["scheduler_id", "program", "schedule"]
 
+class HpSchema(Schema):
+    total: int
+    a_level: int
+    g_level: int
+
 class MyCourseSchema(Schema):
-    hp: int
+    hp: HpSchema
     courses: List[SchedulerSchema]
 
 class MyPeriodSchema(Schema):
@@ -41,11 +46,16 @@ class MyPeriodSchema(Schema):
     period_2: MyCourseSchema
 
 class MySemesterCourses(Schema):
-    hp: int
+    hp: HpSchema
     periods: MyPeriodSchema
 
+# class TestHpSchema(Schema):
+#     (7, 1, "a_lever"): int
+#     (7, 2, "g_level"): int
+#     (7, 1, "total"): int
+
 class Semesters(Schema):
-    hp: int
+    hp: HpSchema
     semester_7: MySemesterCourses
     semester_8: MySemesterCourses
     semester_9: MySemesterCourses
