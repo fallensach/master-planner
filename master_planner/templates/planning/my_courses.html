@@ -1,5 +1,5 @@
 {% block content %}
-<table class="table px-20 bg-slate-600 rounded-lg overflow-hidden mb-10 shadow-md w-full">
+<table class="table px-20 bg-slate-600 rounded-none overflow-hidden w-full">
     <thead>
         <tr class="text-white text-lg text-center">
             <td>Kurskod</td>
@@ -10,11 +10,31 @@
             <td>Vof</td>
             <td></td>
         </tr>
-    </thead>
-    <tbody id="my-courses" class="text-sm">
         <tr>
-            <td class="bg-white p-10" colspan="8"> Inga kurser valda </td>
+            <td class="bg-white px-10 py-3 text-black text-xl font-bold" colspan="8"> Period 1 </td>
         </tr>
+    </thead>
+    <tbody id="my-courses-1" class="text-sm">
+
+    </tbody>
+</table>
+<table class="table">
+    <thead class=>
+        <tr class="text-white text-lg text-center invisible">
+            <td>Kurskod</td>
+            <td class="text-left">Kursnamn</td>
+            <td>Hp</td>
+            <td>Block</td>
+            <td>Nivå</td>
+            <td>Vof</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="bg-white px-10 py-3 text-xl font-bold text-black" colspan="8"> Period 2 </td>
+        </tr>
+    </thead>
+    <tbody id="my-courses-2" class="text-sm">
+
     </tbody>
 </table>
 {% endblock %}

@@ -1,5 +1,6 @@
 $(document).ready(function () {
     var programs = JSON.parse($("#programs").text());
+    const semester = $("#chosen-term").val();
     $("#id_program").autocomplete({
         source: programs,
         delay: 100,
@@ -8,6 +9,8 @@ $(document).ready(function () {
 
         }
     });
+
+    load_chosen_courses(semester);
 });
 
 function get_schedule(schedule_id) {
@@ -22,71 +25,75 @@ function get_schedule(schedule_id) {
     return httpRequest.response
 }
 
-function get_course(course_code) {
-    const url = "/api/get_course/" + course_code;
-    var checkbox = $("#check-" + course_code);
-    var hp = $("#hp");
-
-    if (checkbox.is(":checked")) {
-        $.ajax({
-            type: "GET",
-            url: url,
-            success: function (response) {
-                hp.text(parseInt(response.hp.replace("*", "")) + parseInt(hp.text()));
-            }
-        });
-    } else {
-        $.ajax({
-            type: "GET",
-            url: url,
-            success: function (response) {
-                hp.text(parseInt(parseInt(hp.text()) - response.hp.replace("*", "")));
-            }
-        });
-    }
-}
 
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
-    var my_courses = $("#my-courses");
-    const url = "/api/get_course/" + scheduler_id;
+
     if (checkbox.is(":checked")) {
-        $.ajax({
-            type: "GET",
-            url: url,
-            success: function (response) {
-                add_course_table(response, my_courses);
-                add_course_db(scheduler_id);
-            }
-        })
+        add_course_db(scheduler_id);
 
     } else {
-        $("#my-course-" + scheduler_id).remove();
         delete_course_db(scheduler_id);
+
     }
 }
 
+function load_chosen_courses(semester) {
+    const my_courses_1 = $("#my-courses-1");
+    const my_courses_2 = $("#my-courses-2");
+    const url = "/api/account/choices";
 
-function add_course_table(response, my_courses) {
-    remove_course_btn = $("<span>", {
-        text: "delete", 
-        class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
-        
-        })
-    my_courses.append($("<tr>", {
-    id: "my-course-" + response["scheduler_id"],
-    class: "bg-white font-bold",
-    append: [
-            $("<td>", {text: response["course"]["course_code"], class: "text-center font-mono"}),
-            $("<td>", {text: response["course"]["course_name"], class: "w-2/5"}),
-            $("<td>", {text: response["course"]["hp"], class: "text-center"}),
-            $("<td>", {text: response["schedule"]["block"], class: "text-center"}),
-            $("<td>", {text: response["course"]["level"], class: "text-center"}),
-            $("<td>", {text: response["course"]["vof"], class: "text-center"}),
-            $("<td>", {append: [remove_course_btn], class: "flex items-center"})
-            ]
-        })
-    )
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (picked_courses) {
+            my_courses_1.empty();
+            my_courses_2.empty();
+            term_7_p_1 = picked_courses["semester_" + semester]["periods"]["period_1"]["courses"];
+            term_7_p_2 = picked_courses["semester_" + semester]["periods"]["period_2"]["courses"];
+            add_course_table(term_7_p_1, my_courses_1);
+            add_course_table(term_7_p_2, my_courses_2);
+            load_term_hp(picked_courses);
+        }
+    });
+}
+
+function load_term_hp(picked_courses) {
+    for (var semester = 7; semester < 10; semester++) {
+        semester_hp = $("#semester-" + semester + "-hp");
+        semester_hp.text(picked_courses["semester_" + semester]["hp"]);
+        for (var period = 1; period < 3; period++) {
+            period_p = $("#semester-" + semester + "-p-" + period);
+            period_p.text(picked_courses["semester_" + semester]["periods"]["period_" + period]["hp"])
+        }
+    }
+}
+
+function add_course_table(courses, my_courses) {
+    $.each(courses, function (index, course_data) { 
+        scheduler_id = course_data["scheduler_id"];
+        remove_course_btn = $("<span>", {
+            text: "delete", 
+            class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
+            onclick: "delete_course_db(" + scheduler_id + ")"
+            })
+
+        my_courses.append($("<tr>", {
+            id: "my-course-" + scheduler_id,
+            class: "bg-white font-bold",
+            append: [
+                    $("<td>", {text: course_data["course"]["course_code"], class: "text-center font-mono"}),
+                    $("<td>", {text: course_data["course"]["course_name"], class: "w-2/5"}),
+                    $("<td>", {text: course_data["course"]["hp"], class: "text-center"}),
+                    $("<td>", {text: course_data["schedule"]["block"], class: "text-center"}),
+                    $("<td>", {text: course_data["course"]["level"], class: "text-center"}),
+                    $("<td>", {text: course_data["course"]["vof"], class: "text-center"}),
+                    $("<td>", {append: [remove_course_btn], class: "flex items-center"})
+                    ]
+                })
+            )        
+    });
+
 }
 
 function load_course_info(course_code, scheduler_id) {
@@ -212,6 +219,8 @@ function course_examination(response, scheduler_id) {
 function add_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
     const url = "/api/account/choice";
+    const semester = $("#chosen-term").val();
+
 
     $.ajax({
         type: "POST",
@@ -219,6 +228,7 @@ function add_course_db(scheduler_id) {
         data: payload,
         success: function (response) {
             console.log(response);
+            load_chosen_courses(semester);
         }
     });
 }
@@ -226,6 +236,7 @@ function add_course_db(scheduler_id) {
 function delete_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
     const url = "/api/account/choice";
+    const semester = $("#chosen-term").val();
 
     $.ajax({
         type: "DELETE",
@@ -233,6 +244,7 @@ function delete_course_db(scheduler_id) {
         data: payload,
         success: function (response) {
             console.log(response);
+            load_chosen_courses(semester);
         }
     });
 }
@@ -336,6 +348,7 @@ function highlight_semester(semester, profile_code) {
     var semester_7 = $("#semester-btn-" + "7" + "-" + profile_code);
     var semester_8 = $("#semester-btn-" + "8" + "-" + profile_code);
     var semester_9 = $("#semester-btn-" + "9" + "-" + profile_code);
+    
     var semesters = [semester_7, semester_8, semester_9];
 
     $.each(semesters, function(index, semester) {
@@ -376,4 +389,21 @@ function toggle_period(period) {
         period_btn.removeAttr("class");
         period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
     }
+}
+
+function highlight_semester_card(card_id, semester) {
+    const term_7_card = $("#semester-7-card");
+    const term_8_card = $("#semester-8-card");
+    const term_9_card = $("#semester-9-card");
+    const highlight_card = $("#" + card_id);
+    $("#chosen-term").val(semester);
+
+
+    var cards = [term_7_card, term_8_card, term_9_card];
+
+    $.each(cards, function(index, card) {
+        card.removeClass("card-active");
+    });
+
+    highlight_card.addClass("card-active");
 }
