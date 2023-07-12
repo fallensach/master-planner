@@ -33,7 +33,7 @@ class Course(models.Model):
                 }
 
     def __str__(self):
-        return self.course_code
+        return f"{self.course_code}, {self.hp}, {self.level}"
 
 class Examination(models.Model):
     id = models.AutoField(primary_key=True)
