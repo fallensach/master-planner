@@ -51,3 +51,10 @@
     cursor: pointer;
 }
 
+.card-active {
+    background: #facc15;
+}
+
+.card-active:hover {
+    background: #facc15;
+}
