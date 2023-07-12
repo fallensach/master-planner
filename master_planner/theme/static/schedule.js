@@ -13,19 +13,6 @@ $(document).ready(function () {
     load_chosen_courses(semester);
 });
 
-function get_schedule(schedule_id) {
-    const httpRequest = new XMLHttpRequest();
-    const url = "/api/get_schedule/".concat(schedule_id);
-    httpRequest.open("GET", url);
-
-    httpRequest.onload = () => {
-        console.log(httpRequest.response)
-    }
-    httpRequest.send()
-    return httpRequest.response
-}
-
-
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
 
@@ -61,10 +48,18 @@ function load_chosen_courses(semester) {
 function load_term_hp(picked_courses) {
     for (var semester = 7; semester < 10; semester++) {
         semester_hp = $("#semester-" + semester + "-hp");
-        semester_hp.text(picked_courses["semester_" + semester]["hp"]);
+        advanced_hp = $("#semester-" + semester + "-advanced");
+        basic_hp = $("#semester-" + semester + "-basic");
+
+        console.log(picked_courses)
+
+        advanced_hp.text(picked_courses["semester_" + semester]["hp"]["a_level"]);
+        basic_hp.text(picked_courses["semester_" + semester]["hp"]["g_level"]);
+        semester_hp.text(picked_courses["semester_" + semester]["hp"]["total"]);
+
         for (var period = 1; period < 3; period++) {
             period_p = $("#semester-" + semester + "-p-" + period);
-            period_p.text(picked_courses["semester_" + semester]["periods"]["period_" + period]["hp"])
+            period_p.text(picked_courses["semester_" + semester]["periods"]["period_" + period]["hp"]["total"])
         }
     }
 }
@@ -80,7 +75,7 @@ function add_course_table(courses, my_courses) {
 
         my_courses.append($("<tr>", {
             id: "my-course-" + scheduler_id,
-            class: "bg-white font-bold",
+            class: "bg-white font-bold transition ease hover:bg-slate-200",
             append: [
                     $("<td>", {text: course_data["course"]["course_code"], class: "text-center font-mono"}),
                     $("<td>", {text: course_data["course"]["course_name"], class: "w-2/5"}),
@@ -131,7 +126,6 @@ function load_course_info(course_code, scheduler_id) {
 }
 
 function course_info_div(response) {
-    // Assuming you have the variables response.course_code, response.course_name, response.examination, and response.examinator
     var courseCode = response.course_code;
     var courseName = response.course_name;
     var fields = response.main_field;
@@ -268,7 +262,7 @@ function replace_period_table(period, semester_data) {
     table_body.empty();
 
     $.each(semester_data[`period_${period}`], function(key, value) {
-        var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200/75 transition ease-in-out"}).appendTo(table_body);
+        var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-center font-mono"}),
