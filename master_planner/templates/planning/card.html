@@ -1,0 +1,66 @@
+{% block content  %}
+<button id="{{ card_id }}" onclick="load_chosen_courses(this.value); highlight_semester_card(this.id, this.value)" value="{{ termin }}" class="{{ highlight }} w-full transition ease-in hover:bg-yellow-300/75 cursor-pointer max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
+    <div class="flex items-center justify-between mb-4">
+        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Termin {{ termin }}</h5>
+        <a href="#" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
+            Visa mer
+        </a>
+   </div>
+
+   <div class="flow-root">
+        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+            <li class="py-3 sm:py-4">
+                <div class="flex items-center justify-between space-x-4">
+                    <div class="flex-1 min-w-0 text-left text-gray-600">
+                        <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                            Total hp
+                        </p>
+                        <p class="text-sm truncate dark:text-gray-400">
+                            Period 1
+                        </p>
+                        <p class="text-sm truncate dark:text-gray-400">
+                            Period 2
+                        </p>
+                    </div>
+                    <div class="inline-flex flex-col items-center text-base font-semibold text-gray-900 dark:text-white">
+                        <p id="{{ semester_total_hp }}"> {{ total_hp }} </p>
+                        <p id="{{ period_1_hp_id }}" class="text-sm text-gray-600 truncate dark:text-gray-400">
+                            {{ period_1_hp }}
+                        </p>
+                        <p id="{{ period_2_hp_id }}" class="text-sm text-gray-600 truncate dark:text-gray-400">
+                            {{ period_2_hp }}
+                        </p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="py-3 sm:py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1 min-w-0 text-left text-gray-600">
+                        <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                            Hp per nivå
+                        </p>
+                        <p class="text-sm truncate dark:text-gray-400">
+                            Avancerad
+                        </p>
+                        <p class="text-sm truncate dark:text-gray-400">
+                            Grund
+                        </p>
+                    </div>
+                    <div class="inline-flex flex-col items-center text-base font-semibold text-gray-900 dark:text-white">
+                        Hp
+                        <p id="{{ advanced_hp_id }}" class="text-sm text-gray-600 truncate dark:text-gray-400">
+                            0
+                        </p>
+                        <p id="{{ basic_hp_id }}" class="text-sm text-gray-600 truncate dark:text-gray-400">
+                            0
+                        </p>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+   </div>
+</button>
+{% endblock content  %}
+
