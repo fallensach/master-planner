@@ -2,6 +2,7 @@
 
 {% block content %}
     <div id="home-container" class=" bg-gray-100 flex-col justify-center items-center overflow-y-auto max-h-screen flex-grow">
+        <input id="chosen-term" value="7" class="hidden">
         <div id="chosen-courses" class="flex flex-col w-full px-48 pt-20">
             <div class="flex-grow">
                 <p class="text-2xl font-bold my-2"> Mina kurser </p>
@@ -11,9 +12,9 @@
             <div class="">
                 <p class="font-bold text-2xl my-2">Översikt</p>
                 <div class="flex space-x-5">
-                    {% include 'card.html' with termin=7 total_hp=30 period_1_hp=15 period_2_hp=15 %}
-                    {% include 'card.html' with termin=8 total_hp=30 period_1_hp=15 period_2_hp=15 %}
-                    {% include 'card.html' with termin=9 total_hp=30 period_1_hp=15 period_2_hp=15 %}
+                    {% include 'card.html' with highlight="card-active" card_id="semester-7-card" semester_total_hp="semester-7-hp" period_1_hp_id="semester-7-p-1" period_2_hp_id="semester-7-p-2" termin=7 total_hp=0 period_1_hp=0 period_2_hp=0 %}
+                    {% include 'card.html' with card_id="semester-8-card" semester_total_hp="semester-8-hp" period_1_hp_id="semester-8-p-1" period_2_hp_id="semester-8-p-2" termin=8 total_hp=0 period_1_hp=0 period_2_hp=0 %}
+                    {% include 'card.html' with card_id="semester-9-card" semester_total_hp="semester-9-hp" period_1_hp_id="semester-9-p-1" period_2_hp_id="semester-9-p-2" termin=9 total_hp=0 period_1_hp=0 period_2_hp=0 %}
                 </div>
                 
             </div>
