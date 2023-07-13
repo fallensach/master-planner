@@ -8,7 +8,7 @@
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
 		{% tailwind_css %}
 	</head>
-    <body class="h-screen w-full fixed bg-gray-200">
+    <body style="background-image: url({% static '' %});" class="h-screen bg-slate-800 bg-no-repeat bg-cover w-full">	
         {% block content %}
         {% endblock %}
 	</body>

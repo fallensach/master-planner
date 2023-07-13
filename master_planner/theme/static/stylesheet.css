@@ -50,3 +50,11 @@
     background-color: rgb(247, 247, 247);
     cursor: pointer;
 }
+
+.card-active {
+    background: #facc15;
+}
+
+.card-active:hover {
+    background: #facc15;
+}

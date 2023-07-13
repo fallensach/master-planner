@@ -53,7 +53,7 @@ def choice(request, data: ChoiceSchema):
     if scheduler.linked:
         account.choices.remove(scheduler.linked)
         account.save()
-        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked} has been removed from account: {account.user.username}"}
+        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked.scheduler_id} has been removed from account: {account.user.username}"}
                 
     return 200, {"message": f"choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
 
