@@ -68,7 +68,7 @@ function add_course_table(courses, my_courses, period) {
             id: "my-course-placeholder-" + period,
             class: "bg-white font-bold",
             append: [
-                    $("<td>", {text: "Inga kurser valda", class: "", colspan:"8"}),
+                    $("<td>", {text: "Inga kurser valda", class: "px-20", colspan:"8"}),
                     ]
                 })
             ) 
@@ -251,14 +251,14 @@ function delete_course_db(scheduler_id) {
     });
 }
 
-function get_courses_semester(semester, profile_code) {
+function get_courses_semester(semester) {
+    profile_code = $("#profile-code").val();
     const url = "/api/courses/" + profile_code + "/" + semester;
-
     $.ajax({
         type: "GET",
         url: url,
         success: function (semester_data) {
-            highlight_semester(semester, profile_code); 
+            highlight_semester(semester); 
             replace_period_table(1, semester_data);
             replace_period_table(2, semester_data);
         }
@@ -345,11 +345,11 @@ function make_expand_btn(course_code, scheduler_id) {
     return tdElement;
 }
 
-function highlight_semester(semester, profile_code) {
-    var current_semester = $("#semester-btn-" + semester + "-" + profile_code);
-    var semester_7 = $("#semester-btn-" + "7" + "-" + profile_code);
-    var semester_8 = $("#semester-btn-" + "8" + "-" + profile_code);
-    var semester_9 = $("#semester-btn-" + "9" + "-" + profile_code);
+function highlight_semester(semester) {
+    var current_semester = $("#semester-btn-" + semester);
+    var semester_7 = $("#semester-btn-" + "7");
+    var semester_8 = $("#semester-btn-" + "8");
+    var semester_9 = $("#semester-btn-" + "9");
     
     var semesters = [semester_7, semester_8, semester_9];
 
