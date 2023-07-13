@@ -16,9 +16,7 @@ $(document).ready(function () {
 function check_course_boxes(periods) {
     for (var i = 1; i < 3; i ++) {
         var period = periods["period_" + i]["courses"];
-        console.log(period)
         period.forEach(scheduler => {
-            console.log("#check-" + scheduler["scheduler_id"])
             $("#check-" + scheduler["scheduler_id"]).prop("checked", true); 
             
         });
@@ -100,7 +98,10 @@ function add_course_table(courses, my_courses, period) {
             class: "bg-white font-bold transition ease hover:bg-slate-200",
             append: [
                     $("<td>", {text: course_data["course"]["course_code"], class: "text-center font-mono"}),
-                    $("<td>", {text: course_data["course"]["course_name"], class: "w-2/5"}),
+                    $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + course_data["course"]["course_code"], 
+                                                                 text: course_data["course"]["course_name"],
+                                                                 class: "hover:text-yellow-500 transition ease"
+                                                                })),
                     $("<td>", {text: course_data["course"]["hp"], class: "text-center"}),
                     $("<td>", {text: course_data["schedule"]["block"], class: "text-center"}),
                     $("<td>", {text: course_data["course"]["level"], class: "text-center"}),
@@ -241,7 +242,6 @@ function add_course_db(scheduler_id) {
         url: url,
         data: payload,
         success: function (response) {
-            console.log(response);
             load_chosen_courses(semester);
             $("#check-" + response["scheduler_id"]).prop("checked", true);
         }
@@ -258,9 +258,9 @@ function delete_course_db(scheduler_id) {
         url: url,
         data: payload,
         success: function (response) {
-            console.log(response);
             load_chosen_courses(semester);
             $("#check-" + response["scheduler_id"]).prop("checked", false);
+            $("#check-" + scheduler_id).prop("checked", false);
         }
     });
 }
@@ -289,7 +289,11 @@ function replace_period_table(period, semester_data) {
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-center font-mono"}),
-            $("<td>", {text: value["course"]["course_name"], class: "w-2/5"}),
+            $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + value["course"]["course_code"], 
+                                                         text: value["course"]["course_name"],
+                                                         class: "hover:text-yellow-500 transition ease"
+                                                        
+                                                        })),
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
             $("<td>", {text: value["schedule"]["block"], class: "text-center"}),
             $("<td>", {text: value["course"]["level"], class: "text-center"}),

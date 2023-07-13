@@ -60,13 +60,17 @@
                 </thead>
                     <tbody id="table-{{period}}" class="text-sm font-bold" >
                         {% for scheduler in schedulers %}
-                        <tr class="bg-white transition ease-in-out hover:bg-slate-200/75 text-center font-bold text-sm">
+                        <tr class="bg-white transition ease-in-out hover:bg-slate-200 text-center font-bold text-sm">
                             <td class="flex justify-center">
                                 <input id="check-{{scheduler.scheduler_id}}" type="checkbox" onclick="add_course(this.value)" class="checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" value="{{scheduler.scheduler_id}}">
                             </td>
                         
                             <td class="font-mono"> {{scheduler.course.course_code}} </td>
-                            <td class="text-left w-2/5"> {{scheduler.course.course_name}} </td>
+                            <td class="text-left w-2/5"> 
+                                <a href="https://studieinfo.liu.se/kurs/{{ scheduler.course.course_code }}" class="hover:text-yellow-500 transition ease">
+                                    {{scheduler.course.course_name}} 
+                                </a>
+                            </td>
                             <td> {{scheduler.course.hp}} </td>
                             <td> {{scheduler.schedule.block}} </td>
                             <td> {{scheduler.course.level}} </td>
