@@ -36,10 +36,10 @@ function load_chosen_courses(semester) {
         success: function (picked_courses) {
             my_courses_1.empty();
             my_courses_2.empty();
-            term_7_p_1 = picked_courses["semester_" + semester]["periods"]["period_1"]["courses"];
-            term_7_p_2 = picked_courses["semester_" + semester]["periods"]["period_2"]["courses"];
-            add_course_table(term_7_p_1, my_courses_1);
-            add_course_table(term_7_p_2, my_courses_2);
+            term_p_1 = picked_courses["semester_" + semester]["periods"]["period_1"]["courses"];
+            term_p_2 = picked_courses["semester_" + semester]["periods"]["period_2"]["courses"];
+            add_course_table(term_p_1, my_courses_1, 1);
+            add_course_table(term_p_2, my_courses_2, 2);
             load_term_hp(picked_courses);
         }
     });
@@ -50,8 +50,6 @@ function load_term_hp(picked_courses) {
         semester_hp = $("#semester-" + semester + "-hp");
         advanced_hp = $("#semester-" + semester + "-advanced");
         basic_hp = $("#semester-" + semester + "-basic");
-
-        console.log(picked_courses)
 
         advanced_hp.text(picked_courses["semester_" + semester]["hp"]["a_level"]);
         basic_hp.text(picked_courses["semester_" + semester]["hp"]["g_level"]);
@@ -64,7 +62,18 @@ function load_term_hp(picked_courses) {
     }
 }
 
-function add_course_table(courses, my_courses) {
+function add_course_table(courses, my_courses, period) {
+    if (courses.length == 0) {
+        my_courses.append($("<tr>", {
+            id: "my-course-placeholder-" + period,
+            class: "bg-white font-bold",
+            append: [
+                    $("<td>", {text: "Inga kurser valda", class: "", colspan:"8"}),
+                    ]
+                })
+            ) 
+    }
+    
     $.each(courses, function (index, course_data) { 
         scheduler_id = course_data["scheduler_id"];
         remove_course_btn = $("<span>", {
@@ -103,7 +112,6 @@ function load_course_info(course_code, scheduler_id) {
             method: "GET", // The HTTP method (GET, POST, PUT, DELETE, etc.)
             dataType: "json", // The expected data type of the response
             success: function(response) {
-                console.log(response)
                 // The success callback function to handle the response
                 
                 info_container.append(course_info_div(response));
