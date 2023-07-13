@@ -69,6 +69,9 @@ class ChoiceSchema(Schema):
 
 class Error(Schema):
     message: str 
+    
+class LinkedScheduler(Schema):
+    scheduler_id: int
 
 class NoContent(Schema):
     message: str
