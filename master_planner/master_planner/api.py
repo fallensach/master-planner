@@ -18,9 +18,10 @@ def get_schedule(request, schedule_id):
 def overview(request):
     pass
 
-@api.post('account/choice', response={200: NoContent, 404: Error})
+@api.post('account/choice', response={200: LinkedScheduler, 404: Error})
 def choice(request, data: ChoiceSchema):
     account = Account.objects.get(user=request.user)
+    
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
@@ -32,14 +33,13 @@ def choice(request, data: ChoiceSchema):
     if scheduler.linked:
         account.choices.add(scheduler.linked)
         account.save()
-        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked} has been added to account: {account.user.username}"}
+        return 200, {"scheduler_id": scheduler.linked.scheduler_id}
+         
+    return 200, {"scheduler_id": -1}
     
-                
-    return 200, {"message": f"choice: {data.scheduler_id} has been added to account: {account.user.username}"}
 
-@api.delete('account/choice', response={200: NoContent, 404: Error})
+@api.delete('account/choice', response={200: LinkedScheduler, 404: Error})
 def choice(request, data: ChoiceSchema):
-    
     account = Account.objects.get(user=request.user)
     
     try:
@@ -53,10 +53,10 @@ def choice(request, data: ChoiceSchema):
     if scheduler.linked:
         account.choices.remove(scheduler.linked)
         account.save()
-        return 200, {"message": f"choice: {data.scheduler_id} and {scheduler.linked.scheduler_id} has been removed from account: {account.user.username}"}
-                
-    return 200, {"message": f"choice: {data.scheduler_id} has been removed from account: {account.user.username}"}
-
+        return 200, {"scheduler_id": scheduler.linked.scheduler_id}
+                    
+    return 200, {"scheduler_id": -1}
+    
 @api.get('account/choices', response=Semesters)
 def choice(request):
     account = Account.objects.get(user=request.user)
@@ -100,7 +100,6 @@ def choice(request):
                             "a_level": level_hp["a_level"],
                             "g_level": level_hp["g_level"]
                             }
-    print(course_choices)
     return course_choices
 
 @api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})

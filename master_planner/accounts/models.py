@@ -24,7 +24,7 @@ class Account(models.Model):
 
         result_dict["a_level"] = 0
         result_dict["g_level"] = 0
-        print(result_dict)
+        
         for choice in self.choices.all():
             schedule = choice.schedule
 
