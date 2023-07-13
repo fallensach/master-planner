@@ -13,6 +13,18 @@ $(document).ready(function () {
     load_chosen_courses(semester);
 });
 
+function check_course_boxes(periods) {
+    for (var i = 1; i < 3; i ++) {
+        var period = periods["period_" + i]["courses"];
+        console.log(period)
+        period.forEach(scheduler => {
+            console.log("#check-" + scheduler["scheduler_id"])
+            $("#check-" + scheduler["scheduler_id"]).prop("checked", true); 
+            
+        });
+    }
+}
+
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
 
@@ -41,6 +53,7 @@ function load_chosen_courses(semester) {
             add_course_table(term_p_1, my_courses_1, 1);
             add_course_table(term_p_2, my_courses_2, 2);
             load_term_hp(picked_courses);
+            check_course_boxes(picked_courses["semester_" + semester]["periods"])
         }
     });
 }
@@ -223,7 +236,6 @@ function add_course_db(scheduler_id) {
     const url = "/api/account/choice";
     const semester = $("#chosen-term").val();
 
-
     $.ajax({
         type: "POST",
         url: url,
@@ -231,6 +243,7 @@ function add_course_db(scheduler_id) {
         success: function (response) {
             console.log(response);
             load_chosen_courses(semester);
+            $("#check-" + response["scheduler_id"]).prop("checked", true);
         }
     });
 }
@@ -247,6 +260,7 @@ function delete_course_db(scheduler_id) {
         success: function (response) {
             console.log(response);
             load_chosen_courses(semester);
+            $("#check-" + response["scheduler_id"]).prop("checked", false);
         }
     });
 }
@@ -261,6 +275,7 @@ function get_courses_semester(semester) {
             highlight_semester(semester); 
             replace_period_table(1, semester_data);
             replace_period_table(2, semester_data);
+            load_chosen_courses(semester)
         }
     });
 }
@@ -399,7 +414,6 @@ function highlight_semester_card(card_id, semester) {
     const term_9_card = $("#semester-9-card");
     const highlight_card = $("#" + card_id);
     $("#chosen-term").val(semester);
-
 
     var cards = [term_7_card, term_8_card, term_9_card];
 
