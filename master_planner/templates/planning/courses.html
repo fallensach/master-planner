@@ -6,34 +6,62 @@
             <h1>Hello world</h1>
         </section>
         <p class="text-4xl font-bold"> {{ program_name }} </p>
-        <div id="pickable-courses" class="flex flex-row justify-between items-end mb-3">
-            <div>
-                <p class="font-bold text-lg">Välj termin</p>
-                <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
-                    <button id="semester-btn-7" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-800 p-3 cursor-default text-white transition ease-in-out" value="7" type="submit">Termin 7</button>
-                    <button id="semester-btn-8" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" value="8" type="submit">Termin 8</button>
-                    <button id="semester-btn-9" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" value="9" type="submit">Termin 9</button>
+        <div id="pickable-courses" class="sticky top-0 transition ease z-10">
+            <div class="flex justify-between items-end">
+                <div>
+                    <p class="font-bold text-lg">Välj termin</p>
+                    <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
+                        <button id="semester-btn-7" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-800 p-3 cursor-default text-white transition ease-in-out" value="7" type="submit">Termin 7</button>
+                        <button id="semester-btn-8" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" value="8" type="submit">Termin 8</button>
+                        <button id="semester-btn-9" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" value="9" type="submit">Termin 9</button>
+                    </div>
+                </div>
+                
+                <form action="{% url 'home' %}" method="POST" class="flex h-full">
+                    {% csrf_token %}
+                    {{ form.profiles }}
+                    <button class="bg-slate-600 text-white p-3 transition ease-in-out duration-300 hover:bg-slate-900 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
+                </form>
+                <div>
+                    <p class="font-bold text-lg"> Välj period: </p>
+                    <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
+                        <button id="period-1-btn" onclick="toggle_period(this.value)" value="1" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 1</button>
+                        <button id="period-2-btn" onclick="toggle_period(this.value)" value="2" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 2</button>
+                    </div>
                 </div>
             </div>
-            
-            <form action="{% url 'home' %}" method="POST" class="flex h-full">
-                {% csrf_token %}
-                {{ form.profiles }}
-                <button class="bg-slate-600 text-white p-3 transition ease-in-out duration-300 hover:bg-slate-900 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
-            </form>
-            <div>
-                <p class="font-bold text-lg"> Välj period: </p>
-                <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
-                    <button id="period-1-btn" onclick="toggle_period(this.value)" value="1" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 1</button>
-                    <button id="period-2-btn" onclick="toggle_period(this.value)" value="2" data-toggled="true" class="bg-slate-800 p-3 text-white transition ease-in-out" type="submit">Period 2</button>
-                </div>
-            </div>
+            <table id="pop-up-row" class="table hidden absolute px-20 bg-slate-600 rounded-t-md rounded-b-none overflow-hidden w-full shadow-md">
+                <thead id="my-course-head-1">
+                    <tr class="text-white text-lg text-center">
+                        <td>Välj</td>
+                        <td>Kurskod</td>
+                        <td class="text-left">Kursnamn</td>
+                        <td>Hp</td>
+                        <td>Block</td>
+                        <td>Nivå</td>
+                        <td>Vof</td>
+                        <td>Detaljer</td>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <tr style="visibility:collapse;" class="invisible">
+                        <td>Välj</td>
+                        <td>Kurskod</td>
+                        <td class="text-left w-2/5">Kursnamn</td>
+                        <td>Hp</td>
+                        <td>Block</td>
+                        <td>Nivå</td>
+                        <td>Vof</td>
+                        <td>Detaljer</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="flex">
             <p class="text-2xl font-bold">Profil Vald: &nbsp</p>
             <p class="text-2xl"> {{ profile_name }} </p>
         </div>
-        <div class="flex flex-col">
+        <div id="tables-container" class="flex flex-col">
             {% for period, schedulers in period_scheduler.items %}
             <div id="period-{{period}}">
                 <table class="table rounded-md overflow-hidden mb-10">

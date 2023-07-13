@@ -1,3 +1,5 @@
+var header;
+var sticky;
 $(document).ready(function () {
     var programs = JSON.parse($("#programs").text());
     const semester = $("#chosen-term").val();
@@ -10,8 +12,36 @@ $(document).ready(function () {
         }
     });
 
+    home = document.querySelector("#home-container");
+    home.onscroll = function() {myFunction(home)};
+
     load_chosen_courses(semester);
 });
+
+
+function myFunction(home) {
+    header = document.querySelector("#pickable-courses");
+    sticky = header.getBoundingClientRect().top;
+    floatingRow = document.querySelector("#pop-up-row");
+    table = document.querySelector("#tables-container");
+
+    console.log(table.getBoundingClientRect().y)
+
+    if (table.getBoundingClientRect().y > 95) {
+        floatingRow.classList.add("hidden")
+        }
+    if (window.scrollY == sticky) {
+        if (table.getBoundingClientRect().y < 80) {
+            floatingRow.classList.remove("hidden")
+        }
+
+        header.classList.add("bg-yellow-accent");
+        
+    } else {
+        header.classList.remove("bg-yellow-accent");
+
+        }
+    }
 
 function check_course_boxes(periods) {
     for (var i = 1; i < 3; i ++) {
@@ -22,6 +52,8 @@ function check_course_boxes(periods) {
         });
     }
 }
+
+
 
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
