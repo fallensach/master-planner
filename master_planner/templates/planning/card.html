@@ -2,9 +2,6 @@
 <button id="{{ card_id }}" onclick="load_chosen_courses(this.value); highlight_semester_card(this.id, this.value); highlight_semester(this.value); get_courses_semester(this.value)" value="{{ termin }}" class="{{ highlight }} w-full transition ease-in hover:bg-yellow-300/75 cursor-pointer max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
     <div class="flex items-center justify-between mb-4">
         <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Termin {{ termin }}</h5>
-        <a href="#" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
-            Visa mer
-        </a>
    </div>
 
    <div class="flow-root">
@@ -48,7 +45,7 @@
                         </p>
                     </div>
                     <div class="inline-flex flex-col items-center text-base font-semibold text-gray-900 dark:text-white">
-                        Hp
+                        <p class="font-medium">Hp</p>
                         <p id="{{ advanced_hp_id }}" class="text-sm text-gray-600 truncate dark:text-gray-400">
                             0
                         </p>

@@ -1,3 +1,5 @@
+var header;
+var sticky;
 $(document).ready(function () {
     var programs = JSON.parse($("#programs").text());
     const semester = $("#chosen-term").val();
@@ -10,8 +12,48 @@ $(document).ready(function () {
         }
     });
 
+    home = document.querySelector("#home-container");
+    home.onscroll = function() {myFunction(home)};
+
     load_chosen_courses(semester);
 });
+
+
+function myFunction(home) {
+    header = document.querySelector("#pickable-courses");
+    sticky = header.getBoundingClientRect().top;
+    floatingRow = document.querySelector("#pop-up-row");
+    table = document.querySelector("#tables-container");
+
+    console.log(table.getBoundingClientRect().y)
+
+    if (table.getBoundingClientRect().y > 95) {
+        floatingRow.classList.add("hidden")
+        }
+    if (window.scrollY == sticky) {
+        if (table.getBoundingClientRect().y < 80) {
+            floatingRow.classList.remove("hidden")
+        }
+
+        header.classList.add("bg-yellow-accent");
+        
+    } else {
+        header.classList.remove("bg-yellow-accent");
+
+        }
+    }
+
+function check_course_boxes(periods) {
+    for (var i = 1; i < 3; i ++) {
+        var period = periods["period_" + i]["courses"];
+        period.forEach(scheduler => {
+            $("#check-" + scheduler["scheduler_id"]).prop("checked", true); 
+            
+        });
+    }
+}
+
+
 
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
@@ -41,8 +83,36 @@ function load_chosen_courses(semester) {
             add_course_table(term_p_1, my_courses_1, 1);
             add_course_table(term_p_2, my_courses_2, 2);
             load_term_hp(picked_courses);
+            check_course_boxes(picked_courses["semester_" + semester]["periods"])
+            load_total_term_card(picked_courses)
         }
     });
+}
+
+function load_total_term_card(semesters_hp) {
+    total_hp = $("#semesters-total-hp");
+    total_hp_advanced = $("#semesters-total-hp-advanced");
+    total_hp_basic = $("#semesters-total-hp-basic");
+
+    for (var i = 7; i < 10; i++) {
+        semester_hp = semesters_hp["semester_" + i]["hp"]["total"]
+        check_mark = $("#semester-" + i + "-check");
+        check_tooltip = $("#tooltip-term-" + i);
+        $("#semester-" + i + "-total-hp").text(semester_hp)
+        if (semester_hp < 30) {
+            var needed_hp = 30 - semester_hp;
+            check_mark.addClass("fill-red-500")
+            check_tooltip.text("Du behöver minst 30 hp per termin. Du behöver " + needed_hp + " hp till");
+        } else {
+            check_mark.addClass("fill-green-500");
+            check_mark.removeClass("fill-red-500");
+            check_tooltip.text("Minst 30 hp uppnådd");
+        }
+    }
+
+    total_hp.text(semesters_hp["hp"]["total"]);
+    total_hp_advanced.text(semesters_hp["hp"]["a_level"]);
+    total_hp_basic.text(semesters_hp["hp"]["g_level"]);
 }
 
 function load_term_hp(picked_courses) {
@@ -87,7 +157,10 @@ function add_course_table(courses, my_courses, period) {
             class: "bg-white font-bold transition ease hover:bg-slate-200",
             append: [
                     $("<td>", {text: course_data["course"]["course_code"], class: "text-center font-mono"}),
-                    $("<td>", {text: course_data["course"]["course_name"], class: "w-2/5"}),
+                    $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + course_data["course"]["course_code"], 
+                                                                 text: course_data["course"]["course_name"],
+                                                                 class: "hover:text-yellow-500 transition ease"
+                                                                })),
                     $("<td>", {text: course_data["course"]["hp"], class: "text-center"}),
                     $("<td>", {text: course_data["schedule"]["block"], class: "text-center"}),
                     $("<td>", {text: course_data["course"]["level"], class: "text-center"}),
@@ -223,14 +296,13 @@ function add_course_db(scheduler_id) {
     const url = "/api/account/choice";
     const semester = $("#chosen-term").val();
 
-
     $.ajax({
         type: "POST",
         url: url,
         data: payload,
         success: function (response) {
-            console.log(response);
             load_chosen_courses(semester);
+            $("#check-" + response["scheduler_id"]).prop("checked", true);
         }
     });
 }
@@ -245,8 +317,9 @@ function delete_course_db(scheduler_id) {
         url: url,
         data: payload,
         success: function (response) {
-            console.log(response);
             load_chosen_courses(semester);
+            $("#check-" + response["scheduler_id"]).prop("checked", false);
+            $("#check-" + scheduler_id).prop("checked", false);
         }
     });
 }
@@ -261,6 +334,7 @@ function get_courses_semester(semester) {
             highlight_semester(semester); 
             replace_period_table(1, semester_data);
             replace_period_table(2, semester_data);
+            load_chosen_courses(semester)
         }
     });
 }
@@ -274,7 +348,11 @@ function replace_period_table(period, semester_data) {
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-center font-mono"}),
-            $("<td>", {text: value["course"]["course_name"], class: "w-2/5"}),
+            $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + value["course"]["course_code"], 
+                                                         text: value["course"]["course_name"],
+                                                         class: "hover:text-yellow-500 transition ease"
+                                                        
+                                                        })),
             $("<td>", {text: value["course"]["hp"], class: "text-center"}),
             $("<td>", {text: value["schedule"]["block"], class: "text-center"}),
             $("<td>", {text: value["course"]["level"], class: "text-center"}),
@@ -399,7 +477,6 @@ function highlight_semester_card(card_id, semester) {
     const term_9_card = $("#semester-9-card");
     const highlight_card = $("#" + card_id);
     $("#chosen-term").val(semester);
-
 
     var cards = [term_7_card, term_8_card, term_9_card];
 
