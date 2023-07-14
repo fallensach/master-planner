@@ -100,8 +100,9 @@ function load_total_term_card(semesters_hp) {
         check_tooltip = $("#tooltip-term-" + i);
         $("#semester-" + i + "-total-hp").text(semester_hp)
         if (semester_hp < 30) {
+            var needed_hp = 30 - semester_hp;
             check_mark.addClass("fill-red-500")
-            check_tooltip.text("Du behöver minst 30 hp per termin");
+            check_tooltip.text("Du behöver minst 30 hp per termin. Du behöver " + needed_hp + " hp till");
         } else {
             check_mark.addClass("fill-green-500");
             check_mark.removeClass("fill-red-500");
