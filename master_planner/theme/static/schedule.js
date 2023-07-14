@@ -1,6 +1,9 @@
+
 var header;
 var sticky;
-$(document).ready(function () {
+var all_courses;
+
+$(document).ready(async function () {
     var programs = JSON.parse($("#programs").text());
     const semester = $("#chosen-term").val();
     $("#id_program").autocomplete({
@@ -14,8 +17,9 @@ $(document).ready(function () {
 
     home = document.querySelector("#home-container");
     home.onscroll = function() {myFunction(home)};
-
-    load_chosen_courses(semester);
+    get_courses_semester(semester)
+    await load_chosen_courses(semester);
+    console.log("finished loading");
 });
 
 
@@ -24,8 +28,6 @@ function myFunction(home) {
     sticky = header.getBoundingClientRect().top;
     floatingRow = document.querySelector("#pop-up-row");
     table = document.querySelector("#tables-container");
-
-    console.log(table.getBoundingClientRect().y)
 
     if (table.getBoundingClientRect().y > 95) {
         floatingRow.classList.add("hidden")
@@ -53,8 +55,6 @@ function check_course_boxes(periods) {
     }
 }
 
-
-
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
 
@@ -71,7 +71,6 @@ function load_chosen_courses(semester) {
     const my_courses_1 = $("#my-courses-1");
     const my_courses_2 = $("#my-courses-2");
     const url = "/api/account/choices";
-
     $.ajax({
         type: "GET",
         url: url,
@@ -324,19 +323,56 @@ function delete_course_db(scheduler_id) {
     });
 }
 
-function get_courses_semester(semester) {
+function sort_courses(tag, id) {
+    var semester = $("#chosen-term").val();
+    th = $("#" + id);
+    th.data("ascend", !th.data("ascend"));
+
+    for (var i = 1; i < 3; i++) {
+        var sorted_courses = Object.keys(all_courses["period_" + i])
+        .map(function(key) {
+            return all_courses["period_" + i][key];
+        })
+        .sort(function(a, b) {
+            if (tag == "block") {
+                return a.schedule[tag].localeCompare(b.schedule[tag]);
+            }
+            return a.course[tag].localeCompare(b.course[tag]);
+        });
+
+        if (th.data("ascend")) {
+            sorted_courses.reverse();
+        } 
+
+        all_courses["period_" + i] = sorted_courses
+    }
+
+    get_courses_semester(semester, true)
+}
+
+function get_courses_semester(semester, sort=false) {
     profile_code = $("#profile-code").val();
-    const url = "/api/courses/" + profile_code + "/" + semester;
-    $.ajax({
-        type: "GET",
-        url: url,
-        success: function (semester_data) {
-            highlight_semester(semester); 
-            replace_period_table(1, semester_data);
-            replace_period_table(2, semester_data);
-            load_chosen_courses(semester)
-        }
-    });
+    if (sort) {
+        replace_period_table(1, all_courses);
+        replace_period_table(2, all_courses);
+        load_chosen_courses(semester);
+
+    } else {
+        const url = "/api/courses/" + profile_code + "/" + semester;
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (semester_data) {
+                all_courses = semester_data;
+                highlight_semester(semester); 
+                $("#chosen-term").val(semester);
+                replace_period_table(1, semester_data);
+                replace_period_table(2, semester_data);
+                load_chosen_courses(semester)
+            }
+        });
+    }
+
 }
 
 function replace_period_table(period, semester_data) {
