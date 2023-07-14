@@ -9,23 +9,27 @@ from .schemas import *
 
 api = NinjaAPI()
 
-@api.get('get_schedule/{schedule_id}', response=ScheduleSchema)
-def get_schedule(request, schedule_id):
-    schedule = Schedule.objects.get(schedule_id=schedule_id)
-    return schedule
+# @api.get('get_schedule/{schedule_id}', response=ScheduleSchema)
+# def get_schedule(request, schedule_id):
+#     schedule = Schedule.objects.get(schedule_id=schedule_id)
+#     return schedule
 
-@api.get('account/overview')
+@api.get('account/overview', response={200: NoContent, 401: Error})
 def overview(request):
-    pass
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
+    return 200, {"message": "placeholder"}
 
-@api.post('account/choice', response={200: LinkedScheduler, 404: Error})
+@api.post('account/choice', url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
 def choice(request, data: ChoiceSchema):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
     account = Account.objects.get(user=request.user)
     
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": f"Could not find scheduler object: {data.scheduler_id} in scheduler table"}
+        return 406, {"message": f"Could not find scheduler object in scheduler table"}
 
     account.choices.add(scheduler)
     account.save()
@@ -38,14 +42,16 @@ def choice(request, data: ChoiceSchema):
     return 200, {"scheduler_id": -1}
     
 
-@api.delete('account/choice', response={200: LinkedScheduler, 404: Error})
+@api.delete('account/choice', url_name="delete_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
 def choice(request, data: ChoiceSchema):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
     account = Account.objects.get(user=request.user)
     
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
     except Scheduler.DoesNotExist:
-        return 404, {"message": f"Could not find scheduler object: {data.scheduler_id} in scheduler table"}
+        return 406, {"message": f"Could not find scheduler object in scheduler table"}
     
     account.choices.remove(scheduler)
     account.save()
@@ -57,8 +63,10 @@ def choice(request, data: ChoiceSchema):
                     
     return 200, {"scheduler_id": -1}
     
-@api.get('account/choices', response=Semesters)
+@api.get('account/choices', response={200: Semesters, 401: Error})
 def choice(request):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
     account = Account.objects.get(user=request.user)
     course_choices = {}
     total_hp = 0
@@ -100,19 +108,21 @@ def choice(request):
                             "a_level": level_hp["a_level"],
                             "g_level": level_hp["g_level"]
                             }
-    return course_choices
+    return 200, course_choices
 
-@api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})
-def get_course(request, scheduler_id):
-    try:
-        course_instance = Scheduler.objects.get(scheduler_id=scheduler_id)
-    except Scheduler.DoesNotExist:
-        return 404, {"message": f"Could not find scheduler object: {scheduler_id} in scheduler table"}
+# @api.get('get_course/{scheduler_id}', response={200: SchedulerSchema, 404: Error})
+# def get_course(request, scheduler_id):
+#     try:
+#         course_instance = Scheduler.objects.get(scheduler_id=scheduler_id)
+#     except Scheduler.DoesNotExist:
+#         return 404, {"message": f"Could not find scheduler object: {scheduler_id} in scheduler table"}
+#
+#     return 200, course_instance
 
-    return 200, course_instance
-
-@api.get('courses/{profile}/{semester}', response=SemesterCourses)
+@api.get('courses/{profile}/{semester}', response={200: SemesterCourses, 401: Error})
 def get_semester_courses(request, profile, semester):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
     program = Account.objects.get(user=request.user).program
     
 
@@ -128,13 +138,17 @@ def get_semester_courses(request, profile, semester):
     data = {"period_1": list(period1),
             "period_2": list(period2)}
     
-    return data
+    return 200, data
 
 
 @api.get('get_extra_course_info/{course_code}')
 def get_extra_course_info(request, course_code):
     extra_info = fetch_course_info(course_code)
+    # TODO when detailed course infor stored in db, fix error handling and enable tests
+    # try:
     course = Course.objects.get(course_code=course_code)
+    # except Course.DoesNotExist:
+        # return 406, {"message": "No course with that course code"}
     extra_info["course_code"] = course.course_code
     extra_info["course_name"] = course.course_name
     """    

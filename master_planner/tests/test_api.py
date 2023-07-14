@@ -1,7 +1,8 @@
-
+from django.urls import reverse
 from django.test import TestCase
 from planning.models import Scheduler, Schedule, Course, Program, Profile, MainField, Examination, register_courses, register_programs, register_profiles
 from accounts.models import User, Account
+import json
 
 
 class TestGetters(TestCase):
@@ -46,9 +47,9 @@ class TestGetters(TestCase):
                                         "period" : 1,
                                         "semester": 7
                                         }])
-        user = Account.objects.get(user__username="test_user")
-        user.program = programs[0]
-        user.save()
+        account = Account.objects.get(user__username="test_user")
+        account.program = programs[0]
+        account.save()
 
         self.client.login(username="test_user", password="123")
 
@@ -97,46 +98,6 @@ class TestGetters(TestCase):
         response = self.client.get('/api/courses/AAAA/7')
         
         self.assertEqual(response.status_code, 401)
-    
-    # def test_course_details(self):
-    #     course = Course.objects.get(course_code="AAAA")
-    #     examination1 = Examination.objects.create(code="lab1",
-    #                                               name="labb",
-    #                                               hp="2",
-    #                                               grading="u, g")
-    #     examination2 = Examination.objects.create(code="lab2",
-    #                                               name="labb",
-    #                                               hp="2",
-    #                                               grading="u, g")
-    #     main_field1 = MainField.objects.create(field_name="Matematik")
-    #     main_field2 = MainField.objects.create(field_name="nåttannat")
-    #
-    #     examination1.course = course
-    #     examination2.course = course
-    #     course.main_fields.add(main_field1)
-    #     course.main_fields.add(main_field2)
-    #     examination1.save()
-    #     examination2.save()
-    #     course.save()
-    #
-    #     response = self.client.get('/api/get_extra_course_info/AAAA')
-    #     self.assertEqual(response.status_code, 200)
-    #
-    #     main_field_data = response.json().get("main_field")
-    #     self.assertEqual(len(main_field), 2)
-    #
-    #     examination_data = response.json().get("examination")
-    #     self.assertEqual(len(examination_data), 2)
-    #
-    #     self.assertEqual(examination_data[0]["code"], "lab1")
-    #     self.assertEqual(examination_data[0]["name"], "labb")
-    #     self.assertEqual(examination_data[0]["hp"], "2")
-    #     self.assertEqual(examination_data[0]["grading"], "u, g")
-    #     
-    # def test_course_details_wrong_course_code(self):
-    #
-    #     response = self.client.get('/api/get_extra_course_info/WWWW')
-    #     self.assertEqual(response.status_code, 400)
 
     def test_choices(self):
         response = self.client.get('/api/account/choices')
@@ -146,7 +107,7 @@ class TestGetters(TestCase):
     def test_choices_not_auth(self):
         self.client.logout()
         response = self.client.get('/api/account/choices')
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
     def test_overview(self):
         response = self.client.get('/api/account/choices')
@@ -156,9 +117,253 @@ class TestGetters(TestCase):
     def test_overview_not_auth(self):
         self.client.logout()
         response = self.client.get('/api/account/choices')
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
+
+class TestPosters(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create_user(username="test_user",  
+                                        password="123",
+                                        is_superuser=True,
+                                        is_staff=True)
+        account = Account.objects.create(user=user)
+        
+    def setUp(self):
+        account = Account.objects.get(user__username="test_user")
+        account.save()
+
+        self.client.login(username="test_user", password="123")
+
+    def test_choice(self):
+        program_data = [("6CMJU", 'Civilingenjörsprogram i mjukvaruteknik')]
+        profile_data = [("profile_1", "AAAA")]
+        programs = register_programs(program_data)
+        
+        profiles = register_profiles(programs[0], profile_data[:2])
+        
+        register_courses(programs[0], [{"course_code": "AAAA",
+                                        "course_name": "test_course_1",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        },
+                                       {"course_code": "BBBB",
+                                        "course_name": "test_course_2",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        }])
+        account = Account.objects.get(user__username="test_user")
+        account.program = programs[0]
+        account.save()
+        course_instance = Scheduler.objects.create(course=Course.objects.get(course_code="AAAA"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7))
+        course_instance.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance.save()
+        
+        data = {"scheduler_id": course_instance.scheduler_id}
+        response = self.client.post(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("scheduler_id"), -1)
+        self.assertEqual(account.choices.count(), 1)
+
+    def test_choice_linked(self):
+        program_data = [("6CMJU", 'Civilingenjörsprogram i mjukvaruteknik')]
+        profile_data = [("profile_1", "AAAA")]
+        programs = register_programs(program_data)
+        
+        profiles = register_profiles(programs[0], profile_data[:2])
+        
+        register_courses(programs[0], [{"course_code": "AAAA",
+                                        "course_name": "test_course_1",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        },
+                                       {"course_code": "BBBB",
+                                        "course_name": "test_course_2",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        }])
+        account = Account.objects.get(user__username="test_user")
+        account.program = programs[0]
+        account.save()
+        course_instance = Scheduler.objects.create(course=Course.objects.get(course_code="AAAA"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7))
+        course_instance.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance.save()
+        course_instance2 = Scheduler.objects.create(course=Course.objects.get(course_code="BBBB"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7),
+                                                   linked=course_instance)
+        course_instance2.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance2.save()
+        
+        data = {"scheduler_id": course_instance2.scheduler_id}
+        response = self.client.post(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("scheduler_id"), course_instance.scheduler_id)
+        self.assertEqual(account.choices.count(), 2)
+
+    def test_choice_not_auth(self):
+        self.client.logout()
+        data = {"scheduler_id": 1}
+        response = self.client.post(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_choice_wrong_id(self):
+        data = {"scheduler_id": 1}
+        response = self.client.post(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 406)
+
+class TestDeleters(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create_user(username="test_user",  
+                                        password="123",
+                                        is_superuser=True,
+                                        is_staff=True)
+        account = Account.objects.create(user=user)
+        
+    def setUp(self):
+        account = Account.objects.get(user__username="test_user")
+        account.save()
+
+        self.client.login(username="test_user", password="123")
+
+    def test_choice(self):
+        program_data = [("6CMJU", 'Civilingenjörsprogram i mjukvaruteknik')]
+        profile_data = [("profile_1", "AAAA")]
+        programs = register_programs(program_data)
+        
+        profiles = register_profiles(programs[0], profile_data[:2])
+        
+        register_courses(programs[0], [{"course_code": "AAAA",
+                                        "course_name": "test_course_1",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        },
+                                       {"course_code": "BBBB",
+                                        "course_name": "test_course_2",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        }])
+        account = Account.objects.get(user__username="test_user")
+        account.program = programs[0]
+        account.save()
+        course_instance = Scheduler.objects.create(course=Course.objects.get(course_code="AAAA"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7))
+        course_instance.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance.save()
+        account.choices.add(course_instance)
+        account.save()
 
 
+        data = {"scheduler_id": course_instance.scheduler_id}
+        response = self.client.delete(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("scheduler_id"), -1)
+        self.assertEqual(account.choices.count(), 0)
+
+    def test_choice_linked(self):
+        program_data = [("6CMJU", 'Civilingenjörsprogram i mjukvaruteknik')]
+        profile_data = [("profile_1", "AAAA")]
+        programs = register_programs(program_data)
+        
+        profiles = register_profiles(programs[0], profile_data[:2])
+        
+        register_courses(programs[0], [{"course_code": "AAAA",
+                                        "course_name": "test_course_1",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        },
+                                       {"course_code": "BBBB",
+                                        "course_name": "test_course_2",
+                                        "hp": "6",
+                                        "level": "A1X",
+                                        "block": 4,
+                                        "vof": "v",
+                                        "profile_code": "AAAA",
+                                        "period" : 1,
+                                        "semester": 7
+                                        }])
+        account = Account.objects.get(user__username="test_user")
+        account.program = programs[0]
+        account.save()
+        course_instance = Scheduler.objects.create(course=Course.objects.get(course_code="AAAA"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7))
+        course_instance.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance.save()
+        course_instance2 = Scheduler.objects.create(course=Course.objects.get(course_code="BBBB"),
+                                                   program=programs[0],
+                                                   schedule=Schedule.objects.get(semester=7),
+                                                   linked=course_instance)
+        course_instance2.profiles.add(Profile.objects.get(profile_code="AAAA"))
+        course_instance2.save()
+        account.choices.add(course_instance)
+        account.choices.add(course_instance2)
+        account.save()
+        
+        data = {"scheduler_id": course_instance2.scheduler_id}
+        response = self.client.delete(reverse('api-1.0.0:post_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("scheduler_id"), course_instance.scheduler_id)
+        self.assertEqual(account.choices.count(), 0)
+
+    def test_choices_not_auth(self):
+        self.client.logout()
+        data = {"scheduler_id": 1}
+        response = self.client.delete(reverse('api-1.0.0:delete_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_choices_wrong_id(self):
+        data = {"scheduler_id": 100000000}
+        response = self.client.delete(reverse('api-1.0.0:delete_choice'), data=data, content_type='application/json')
+
+        self.assertEqual(response.status_code, 406)
 
 
 
