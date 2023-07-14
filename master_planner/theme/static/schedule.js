@@ -84,8 +84,34 @@ function load_chosen_courses(semester) {
             add_course_table(term_p_2, my_courses_2, 2);
             load_term_hp(picked_courses);
             check_course_boxes(picked_courses["semester_" + semester]["periods"])
+            load_total_term_card(picked_courses)
         }
     });
+}
+
+function load_total_term_card(semesters_hp) {
+    total_hp = $("#semesters-total-hp");
+    total_hp_advanced = $("#semesters-total-hp-advanced");
+    total_hp_basic = $("#semesters-total-hp-basic");
+
+    for (var i = 7; i < 10; i++) {
+        semester_hp = semesters_hp["semester_" + i]["hp"]["total"]
+        check_mark = $("#semester-" + i + "-check");
+        check_tooltip = $("#tooltip-term-" + i);
+        $("#semester-" + i + "-total-hp").text(semester_hp)
+        if (semester_hp < 30) {
+            check_mark.addClass("fill-red-500")
+            check_tooltip.text("Du behöver minst 30 hp per termin");
+        } else {
+            check_mark.addClass("fill-green-500");
+            check_mark.removeClass("fill-red-500");
+            check_tooltip.text("Minst 30 hp uppnådd");
+        }
+    }
+
+    total_hp.text(semesters_hp["hp"]["total"]);
+    total_hp_advanced.text(semesters_hp["hp"]["a_level"]);
+    total_hp_basic.text(semesters_hp["hp"]["g_level"]);
 }
 
 function load_term_hp(picked_courses) {
