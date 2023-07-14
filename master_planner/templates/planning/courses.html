@@ -1,6 +1,7 @@
 {% block courses %}
 <input id="profile-code" value="{{ profile_code }}" class="hidden">
-    <div id="courses-main-container" class="w-full space-y-3 px-48 bg-yellow-accent">
+<div id="courses-main-container" class="flex w-full space-x-5 px-32 bg-yellow-accent">
+    <div class="w-full">
         <p class="text-4xl font-bold"> {{ program_name }} </p>
         <div id="pickable-courses" class="sticky top-0 transition ease z-10">
             <div class="flex justify-between items-end">
@@ -104,10 +105,10 @@
             <div id="period-1">
                 <table id="courses-period-1" class="table rounded-t-md rounded-b-none overflow-hidden">
                 <thead class="bg-slate-600 text-white text-lg">
-                    <tr class="text-center">
+                    <tr class="text-">
                         <th>Välj</th>
                         <th id="kurskod" data-ascend=true onclick="sort_courses('course_code', this.id)">
-                            <div class="flex items-center ml-1 w-max cursor-pointer">
+                            <div class="flex items-center w-max cursor-pointer">
                                 Kurskod
                                 <span style="font-size:20px;" class="material-symbols-outlined ml-1">
                                     swap_vert
@@ -165,16 +166,59 @@
             <div id="period-2">
                 <table id="courses-period-2" class="table rounded-b-md rounded-t-none overflow-hidden mb-10">
                 <thead>
-                    <tr style="visibility:collapse;" class="text-white text-lg text-center">
-                        <td>Välj</td>
-                        <td>Kurskod</td>
-                        <td class="text-left">Kursnamn</td>
-                        <td>Hp</td>
-                        <td>Block</td>
-                        <td>Nivå</td>
-                        <td>Vof</td>
-                        <td>Detaljer</td>
-                    </tr>
+                    <tr class="text-lg " style="visibility:collapse" >
+                    <th>Välj</th>
+                    <th id="kurskod" data-ascend=true onclick="sort_courses('course_code', this.id)">
+                        <div class="flex items-center w-max cursor-pointer">
+                            Kurskod
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th id="kursnamn" class="text-left" data-ascend=true onclick="sort_courses('course_name', this.id)">
+                        <div class="flex items-center cursor-pointer w-max">
+                            Kursnamn
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th id="hp" data-ascend=true onclick="sort_courses('hp', this.id)" >
+                        <div class="flex items-center space-x-4 cursor-pointer">
+                            Hp
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th id="block" data-ascend=true onclick="sort_courses('block', this.id)" >
+                        <div class="flex items-center space-x-4 cursor-pointer">
+                            Block
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th id="level" data-ascend=true onclick="sort_courses('level', this.id)" >
+                        <div class="flex items-center space-x-4 cursor-pointer">
+                            Nivå
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th id="vof" data-ascend=true onclick="sort_courses('vof', this.id)" >
+                        <div class="flex items-center space-x-4 cursor-pointer">
+                            Vof
+                            <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                swap_vert
+                            </span>
+                        </div>
+                    </th>
+                    <th>
+                        Detaljer
+                    </th>
                     <tr>
                         <td class=" px-10 py-3 text-xl font-bold text-black shadow-md bg-slate-100" colspan="8"> Period 2 </td>
                     </tr>
