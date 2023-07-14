@@ -27,16 +27,58 @@
                 </div>
             </div>
             <table id="pop-up-row" class="table hidden absolute px-20 bg-slate-600 rounded-t-md rounded-b-none overflow-hidden w-full shadow-md">
-                <thead id="my-course-head-1">
+                <thead id="big-ass-head">
                     <tr class="text-white text-lg text-center">
-                        <td>Välj</td>
-                        <td>Kurskod</td>
-                        <td class="text-left">Kursnamn</td>
-                        <td>Hp</td>
-                        <td>Block</td>
-                        <td>Nivå</td>
-                        <td>Vof</td>
-                        <td>Detaljer</td>
+                        <th>Välj</th>
+                        <th id="kurskod" data-ascend=true onclick="sort_courses('course_code', this.id)">
+                            <div class="flex items-center ml-1 w-max cursor-pointer">
+                                Kurskod
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="kursnamn" class="text-left" data-ascend=true onclick="sort_courses('course_name', this.id)">
+                            <div class="flex items-center cursor-pointer w-max">
+                                Kursnamn
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="hp" data-ascend=true onclick="sort_courses('hp', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Hp
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="block" data-ascend=true onclick="sort_courses('block', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Block
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="level" data-ascend=true onclick="sort_courses('level', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Nivå
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="vof" data-ascend=true onclick="sort_courses('vof', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Vof
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th>Detaljer</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm">
@@ -53,92 +95,93 @@
                 </tbody>
             </table>
         </div>
+        
         <div class="flex">
             <p class="text-2xl font-bold">Profil Vald: &nbsp</p>
             <p class="text-2xl"> {{ profile_name }} </p>
         </div>
         <div id="tables-container" class="flex flex-col">
-            {% for period, schedulers in period_scheduler.items %}
-            <div id="period-{{period}}">
-                <table class="table rounded-md overflow-hidden mb-10">
+            <div id="period-1">
+                <table id="courses-period-1" class="table rounded-t-md rounded-b-none overflow-hidden">
                 <thead class="bg-slate-600 text-white text-lg">
-                    <tr>
-                        <th class="text-center">Välj</th>
-                    {% for tag, x in course_tags.items %}
-                        {% if tag != "Kursnamn" %}
-                            <th class="text-center">
-                                {{ tag }}
-                            </th>
-                        {% else %}
-                            <th>
-                                {{ tag }}
-                            </th>
-                        {% endif %}
-
-                    {% endfor %}
+                    <tr class="text-center">
+                        <th>Välj</th>
+                        <th id="kurskod" data-ascend=true onclick="sort_courses('course_code', this.id)">
+                            <div class="flex items-center ml-1 w-max cursor-pointer">
+                                Kurskod
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="kursnamn" class="text-left" data-ascend=true onclick="sort_courses('course_name', this.id)">
+                            <div class="flex items-center cursor-pointer w-max">
+                                Kursnamn
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="hp" data-ascend=true onclick="sort_courses('hp', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Hp
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="block" data-ascend=true onclick="sort_courses('block', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Block
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="level" data-ascend=true onclick="sort_courses('level', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Nivå
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th id="vof" data-ascend=true onclick="sort_courses('vof', this.id)" >
+                            <div class="flex items-center space-x-4 cursor-pointer">
+                                Vof
+                                <span style="font-size:20px;" class="material-symbols-outlined ml-1">
+                                    swap_vert
+                                </span>
+                            </div>
+                        </th>
+                        <th>Detaljer</th>
                     </tr>
-                    <tr class="bg-slate-100 text-black">
-                        <th colspan="8"> Period {{period}} </th>
-                    </tr>
-
                 </thead>
-                    <tbody id="table-{{period}}" class="text-sm font-bold" >
-                        {% for scheduler in schedulers %}
-                        <tr class="bg-white transition ease-in-out hover:bg-slate-200 text-center font-bold text-sm">
-                            <td class="flex justify-center">
-                                <input id="check-{{scheduler.scheduler_id}}" type="checkbox" onclick="add_course(this.value)" class="checkbox flex checkbox-warning transition ease-in-out border-none bg-slate-300 hover:bg-slate-500 focus:ring-transparent" value="{{scheduler.scheduler_id}}">
-                            </td>
-                        
-                            <td class="font-mono"> {{scheduler.course.course_code}} </td>
-                            <td class="text-left w-2/5"> 
-                                <a href="https://studieinfo.liu.se/kurs/{{ scheduler.course.course_code }}" class="hover:text-yellow-500 transition ease">
-                                    {{scheduler.course.course_name}} 
-                                </a>
-                            </td>
-                            <td> {{scheduler.course.hp}} </td>
-                            <td> {{scheduler.schedule.block}} </td>
-                            <td> {{scheduler.course.level}} </td>
-                            <td> {{scheduler.course.vof}} </td>
-
-                            <td class="flex justify-center">
-                                <label class="swap bg-slate-300 rounded-md transition ease-in-out drop-shadow-sm hover:bg-yellow-500 ">
-                                    <input class="hidden" type="checkbox" onclick="load_course_info(this.name, this.value)" value="{{scheduler.scheduler_id}}" name="{{scheduler.course.course_code}}" id="scheduler-{{scheduler.scheduler_id}}"/>
-                                    <span class="material-symbols-outlined swap-on rounded-lg bg-yellow-500 ">
-                                        keyboard_arrow_up
-                                    </span>
-                                
-                                    <span class="material-symbols-outlined swap-off ">
-                                        expand_more
-                                    </span>
-                                </label>
-                            </td>
-                        </tr>
-                            <tr id="dropdown-{{scheduler.course.course_code}}">
-                                <td class="overflow-hidden p-0" colspan="8" id="insert-{{scheduler.course.course_code}}">
-                                    <div id="course-info-container-{{scheduler.scheduler_id}}" class="hidden overflow-hidden">
-                                        <div class="flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg">
-                                            <span id="courses-loader-{{scheduler.scheduler_id}}" class"hidden">
-                                                <button class="btn">
-                                                    <span class="loading loading-spinner"></span>
-                                                        Laddar
-                                                    </button>
-                                            </span>
-                                            <div id="info-container-{{scheduler.scheduler_id}}" class="flex flex-col p-5 border-r-2 w-1/2 border-black/25">
-                                            </div>
-
-                                            <div id="examination-container-{{scheduler.scheduler_id}}" class="flex flex-col p-5 space-y-2">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-
+                    <tbody id="table-1" class="text-sm font-bold" >
                     </tbody>
                 </table>
             </div>
-            {% endfor %}
-        </div>
+
+            <div id="period-2">
+                <table id="courses-period-2" class="table rounded-b-md rounded-t-none overflow-hidden mb-10">
+                <thead>
+                    <tr style="visibility:collapse;" class="text-white text-lg text-center">
+                        <td>Välj</td>
+                        <td>Kurskod</td>
+                        <td class="text-left">Kursnamn</td>
+                        <td>Hp</td>
+                        <td>Block</td>
+                        <td>Nivå</td>
+                        <td>Vof</td>
+                        <td>Detaljer</td>
+                    </tr>
+                    <tr>
+                        <td class=" px-10 py-3 text-xl font-bold text-black shadow-md bg-slate-100" colspan="8"> Period 2 </td>
+                    </tr>
+                    <tbody id="table-2" class="text-sm font-bold" >
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
