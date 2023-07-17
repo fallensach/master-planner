@@ -10,8 +10,7 @@ class Account(models.Model):
     def __str__(self):
         return str(self.user)
 
-    @property
-    def level_hp(self):
+    def level_hp(self, profile: str=None) -> dict[float]:
         result_dict = {}
 
         for semester in range(7, 10):
@@ -25,7 +24,12 @@ class Account(models.Model):
         result_dict["a_level"] = 0
         result_dict["g_level"] = 0
         
-        for choice in self.choices.all():
+        if not profile:
+            choices = self.choices.all()
+        else:
+            choices = self.choices.filter(profiles=profile)
+
+        for choice in choices:
             schedule = choice.schedule
 
             level = "a_level" if "A" in choice.course.level else "g_level"
@@ -42,11 +46,9 @@ class Account(models.Model):
         
         return result_dict
 
-    @property
     def field_hp(self):
         pass
 
-    @property
     def profile_hp(self):
         pass
 

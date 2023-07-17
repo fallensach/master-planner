@@ -70,7 +70,7 @@ def choice(request):
     account = Account.objects.get(user=request.user)
     course_choices = {}
     total_hp = 0
-    level_hp = account.level_hp
+    level_hp = account.level_hp()
    
     # sum hp for periods and semesters
     for semester in range(7, 10):

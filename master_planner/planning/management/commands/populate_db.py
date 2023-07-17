@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand
 from planning.management.commands.scrappy.program_plan import ProgramPlan
 from planning.management.commands.scrappy.courses import fetch_course_info, fetch_programs
-from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs, register_schedule
+from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs
 from django.contrib.auth.models import User
 from accounts.models import Account 
 from planning.management.commands.scrappy.program_plan import ProgramPlan 
+import threading
 
 
 class Command(BaseCommand):
@@ -95,15 +96,48 @@ class Command(BaseCommand):
                             ('6CDDD', 'Civilingenjörsprogram i datateknik'),
                             ('6CYYY', 'Civilingenjörsprogram i teknisk fysik och elektroteknik')]
         else:
+            print("start to fetch program data")
             program_data = fetch_programs()
-        programs = register_programs(program_data)
+        register_programs(program_data)
         
-        # scrape program data, add courses and profiles
-        for program in programs:
-            prog_scraper = ProgramPlan(program.program_code)
+        course_data = []
+        profile_data = []
 
-            profiles = register_profiles(program, prog_scraper.profiles())
-            register_courses(program, prog_scraper.courses())
+        # scrape program data, add courses and profiles
+        def extract_data(program_code):
+            print(f"extracting course and profile data for {program_code}")
+            prog_scraper = ProgramPlan(program_code)
+            return prog_scraper.courses(), prog_scraper.profiles()
+
+        def extract_data_thread(program_code):
+            courses, profiles = extract_data(program_code)
+            # Acquire a lock before modifying the shared lists
+            with lock:
+                course_data.extend(courses)
+                profile_data.extend(profiles)
+
+           # Create a lock to synchronize access to the shared lists
+        lock = threading.Lock()
+
+        # Create and start 17 threads
+        threads = []
+        for code, name in program_data:
+            thread = threading.Thread(target=extract_data_thread, args=(code,))
+            thread.start()
+            threads.append(thread)
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+       
+        # for program_code, name in program_data:
+        #     print(f"extracting course and profile data for {name}")
+        #     prog_scraper = ProgramPlan(program_code)
+        #     course_data.extend(prog_scraper.courses()) 
+        #     profile_data.extend(prog_scraper.profiles())
+
+        register_profiles(profile_data)
+        register_courses(course_data)
         
 
     def handle(self, *args, **options):
