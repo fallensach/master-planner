@@ -60,19 +60,3 @@ def register_account(username: str, email: str, password: str):
     except IntegrityError:
         return False
     
-def get_user(username: str) -> Account | None:
-    """Retrieves user object from Account based on session.
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        Account | None: Account object or None
-    """
-    try:
-        user = User.objects.get(username=username)
-        #account = Account.objects.get(user=user)
-        return user
-    
-    except IntegrityError:
-        return None

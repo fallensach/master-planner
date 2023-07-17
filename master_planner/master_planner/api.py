@@ -3,7 +3,7 @@ from planning.models import Schedule, Course, Scheduler
 from django.db.models import Sum, F, ExpressionWrapper, Case, When, Value, IntegerField
 from django.db.models.functions import Cast, Replace
 from planning.management.commands.scrappy.courses import fetch_course_info
-from accounts.models import get_user, Account
+from accounts.models import Account
 from typing import List
 from .schemas import *
 

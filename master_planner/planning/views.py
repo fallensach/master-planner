@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import ProgramForm, Profiles
-from planning.models import Program, Profile, Schedule, Scheduler
+from planning.models import Program, Profile, Schedule, Scheduler, get_courses_term
 from accounts.models import Account
 from django.contrib.auth.models import User
 
@@ -24,7 +24,7 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     
-    account = Account.objects.get(user=get_user(request.user.username))
+    account = Account.objects.get(user=request.user)
 
     if account.program is None:
         return redirect("setup")
