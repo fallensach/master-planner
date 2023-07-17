@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import ProgramForm, Profiles
-from planning.models import get_profile_courses, get_program_courses, get_courses_term, Program, Profile, Schedule, Scheduler
-from accounts.models import Account, get_user
+from planning.models import Program, Profile, Schedule, Scheduler
+from accounts.models import Account
 from django.contrib.auth.models import User
 
 
