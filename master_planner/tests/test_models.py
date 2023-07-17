@@ -15,7 +15,10 @@ class TestModelsPlanning(TestCase):
 
         self.profile_data = [("profile_1", "AAAA", "6CMJU"), 
                              ("profile_2", "BBBB", "6CMJU"), 
-                             ("profile_3", "CCCC", "6CMJU")]
+                             ("profile_3", "CCCC", "6CMJU"),
+                             ("profile_1", "AAAA", "6CDDD"), 
+                             ("profile_2", "BBBB", "6CDDD"), 
+                             ("profile_3", "CCCC", "6CDDD")]
         
         self.course_data = [{"course_code": "AAAA",
                              "course_name": "test_course_1",
@@ -60,6 +63,50 @@ class TestModelsPlanning(TestCase):
                              "profile_code": "AAAA",
                              "period" : 2,
                              "semester": 7
+                             },
+                            {"course_code": "AAAA",
+                             "course_name": "test_course_1",
+                             "program_code": "6CDDD",
+                             "hp": "6",
+                             "level": "A1X",
+                             "block": 4,
+                             "vof": "v",
+                             "profile_code": "AAAA",
+                             "period" : 1,
+                             "semester": 7
+                             },
+                            {"course_code": "BBBB",
+                             "program_code": "6CDDD",
+                             "course_name": "test_course_2",
+                             "hp": "6",
+                             "level": "A1X",
+                             "block": 4,
+                             "vof": "v",
+                             "profile_code": "AAAA",
+                             "period" : 1,
+                             "semester": 7
+                             },
+                            {"course_code": "CCCC",
+                             "course_name": "test_course_3",
+                             "program_code": "6CDDD",
+                             "hp": "6*",
+                             "level": "A1X",
+                             "block": 4,
+                             "vof": "v",
+                             "profile_code": "AAAA",
+                             "period" : 1,
+                             "semester": 7
+                             },
+                            {"course_code": "CCCC",
+                             "course_name": "test_course_3",
+                             "hp": "6*",
+                             "program_code": "6CDDD",
+                             "level": "A1X",
+                             "block": 4,
+                             "vof": "v",
+                             "profile_code": "AAAA",
+                             "period" : 2,
+                             "semester": 7
                              }]
         
 
@@ -71,7 +118,7 @@ class TestModelsPlanning(TestCase):
 
         self.assertEqual(programs.count(), program_count)
 
-        # register_programs(self.program_data)
+       # register_programs(self.program_data)
         # 
         # programs = Program.objects.all()
         #
@@ -81,22 +128,15 @@ class TestModelsPlanning(TestCase):
     def test_register_profiles(self):
         self.test_register_programs()
         program = Program.objects.get(program_code="6CMJU") 
-        profile_count = len(self.profile_data)
+        profile_count = 3
         
         # regular insert
         register_profiles(self.profile_data)
         self.assertEqual(program.profiles.count(), profile_count)
-        
-        # # double insert
-        # register_profiles( self.profile_data)
-        # self.assertEqual(program.profiles.count(), profile_count)
-        
+
         # # same profiles for another program
-        # program = Program.objects.get(program_code="6CDDD")
-        # profile_count = len(self.profile_data)
-        # 
-        # register_profiles(program, self.profile_data)
-        # self.assertEqual(Profile.objects.count(), profile_count)
+        program = Program.objects.get(program_code="6CDDD")
+        self.assertEqual(program.profiles.count(), profile_count)
     
     def test_register_courses(self):
         # init

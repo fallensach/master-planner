@@ -65,7 +65,7 @@ class ExaminationSchema:
         model = Examination
         model_fields = []
 class ChoiceSchema(Schema):
-    scheduler_id: int
+    scheduler_id: str
 
 class Error(Schema):
     message: str 

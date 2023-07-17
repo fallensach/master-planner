@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from planning.management.commands.scrappy.program_plan import ProgramPlan
 from typing import Union
 import uuid
@@ -96,7 +96,7 @@ def register_profiles(profile_data: list[tuple[str, str, str]]) -> None:
         program_profile_list.append(program_profile)
         profiles[code] = profile
     
-    Profile.objects.bulk_create(list(profiles.values()))
+    Profile.objects.bulk_create(profiles.values())
     Program.profiles.through.objects.bulk_create(program_profile_list)
 
 def register_courses(data: dict[Union[str, int]]) -> None:
@@ -105,46 +105,59 @@ def register_courses(data: dict[Union[str, int]]) -> None:
     courses = {}
     schedules = {}
     scheduler_profiles_list = []
+    test = {}
+    
     for course_data in data:
-        
-        course = Course(course_code=course_data["course_code"],
-                        course_name=course_data["course_name"],
-                        hp=course_data["hp"],
-                        level=course_data["level"],
-                        vof=course_data["vof"]
-                        )
-
         semester = course_data["semester"]
         period = course_data["period"]
         block = course_data["block"]
-        schedule_id = f"{semester}.{period}.{block}"
 
-        schedule = Schedule(id=schedule_id,
-                            block=block,
-                            semester=semester,
-                            period=period
+        if (course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}") in test:
+            scheduler_id = test[course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}"]
+        else:
+            course = Course(course_code=course_data["course_code"],
+                            course_name=course_data["course_name"],
+                            hp=course_data["hp"],
+                            level=course_data["level"],
+                            vof=course_data["vof"]
                             )
-        courses[course.course_code] = course
-        schedules[schedule.id] = schedule
 
-        # profile = Profile.objects.get(profile_code=course_data["profile_code"])
-        # create instance of course in Scheduler
-        scheduler = Scheduler(course=course,
-                              program_id=course_data["program_code"], # TODO HERE IS THE BUG, should not add everytime
-                              schedule=schedule,
-                              )
+            semester = course_data["semester"]
+            period = course_data["period"]
+            block = course_data["block"]
+            schedule_id = f"{semester}.{period}.{block}"
+
+            schedule = Schedule(id=schedule_id,
+                                block=block,
+                                semester=semester,
+                                period=period
+                                )
+            courses[course.course_code] = course
+            schedules[schedule.id] = schedule
+
+            # profile = Profile.objects.get(profile_code=course_data["profile_code"])
+            # create instance of course in Scheduler
+            scheduler = Scheduler(course=course,
+                                  program_id=course_data["program_code"], # TODO HERE IS THE BUG, should not add everytime
+                                  schedule=schedule
+                                  )
+
+            
+            schedulers.append(scheduler)
+
+            scheduler_id = scheduler.scheduler_id
+            test[scheduler.program_id, scheduler.course_id, scheduler.schedule_id] = scheduler_id
 
         scheduler_profile = Scheduler.profiles.through(profile_id=course_data["profile_code"],
-                                                       scheduler_id=scheduler.scheduler_id)
+                                                       scheduler_id=scheduler_id)
         scheduler_profiles_list.append(scheduler_profile)
         # scheduler.profiles.add( course_data["profile_code"])
-        schedulers.append(scheduler)
     
     Course.objects.bulk_create(courses.values())
     Schedule.objects.bulk_create(schedules.values())                            
     Scheduler.objects.bulk_create(schedulers)
-    Scheduler.profiles.through.objects.bulk_create(scheduler_profiles_list)
-    
+    Scheduler.profiles.through.objects.bulk_create(scheduler_profiles_list, ignore_conflicts=True)
+
         # if "*" in course.hp and schedule.period == 2:
         #     first_part = Scheduler.objects.get(course=course,
         #                                        program=program,

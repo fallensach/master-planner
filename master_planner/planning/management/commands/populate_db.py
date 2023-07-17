@@ -102,40 +102,41 @@ class Command(BaseCommand):
         
         course_data = []
         profile_data = []
-
-        # scrape program data, add courses and profiles
-        def extract_data(program_code):
+        #
+        # # scrape program data, add courses and profiles
+        # def extract_data(program_code):
+        #     print(f"extracting course and profile data for {program_code}")
+        #     prog_scraper = ProgramPlan(program_code)
+        #     return prog_scraper.courses(), prog_scraper.profiles()
+        #
+        # def extract_data_thread(program_code):
+        #     courses, profiles = extract_data(program_code)
+        #     # Acquire a lock before modifying the shared lists
+        #     with lock:
+        #         course_data.extend(courses)
+        #         profile_data.extend(profiles)
+        #
+        #    # Create a lock to synchronize access to the shared lists
+        # lock = threading.Lock()
+        #
+        # # Create and start 17 threads
+        # threads = []
+        # for code, name in program_data:
+        #     thread = threading.Thread(target=extract_data_thread, args=(code,))
+        #     thread.start()
+        #     threads.append(thread)
+        #
+        # # Wait for all threads to complete
+        # for thread in threads:
+        #     thread.join()
+        for program_code, name in program_data:
             print(f"extracting course and profile data for {program_code}")
             prog_scraper = ProgramPlan(program_code)
-            return prog_scraper.courses(), prog_scraper.profiles()
-
-        def extract_data_thread(program_code):
-            courses, profiles = extract_data(program_code)
-            # Acquire a lock before modifying the shared lists
-            with lock:
-                course_data.extend(courses)
-                profile_data.extend(profiles)
-
-           # Create a lock to synchronize access to the shared lists
-        lock = threading.Lock()
-
-        # Create and start 17 threads
-        threads = []
-        for code, name in program_data:
-            thread = threading.Thread(target=extract_data_thread, args=(code,))
-            thread.start()
-            threads.append(thread)
-
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
-       
-        # for program_code, name in program_data:
-        #     print(f"extracting course and profile data for {name}")
-        #     prog_scraper = ProgramPlan(program_code)
-        #     course_data.extend(prog_scraper.courses()) 
-        #     profile_data.extend(prog_scraper.profiles())
-
+            course_data.extend(prog_scraper.courses()) 
+            profile_data.extend(prog_scraper.profiles())
+        
+        
+            
         register_profiles(profile_data)
         register_courses(course_data)
         
