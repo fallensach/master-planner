@@ -22,7 +22,7 @@ from .api import api
 
 urlpatterns = [
     path('', planning.home),
-    path('setup/', planning.setup, name="setup"),
+    path('account/', account.account_page, name="overview"),
     path('', include("django.contrib.auth.urls")),
     path('register/', account.register, name="register"),
     path('home/', planning.home, name="home"),
