@@ -1,6 +1,9 @@
+
 var header;
 var sticky;
-$(document).ready(function () {
+var all_courses;
+
+$(document).ready(async function () {
     var programs = JSON.parse($("#programs").text());
     const semester = $("#chosen-term").val();
     $("#id_program").autocomplete({
@@ -14,8 +17,9 @@ $(document).ready(function () {
 
     home = document.querySelector("#home-container");
     home.onscroll = function() {myFunction(home)};
-
-    load_chosen_courses(semester);
+    get_courses_semester(semester)
+    await load_chosen_courses(semester);
+    console.log("finished loading");
 });
 
 
@@ -24,8 +28,6 @@ function myFunction(home) {
     sticky = header.getBoundingClientRect().top;
     floatingRow = document.querySelector("#pop-up-row");
     table = document.querySelector("#tables-container");
-
-    console.log(table.getBoundingClientRect().y)
 
     if (table.getBoundingClientRect().y > 95) {
         floatingRow.classList.add("hidden")
@@ -53,8 +55,6 @@ function check_course_boxes(periods) {
     }
 }
 
-
-
 function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
 
@@ -71,7 +71,6 @@ function load_chosen_courses(semester) {
     const my_courses_1 = $("#my-courses-1");
     const my_courses_2 = $("#my-courses-2");
     const url = "/api/account/choices";
-
     $.ajax({
         type: "GET",
         url: url,
@@ -157,9 +156,10 @@ function add_course_table(courses, my_courses, period) {
             class: "bg-white font-bold transition ease hover:bg-slate-200",
             append: [
                     $("<td>", {text: course_data["course"]["course_code"], class: "text-center font-mono"}),
-                    $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + course_data["course"]["course_code"], 
+                    $("<td>", {class: "w-2/5 underline"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + course_data["course"]["course_code"], 
                                                                  text: course_data["course"]["course_name"],
-                                                                 class: "hover:text-yellow-500 transition ease"
+                                                                 class: "hover:text-yellow-500 transition ease",
+                                                                 target: "_blank"
                                                                 })),
                     $("<td>", {text: course_data["course"]["hp"], class: "text-center"}),
                     $("<td>", {text: course_data["schedule"]["block"], class: "text-center"}),
@@ -324,19 +324,56 @@ function delete_course_db(scheduler_id) {
     });
 }
 
-function get_courses_semester(semester) {
+function sort_courses(tag, id) {
+    var semester = $("#chosen-term").val();
+    th = $("#" + id);
+    th.data("ascend", !th.data("ascend"));
+
+    for (var i = 1; i < 3; i++) {
+        var sorted_courses = Object.keys(all_courses["period_" + i])
+        .map(function(key) {
+            return all_courses["period_" + i][key];
+        })
+        .sort(function(a, b) {
+            if (tag == "block") {
+                return a.schedule[tag].localeCompare(b.schedule[tag]);
+            }
+            return a.course[tag].localeCompare(b.course[tag]);
+        });
+
+        if (th.data("ascend")) {
+            sorted_courses.reverse();
+        } 
+
+        all_courses["period_" + i] = sorted_courses
+    }
+
+    get_courses_semester(semester, true)
+}
+
+function get_courses_semester(semester, sort=false) {
     profile_code = $("#profile-code").val();
-    const url = "/api/courses/" + profile_code + "/" + semester;
-    $.ajax({
-        type: "GET",
-        url: url,
-        success: function (semester_data) {
-            highlight_semester(semester); 
-            replace_period_table(1, semester_data);
-            replace_period_table(2, semester_data);
-            load_chosen_courses(semester)
-        }
-    });
+    if (sort) {
+        replace_period_table(1, all_courses);
+        replace_period_table(2, all_courses);
+        load_chosen_courses(semester);
+
+    } else {
+        const url = "/api/courses/" + profile_code + "/" + semester;
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (semester_data) {
+                all_courses = semester_data;
+                highlight_semester(semester); 
+                $("#chosen-term").val(semester);
+                replace_period_table(1, semester_data);
+                replace_period_table(2, semester_data);
+                load_chosen_courses(semester)
+            }
+        });
+    }
+
 }
 
 function replace_period_table(period, semester_data) {
@@ -344,19 +381,20 @@ function replace_period_table(period, semester_data) {
     table_body.empty();
 
     $.each(semester_data[`period_${period}`], function(key, value) {
-        var course_row = $('<tr>', {class: "bg-white hover:bg-slate-200 transition ease-in-out"}).appendTo(table_body);
+        var course_row = $('<tr>', {class: "bg-white text-left hover:bg-slate-200 transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["scheduler_id"]),
-            $("<td>", {text: value["course"]["course_code"], class: "text-center font-mono"}),
-            $("<td>", {class: "w-2/5"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + value["course"]["course_code"], 
+            $("<td>", {text: value["course"]["course_code"], class: "text-left font-mono"}),
+            $("<td>", {class: "w-2/5 underline"}).append($("<a>", {href: "https://studieinfo.liu.se/kurs/" + value["course"]["course_code"], 
                                                          text: value["course"]["course_name"],
-                                                         class: "hover:text-yellow-500 transition ease"
+                                                         class: "hover:text-yellow-500 transition ease",
+                                                         target: "_blank"
                                                         
                                                         })),
-            $("<td>", {text: value["course"]["hp"], class: "text-center"}),
-            $("<td>", {text: value["schedule"]["block"], class: "text-center"}),
-            $("<td>", {text: value["course"]["level"], class: "text-center"}),
-            $("<td>", {text: value["course"]["vof"], class: "text-center"}),
+            $("<td>", {text: value["course"]["hp"]}),
+            $("<td>", {text: value["schedule"]["block"]}),
+            $("<td>", {text: value["course"]["level"]}),
+            $("<td>", {text: value["course"]["vof"]}),
             make_expand_btn(value["course"]["course_code"], value["scheduler_id"]),
         );
         table_body.append(course_row);
