@@ -1,11 +1,28 @@
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
-from planning.models import Program, Scheduler
+from planning.models import Program, Profile, Scheduler, Course, MainField
+
+class Requirements(models.Model):
+    course_instance = models.ManyToManyField(Scheduler, through="RequiredCourses", blank=True)
+    field_hp = models.ManyToManyField(MainField, through="RequiredFields", blank=True)
+    profile_hp = models.ManyToManyField(Profile, through="RequiredProfiles", blank=True)
+    advanced_hp = models.IntegerField()
+
+class RequiredProfiles(models.Model):
+    requirement = models.ForeignKey(Requirements, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    hp = models.IntegerField()
+
+class RequiredFields(models.Model):
+    requirement = models.ForeignKey(Requirements, on_delete=models.CASCADE)
+    field = models.ForeignKey(MainField, on_delete=models.CASCADE)
+    hp = models.IntegerField()
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True)
     choices = models.ManyToManyField(Scheduler, blank=True)
+    ex_requirements = models.OneToOneField(Requirements, on_delete=CASCADE, blank=True)
 
     def __str__(self):
         return str(self.user)
