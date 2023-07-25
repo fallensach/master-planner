@@ -5,4 +5,4 @@ find . -path "*/migrations/*.pyc"  -delete
 rm db.sqlite3
 python manage.py makemigrations
 python manage.py migrate
-python manage.py populate_db --debug
+python manage.py populate_db 

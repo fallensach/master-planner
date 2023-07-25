@@ -10,8 +10,7 @@ class Account(models.Model):
     def __str__(self):
         return str(self.user)
 
-    @property
-    def level_hp(self):
+    def level_hp(self, profile: str=None) -> dict[float]:
         result_dict = {}
 
         for semester in range(7, 10):
@@ -25,7 +24,12 @@ class Account(models.Model):
         result_dict["a_level"] = 0
         result_dict["g_level"] = 0
         
-        for choice in self.choices.all():
+        if not profile:
+            choices = self.choices.all()
+        else:
+            choices = self.choices.filter(profiles=profile)
+
+        for choice in choices:
             schedule = choice.schedule
 
             level = "a_level" if "A" in choice.course.level else "g_level"
@@ -42,11 +46,9 @@ class Account(models.Model):
         
         return result_dict
 
-    @property
     def field_hp(self):
         pass
 
-    @property
     def profile_hp(self):
         pass
 
@@ -60,19 +62,3 @@ def register_account(username: str, email: str, password: str):
     except IntegrityError:
         return False
     
-def get_user(username: str) -> Account | None:
-    """Retrieves user object from Account based on session.
-
-    Args:
-        request (_type_): _description_
-
-    Returns:
-        Account | None: Account object or None
-    """
-    try:
-        user = User.objects.get(username=username)
-        #account = Account.objects.get(user=user)
-        return user
-    
-    except IntegrityError:
-        return None
