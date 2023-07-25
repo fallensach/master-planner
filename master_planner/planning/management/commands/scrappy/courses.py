@@ -90,4 +90,4 @@ def get_main_field(soup: BeautifulSoup) -> list[str]:
 
 if __name__ == "__main__":
     
-    fetch_course_info('TDDE01', en=False)
+    print(fetch_course_info('TDEI72', en=False))

@@ -100,7 +100,6 @@ def register_profiles(profile_data: list[tuple[str, str, str]]) -> None:
     Program.profiles.through.objects.bulk_create(program_profile_list)
 
 def register_courses(data: dict[Union[str, int]]) -> None:
-    # print("starting register_courses")
     schedulers = []
     courses = {}
     schedules = {}
@@ -184,3 +183,35 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
                                              schedule__period=2))
 
     return {1: period_1, 2: period_2}
+
+def register_course_details(data, course_code):
+    examinations = []
+    fields = []
+    created: bool
+    
+    print(f'Adding examination: {course_code}')
+    for examination in data["examination"]:
+        course = Course.objects.get(course_code=course_code)
+        exam = Examination(
+            code=examination["code"],
+            course=course,
+            hp=examination["hp"],
+            name=examination["name"],
+            grading=examination["grading"]
+        )
+        examinations.append(exam)
+        
+    for field in data["main_field"]:
+        main_field, created = MainField.objects.get_or_create(field_name=field)
+        fields.append(main_field)
+        
+    updated_course = Course.objects.filter(course_code=course_code)
+    course = Course.objects.get(course_code=course_code)
+    course.main_fields.add(*fields)
+    updated_course.update(examinator=data["examinator"])
+    updated_course.update(campus=data["location"])
+        
+    if created:
+        MainField.objects.bulk_create(fields)
+    
+    Examination.objects.bulk_create(examinations)

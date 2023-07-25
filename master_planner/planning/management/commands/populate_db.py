@@ -1,11 +1,13 @@
 from django.core.management.base import BaseCommand
 from planning.management.commands.scrappy.program_plan import ProgramPlan
 from planning.management.commands.scrappy.courses import fetch_course_info, fetch_programs
-from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs
+from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs, register_course_details
 from django.contrib.auth.models import User
 from accounts.models import Account 
 from planning.management.commands.scrappy.program_plan import ProgramPlan 
 import threading
+import time
+
 
 
 class Command(BaseCommand):
@@ -129,17 +131,91 @@ class Command(BaseCommand):
         # # Wait for all threads to complete
         # for thread in threads:
         #     thread.join()
+        st = time.time() 
         for program_code, name in program_data:
+            
             print(f"extracting course and profile data for {program_code}")
-            prog_scraper = ProgramPlan(program_code)
-            course_data.extend(prog_scraper.courses()) 
-            profile_data.extend(prog_scraper.profiles())
-        
-        
+            prog_plan = ProgramPlan(program_code)
+            course_data.extend(prog_plan.courses())
+            profile_data.extend(prog_plan.profiles())
             
         register_profiles(profile_data)
         register_courses(course_data)
         
+        et = time.time()
+        print(f'No concurrency: {et - st}')
+        input("FREEZE")
+        
+    def scrape_data_concurrent(self, options):
+        # fill Schedule
+        # register_schedule()
+
+        user = User.objects.create_user(username="admin",  
+                                        password="123",
+                                        is_superuser=True,
+                                        is_staff=True)
+        user.save()
+
+        account = Account.objects.create(user=user)
+
+        # fetch data and insert programs in db
+        if options['debug']:
+            program_data = [('6CMJU', 'Civilingenjörsprogram i mjukvaruteknik'), 
+                            ('6CDDD', 'Civilingenjörsprogram i datateknik'),
+                            ('6CYYY', 'Civilingenjörsprogram i teknisk fysik och elektroteknik')]
+        else:
+            print("start to fetch program data")
+            program_data = fetch_programs()
+        register_programs(program_data)
+        
+        course_data = []
+        profile_data = []
+        threads = []
+        st = time.time() 
+        for program_code, name in program_data:
+            thread = threading.Thread(target=scrape, args=[program_code, course_data, profile_data])
+            threads.append(thread)
+        
+        for thread in threads:
+            thread.start()
+            
+        for thread in threads:
+            thread.join()    
+        
+        register_profiles(profile_data)
+        register_courses(course_data)
+        
+        test_list = []
+        
+        threads = []
+        for course in Course.objects.all():
+            print("THREADING")
+            thread = threading.Thread(target=scrape_course, args=[course.course_code])
+            threads.append(thread)
+         
+        for thread in threads:
+            thread.start()
+            
+        for thread in threads:
+            thread.join()    
+            
+        et = time.time()
+        print(f'With concurrency: {et - st}')
+        input("")
 
     def handle(self, *args, **options):
-        self.scrape_data(options)
+        #self.scrape_data(options)
+        self.scrape_data_concurrent(options)
+
+def scrape(program_code, course_data, profile_data):
+    prog_scraper = ProgramPlan(program_code)
+    print(f"extracting course and profile data for {program_code}")
+    course_data.extend(prog_scraper.courses())
+    profile_data.extend(prog_scraper.profiles())
+
+def scrape_course(course_code: str):
+    print(f'Fetching: {course_code}')
+    course = fetch_course_info(course_code)
+    register_course_details(course, course_code)
+
+    
