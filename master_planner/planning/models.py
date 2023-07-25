@@ -35,14 +35,14 @@ class Examination(models.Model):
         return self.name, self.course
 
 class Schedule(models.Model):
-    id = models.CharField(max_length=50, primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)    
     period = models.IntegerField()
     semester = models.IntegerField()
     block = models.CharField(max_length=10)
     
-    def save(self, *args, **kwargs):
-        self.id = f"{self.semester}.{self.period}.{self.block}"
-        super(Schedule, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.id = f"{self.semester}.{self.period}.{self.block}"
+    #     super(Schedule, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"sem: {self.semester}, per: {self.period}, block: {self.block}"
@@ -73,6 +73,10 @@ class Scheduler(models.Model):
 
     def __str__(self):
         return f"{str(self.course)}\n{str(self.program)}\n{str(self.profiles)}\n{str(self.schedule)}"
+    
+    @property
+    def friendly_uuid(self):
+        return str(self.scheduler_id).replace("-", "_")
 
 def register_programs(program_data: list[tuple[str, str]]):
     # print("starting register_programs") 
@@ -111,8 +115,8 @@ def register_courses(data: dict[Union[str, int]]) -> None:
         period = course_data["period"]
         block = course_data["block"]
 
-        if (course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}") in test:
-            scheduler_id = test[course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}"]
+        if (course_data["program_code"], course_data["course_code"], semester, period, block) in test:
+            scheduler_id = test[course_data["program_code"], course_data["course_code"], semester, period, block]
         else:
             course = Course(course_code=course_data["course_code"],
                             course_name=course_data["course_name"],
@@ -124,13 +128,14 @@ def register_courses(data: dict[Union[str, int]]) -> None:
             semester = course_data["semester"]
             period = course_data["period"]
             block = course_data["block"]
-            schedule_id = f"{semester}.{period}.{block}"
 
-            schedule = Schedule(id=schedule_id,
+            schedule = Schedule(
                                 block=block,
                                 semester=semester,
                                 period=period
                                 )
+            schedule_id = schedule.id
+
             courses[course.course_code] = course
             schedules[schedule.id] = schedule
 
@@ -145,7 +150,7 @@ def register_courses(data: dict[Union[str, int]]) -> None:
             schedulers.append(scheduler)
 
             scheduler_id = scheduler.scheduler_id
-            test[scheduler.program_id, scheduler.course_id, scheduler.schedule_id] = scheduler_id
+            test[scheduler.program_id, scheduler.course_id, semester, period, block] = scheduler_id
 
         scheduler_profile = Scheduler.profiles.through(profile_id=course_data["profile_code"],
                                                        scheduler_id=scheduler_id)
