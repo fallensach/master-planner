@@ -32,7 +32,7 @@ class Examination(models.Model):
     course = models.ForeignKey(Course,on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return self.name, self.course
+        return f"{self.code}, {self.course}"
 
 class Schedule(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)    
