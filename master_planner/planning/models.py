@@ -75,7 +75,7 @@ class Scheduler(models.Model):
         return f"{str(self.course)}\n{str(self.program)}\n{str(self.profiles)}\n{str(self.schedule)}"
 
 def register_programs(program_data: list[tuple[str, str]]):
-    print("starting register_programs") 
+    # print("starting register_programs") 
     programs = []
     for code, name in program_data:
         program = Program(program_code=code, program_name=name)
@@ -84,7 +84,7 @@ def register_programs(program_data: list[tuple[str, str]]):
     Program.objects.bulk_create(programs)
 
 def register_profiles(profile_data: list[tuple[str, str, str]]) -> None:
-    print("starting register_profiles")
+    # print("starting register_profiles")
     profiles = {}
     program_profile_list = []
     for name, code, program_code in profile_data:
@@ -100,7 +100,7 @@ def register_profiles(profile_data: list[tuple[str, str, str]]) -> None:
     Program.profiles.through.objects.bulk_create(program_profile_list)
 
 def register_courses(data: dict[Union[str, int]]) -> None:
-    print("starting register_courses")
+    # print("starting register_courses")
     schedulers = []
     courses = {}
     schedules = {}
@@ -157,18 +157,20 @@ def register_courses(data: dict[Union[str, int]]) -> None:
     Schedule.objects.bulk_create(schedules.values())                            
     Scheduler.objects.bulk_create(schedulers)
     Scheduler.profiles.through.objects.bulk_create(scheduler_profiles_list, ignore_conflicts=True)
+    
+    linked_course_instances = []
+    for course_instance in Scheduler.objects.all():
+        if "*" in course_instance.course.hp and course_instance.schedule.period == 2:
+            first_part = Scheduler.objects.get(course=course_instance.course,
+                                               program=course_instance.program,
+                                               schedule__period=1,
+                                               schedule__semester=course_instance.schedule.semester
+                                               )
 
-        # if "*" in course.hp and schedule.period == 2:
-        #     first_part = Scheduler.objects.get(course=course,
-        #                                        program=program,
-        #                                        schedule__period=1,
-        #                                        schedule__semester=schedule.semester
-        #                                        )
-        #
-        #     first_part.linked = scheduler
-        #     scheduler.linked = first_part
-        #     first_part.save()
-        #     scheduler.save()
+            first_part.linked = course_instance
+            course_instance.linked = first_part
+            linked_course_instances.extend([first_part, course_instance])
+    Scheduler.objects.bulk_update(linked_course_instances, ["linked"])
 
 def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
     period_1 = list(Scheduler.objects.filter(program=program, 
