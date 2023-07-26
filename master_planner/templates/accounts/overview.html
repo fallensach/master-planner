@@ -2,30 +2,68 @@
 {% block content %}
 <input id="chosen-term" value="7" class="hidden">
 <main class="flex w-full justify-between p-10 space-x-10 h-full">
-    <container class="rounded-md bg-white h-full w-full">
-        <div>
-            <p class="font-bold text-2xl"> Period 1 </p>
-            <div class="grid grid-cols-4"> 
-                <div class="w-36 h-36 bg-black">
-
-                </div>
-                <div class="w-36 h-36 bg-black">
-
-                </div>
-                
-                <div class="w-36 h-36 bg-black">
-
-                </div>
-                <div class="w-36 h-36 bg-black">
-
-                </div>
+    <container class="rounded-md grid grid-cols-3 bg-white h-full w-full">
+        <div class="p-5 overflow-y-scroll">
+            <p class="text-2xl font-bold"> Termin 7 </p>
+            <p class="font-semibold text-xl"> Period 1 </p>
+            <div id="semester-7-p1" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
+            </div>
+            <p class="font-semibold text-xl"> Period 2 </p>
+            <div id="semester-7-p2" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
+            </div>
+        </div>
+        <div class="p-5 overflow-y-scroll">
+            <p class="text-2xl font-bold"> Termin 8 </p>
+            <p class="font-semibold text-xl"> Period 1 </p>
+            <div id="semester-8-p1" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
+            </div>
+            <p class="font-semibold text-xl"> Period 2 </p>
+            <div id="semester-8-p2" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
+            </div>
+        </div>
+        <div class="p-5 overflow-y-scroll">
+            <p class="text-2xl font-bold"> Termin 9 </p>
+            <p class="font-semibold text-xl"> Period 1 </p>
+            <div id="semester-9-p1" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
+            </div>
+            <p class="font-semibold text-xl"> Period 2 </p>
+            <div id="semester-9-p2" class="space-y-3">
+                <p class="m-3"> inga kurser valda </p>
             </div>
         </div>
     </container>
 
-    <div class="flex justify-center rounded-md h-full w-full bg-white">
+    <div class="flex justify-center rounded-md h-full bg-white">
         {% include 'setup.html' %}
     </div>
 </main>
 {% endblock content %}
 
+
+<div class="rounded-xl ">
+    <div class="p-3 shadow-md bg-yellow-400 w-fit space-y-3 rounded-xl">
+        <div class="text-lg text-center w-fit font-semibold break-words">
+            <p> Informationssäkerhet </p>
+            <p class="text-sm"> TDDE23 </p>
+        </div>
+        <div class="text-center flex space-x-3 justify-center text-sm text-gray-700 font-semibold ">
+            <span>
+                <p>Hp</p>
+                <p>5</p>
+            </span> 
+            <span>
+                <p>Block</p>
+                <p>3</p>
+            </span> 
+            <span>
+                <p>Nivå</p>
+                <p>A1X</p>
+            </span> 
+        </div>
+    </div>
+</div>

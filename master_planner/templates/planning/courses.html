@@ -4,8 +4,8 @@
     <div class="w-full">
         <p class="text-4xl font-bold"> {{ program_name }} </p>
         <div id="pickable-courses" class="sticky top-0 transition ease z-10">
-            <div class="flex justify-between items-end">
-                <div>
+            <div class="flex py-2 justify-between items-end">
+                <div> 
                     <p class="font-bold text-lg">Välj termin</p>
                     <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
                         <button id="semester-btn-7" onclick="get_courses_semester(this.value); load_chosen_courses(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-800 p-3 cursor-default text-white transition ease-in-out" value="7" type="submit">Termin 7</button>
@@ -97,15 +97,15 @@
             </table>
         </div>
         
-        <div class="flex">
+        <div class="inline-flex pb-2">
             <p class="text-2xl font-bold">Profil Vald: &nbsp</p>
             <p class="text-2xl"> {{ profile_name }} </p>
         </div>
         <div id="tables-container" class="flex flex-col">
             <div id="period-1">
                 <table id="courses-period-1" class="table rounded-t-md rounded-b-none overflow-hidden">
-                <thead class="bg-slate-600 text-white text-lg">
-                    <tr class="text-">
+                    <thead class="bg-slate-600 text-white text-lg">
+                    <tr class="">
                         <th>Välj</th>
                         <th id="kurskod" data-ascend=true onclick="sort_courses('course_code', this.id)">
                             <div class="flex items-center w-max cursor-pointer">
@@ -157,6 +157,12 @@
                         </th>
                         <th>Detaljer</th>
                     </tr>
+                    
+                        <tr> 
+                            <td class="px-10 py-3 text-xl font-bold text-black shadow-md bg-slate-100" colspan="8">
+                                Period 1
+                            </td>
+                        </tr>
                 </thead>
                     <tbody id="table-1" class="text-sm font-bold" >
                     </tbody>
