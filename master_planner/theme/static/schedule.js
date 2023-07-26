@@ -150,7 +150,7 @@ function add_course_table(courses, my_courses, period) {
         remove_course_btn = $("<span>", {
             text: "delete", 
             class: "material-symbols-outlined cursor-pointer font-2xl text-black/75",
-            onclick: "delete_course_db(" + scheduler_id + ")"
+            onclick: `delete_course_db(\'${scheduler_id}\')`
             })
 
         my_courses.append($("<tr>", {
