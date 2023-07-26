@@ -53,42 +53,42 @@ class ProgramPlan:
 
         return course_map
            
-    def planned_courses(self, profile_code: str = None) -> list[dict[str, list[dict[str, any]]]]:
-        """Get all the courses for the whole program or a profile sorted by their semester and period.
-        This function is used whenever you need the ordered program plan.
-
-        Args:
-            profile_code (str): code of given profile
-
-        Returns:
-            list[dict[str, list[dict[str, any]]]]: All the courses for the given profile
-        """
-        
-        if profile_code is not None: 
-            semesters = self.soup.find_all("div", {"data-specialization": {profile_code}})
-        else:
-            semesters = self.soup.select('div.specialization[data-specialization=""]')
-        
-        if profile_code is None:
-            term_start = MASTER_TERM_START
-            profile_start = 0
-        else:
-            term_start = 0
-            profile_start = MASTER_TERM_START - 1
-
-        program_courses = []
-        for index, semester in enumerate(semesters, 1):
-            if index >= term_start:
-                periods = semester.find_all("tbody", {"class": "period"})
-                s_string = f"Termin {profile_start + index}"
-                semester_courses = {s_string: []}
-                
-                for i, period in enumerate(periods, 1):
-                    courses = period.find_all("tr", {"class": "main-row"})
-                    semester_courses[s_string].append({f"Period {i}" : self.format_course_scrape(courses)})
-                program_courses.append(semester_courses)
-        
-        return program_courses
+    # def planned_courses(self, profile_code: str = None) -> list[dict[str, list[dict[str, any]]]]:
+    #     """Get all the courses for the whole program or a profile sorted by their semester and period.
+    #     This function is used whenever you need the ordered program plan.
+    #
+    #     Args:
+    #         profile_code (str): code of given profile
+    #
+    #     Returns:
+    #         list[dict[str, list[dict[str, any]]]]: All the courses for the given profile
+    #     """
+    #     
+    #     if profile_code is not None: 
+    #         semesters = self.soup.find_all("div", {"data-specialization": {profile_code}})
+    #     else:
+    #         semesters = self.soup.select('div.specialization[data-specialization=""]')
+    #     
+    #     if profile_code is None:
+    #         term_start = MASTER_TERM_START
+    #         profile_start = 0
+    #     else:
+    #         term_start = 0
+    #         profile_start = MASTER_TERM_START - 1
+    #
+    #     program_courses = []
+    #     for index, semester in enumerate(semesters, 1):
+    #         if index >= term_start:
+    #             periods = semester.find_all("tbody", {"class": "period"})
+    #             s_string = f"Termin {profile_start + index}"
+    #             semester_courses = {s_string: []}
+    #             
+    #             for i, period in enumerate(periods, 1):
+    #                 courses = period.find_all("tr", {"class": "main-row"})
+    #                 semester_courses[s_string].append({f"Period {i}" : self.format_course_scrape(courses)})
+    #             program_courses.append(semester_courses)
+    #     
+    #     return program_courses
 
     def courses(self):
         """return all courses sorte in a dict after profiles and program"""
@@ -97,20 +97,22 @@ class ProgramPlan:
         temp, profile_codes, program_code = zip(*self.profiles())
         profile_codes = [*profile_codes, ""]        
         courses = []
-        
+        profile_codes.remove("free")
         for semester_section in self.soup.find_all("section", {"class": "accordion semester js-semester show-focus is-toggled"}):
             semester = semester_section.find("h3").text[:8]
             semester = int(semester[-1:])
-            # ignore semester without valbara courses
+            # ignore semesters outside of master
             if semester not in [7, 8, 9, None]:
                 continue
-            
             # add all non profile specific courses
             for profile_code in profile_codes:
                 if not semester_section.find("div", {"data-specialization": profile_code}):
                     continue
-                for period_sections in semester_section.find("div", {"data-specialization": profile_code}).find_all("tbody", {"class": "period"}):
-                    
+
+                for count, period_sections in enumerate(semester_section.find("div", {"data-specialization": profile_code}).find_all("tbody", {"class": "period"})):
+                    # when searching for data specialization="" all specializations are found -_- 
+                    if count > 1:
+                        continue
                     period = None
                     for row in period_sections.find_all("tr"):
                         if row.find("th"):
@@ -221,9 +223,12 @@ class ProgramPlan:
 
 
 def main():
-    plan = ProgramPlan("6CMJU")
-    pprint.pprint(plan.courses())
-    #plan.program_name()
+    plan = ProgramPlan("6CDDD")
+    # plan.courses()
+    for course in plan.courses():
+        if course["course_code"] == "TDDE01":
+            pprint.pprint(course)
+    # plan.program_name()
 
 if __name__ == "__main__":
     main()
