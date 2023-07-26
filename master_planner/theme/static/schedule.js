@@ -16,14 +16,16 @@ $(document).ready(async function () {
     });
 
     home = document.querySelector("#home-container");
-    home.onscroll = function() {myFunction(home)};
+    if (home != null) {
+        home.onscroll = function() {scroll_home(home)};
+    }
     get_courses_semester(semester)
     await load_chosen_courses(semester);
     console.log("finished loading");
 });
 
 
-function myFunction(home) {
+function scroll_home(home) {
     header = document.querySelector("#pickable-courses");
     sticky = header.getBoundingClientRect().top;
     floatingRow = document.querySelector("#pop-up-row");
@@ -281,7 +283,8 @@ function course_examination(response, scheduler_id) {
             $("<a>", {
                 href: "http://www.gamlatentor.se/LIU/" + courseCode,
                 class: "bg-yellow-500 p-3 rounded-lg hover:bg-yellow-300 transition ease-in-out",
-                text: "Gamla tentor"
+                text: "Gamla tentor",
+                target: "_blank"
             })
         ]
         })

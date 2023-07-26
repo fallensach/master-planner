@@ -30,6 +30,7 @@ def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
 
 
     return format -- {
+                "course_code": str,
                 "examination": [{"code": 
                                  "name": 
                                  "scope":
@@ -53,8 +54,8 @@ def fetch_course_info(code: str, en: bool=False) -> dict[str, any]:
     if r.status_code == 200:
         
         soup = BeautifulSoup(r.content, "html.parser")
-
-        return {"examination": get_examination(soup),
+        return {"course_code": code,
+                "examination": get_examination(soup),
                 "examinator": get_examinator(soup),
                 "location": get_location(soup),
                 "main_field": get_main_field(soup), 
@@ -66,7 +67,7 @@ def get_examination(soup: BeautifulSoup) -> list[dict[str, str]]:
     examinations = []
     for row in soup.find("div", {"id": "examination"} ).find_all("tr")[1:]:
         temp = row.find_all("td") 
-        examinations.append({"code": temp[0].text, 
+        examinations.append({"examination_code": temp[0].text, 
                              "name": temp[1].text, 
                              "hp": temp[2].text.strip().replace('\r\n', '').split()[0], 
                              "grading": temp[3].text})
@@ -90,4 +91,4 @@ def get_main_field(soup: BeautifulSoup) -> list[str]:
 
 if __name__ == "__main__":
     
-    fetch_course_info('TDDE01', en=False)
+    print(fetch_course_info('TDEI72', en=False))

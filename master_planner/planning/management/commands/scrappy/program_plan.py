@@ -94,7 +94,7 @@ class ProgramPlan:
         """return all courses sorte in a dict after profiles and program"""
         
         # extracting code and adding an empty string for easier scraping
-        temp, profile_codes = zip(*self.profiles())
+        temp, profile_codes, program_code = zip(*self.profiles())
         profile_codes = [*profile_codes, ""]        
         courses = []
         
@@ -122,7 +122,7 @@ class ProgramPlan:
                                 course["profile_code"] = "free"
                             else:
                                 course["profile_code"] = profile_code
-
+                            course["program_code"] = self.program_code
                             course["period"] = period
                             course["semester"] = semester
                             courses.append(course)
@@ -205,7 +205,11 @@ class ProgramPlan:
             profile_names.append(option.get_text(strip=True))
         
         profile_names = list(filter(lambda a: a != "", profile_names))
-        profiles = [("Ingen profil", "free"), *zip(profile_names[1:], profile_id[1:])]
+        profiles = [*zip(profile_names[1:], 
+                         profile_id[1:], 
+                         [self.program_code]*len(profile_id))]
+        
+        profiles.append(("Ingen profil", "free", self.program_code))
         
         return profiles
 

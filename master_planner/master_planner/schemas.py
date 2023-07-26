@@ -3,6 +3,7 @@ from ninja.orm import create_schema
 from planning.models import Schedule, Course, Scheduler, Examination
 from planning.management.commands.scrappy.courses import fetch_course_info
 from typing import List, Union
+import uuid
 
 class ScheduleSchema(ModelSchema):
     class Config:
@@ -65,7 +66,7 @@ class ExaminationSchema:
         model = Examination
         model_fields = []
 class ChoiceSchema(Schema):
-    scheduler_id: int
+    scheduler_id: uuid.UUID
 
 class Error(Schema):
     message: str 

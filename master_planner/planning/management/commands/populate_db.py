@@ -1,10 +1,13 @@
 from django.core.management.base import BaseCommand
 from planning.management.commands.scrappy.program_plan import ProgramPlan
 from planning.management.commands.scrappy.courses import fetch_course_info, fetch_programs
-from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs, register_schedule
+from planning.models import Course, Examination, MainField, Profile, Program, Schedule, Scheduler, register_profiles, register_courses, register_programs, register_course_details
 from django.contrib.auth.models import User
 from accounts.models import Account 
 from planning.management.commands.scrappy.program_plan import ProgramPlan 
+import threading
+import time
+
 
 
 class Command(BaseCommand):
@@ -76,8 +79,8 @@ class Command(BaseCommand):
                               profile=profile
                               )        
         scheduler.save()
-
-    def scrape_data(self, options):
+ 
+    def scrape_data_concurrent(self, options):
         # fill Schedule
         # register_schedule()
 
@@ -95,16 +98,55 @@ class Command(BaseCommand):
                             ('6CDDD', 'Civilingenjörsprogram i datateknik'),
                             ('6CYYY', 'Civilingenjörsprogram i teknisk fysik och elektroteknik')]
         else:
+            print("start to fetch program data")
             program_data = fetch_programs()
-        programs = register_programs(program_data)
+        register_programs(program_data)
         
-        # scrape program data, add courses and profiles
-        for program in programs:
-            prog_scraper = ProgramPlan(program.program_code)
-
-            profiles = register_profiles(program, prog_scraper.profiles())
-            register_courses(program, prog_scraper.courses())
+        course_data = []
+        profile_data = []
+        threads = []
+        st = time.time() 
+        for program_code, name in program_data:
+            thread = threading.Thread(target=scrape, args=[program_code, course_data, profile_data])
+            threads.append(thread)
         
-
+        for thread in threads:
+            thread.start()
+            
+        for thread in threads:
+            thread.join()    
+        
+        register_profiles(profile_data)
+        register_courses(course_data)
+        
+        courses = []
+        
+        threads = []
+        for course in Course.objects.all():
+            thread = threading.Thread(target=scrape_course, args=[course.course_code, courses])
+            threads.append(thread)
+         
+        for thread in threads:
+            thread.start()
+            
+        for thread in threads:
+            thread.join()    
+        
+        register_course_details(courses)
+            
     def handle(self, *args, **options):
-        self.scrape_data(options)
+        #self.scrape_data(options)
+        self.scrape_data_concurrent(options)
+
+def scrape(program_code, course_data, profile_data):
+    prog_scraper = ProgramPlan(program_code)
+    print(f"extracting course and profile data for {program_code}")
+    course_data.extend(prog_scraper.courses())
+    profile_data.extend(prog_scraper.profiles())
+
+def scrape_course(course_code: str, courses: list[Course]):
+    print(f'Fetching: {course_code}')
+    course = fetch_course_info(course_code)
+    courses.append(course)
+    
+    

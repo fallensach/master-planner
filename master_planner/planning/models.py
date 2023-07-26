@@ -1,6 +1,8 @@
-from django.db import models
+from django.db import models, IntegrityError
 from planning.management.commands.scrappy.program_plan import ProgramPlan
-from pprint import pprint
+from typing import Union
+import uuid
+
     
 class MainField(models.Model):
     field_name = models.CharField(max_length=15, primary_key=True)
@@ -17,20 +19,6 @@ class Course(models.Model):
     vof = models.CharField(max_length=5)
     campus = models.CharField(max_length=20, null=True)
     main_fields = models.ManyToManyField(MainField)
-    
-    @property
-    def to_dict(self):
-        return { 
-                "course_code": self.course_code,
-                "course_name": self.course_name,
-                "hp": self.hp,
-                "level": self.level,
-                "vof": self.vof,
-                # "examinator": self.examinator,
-                # "examination": self.examination,
-                # "campus": self.campus,
-                # "main_fields": self.main_fields
-                }
 
     def __str__(self):
         return f"{self.course_code}, {self.hp}, {self.level}"
@@ -47,10 +35,14 @@ class Examination(models.Model):
         return self.name, self.course
 
 class Schedule(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.CharField(max_length=50, primary_key=True)
     period = models.IntegerField()
     semester = models.IntegerField()
     block = models.CharField(max_length=10)
+    
+    def save(self, *args, **kwargs):
+        self.id = f"{self.semester}.{self.period}.{self.block}"
+        super(Schedule, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"sem: {self.semester}, per: {self.period}, block: {self.block}"
@@ -71,7 +63,8 @@ class Program(models.Model):
         return self.program_name
 
 class Scheduler(models.Model):
-    scheduler_id = models.AutoField(primary_key=True)
+    # scheduler_id = models.AutoField(primary_key=True)
+    scheduler_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
@@ -81,179 +74,102 @@ class Scheduler(models.Model):
     def __str__(self):
         return f"{str(self.course)}\n{str(self.program)}\n{str(self.profiles)}\n{str(self.schedule)}"
 
-# def register_program(program_code: str):
-#     program_exists = Program.objects.filter(program_code=program_code.upper()).exists()
-#     if not program_exists:
-#         
-#         program = ProgramPlan(program_code.upper())
-#         if program is None:
-#             return False
-#         courses = register_courses(program)
-#         register_profiles(program)
-#         add_courses(program, courses)
-#         program = ProgramPlan(program_code.upper())
-#         register_schedule(program)
-#     
-#     return True
-
-def register_programs(program_data: list[(str, str)]):
-
+def register_programs(program_data: list[tuple[str, str]]):
+    # print("starting register_programs") 
+    programs = []
     for code, name in program_data:
-        program_exists = Program.objects.filter(program_code=code)
-        if not program_exists:
-            temp = Program(program_code=code, program_name=name)
-            temp.save()
-    return Program.objects.all()
+        program = Program(program_code=code, program_name=name)
+        programs.append(program)
+    
+    Program.objects.bulk_create(programs)
 
-# def register_courses(program: ProgramPlan) -> list[Course]:
-#     general_courses = program.courses()
-#     courses = []
-#     
-#     for course in general_courses:
-#         new_course = Course(
-#                     course_code = course["course_code"], 
-#                     course_name = course["course_name"],
-#                     hp = course["hp"],
-#                     level = course["level"],
-#                     vof = course["vof"],
-#                 )
-#         courses.append(new_course)
-#         new_course.save()
-#         
-#     return courses
-def register_courses(program: any, data: any):
+def register_profiles(profile_data: list[tuple[str, str, str]]) -> None:
+    # print("starting register_profiles")
+    profiles = {}
+    program_profile_list = []
+    for name, code, program_code in profile_data:
+        profile = Profile(profile_code=code,
+                          profile_name=name
+                          )
+        program_profile = Program.profiles.through(program_id=program_code,
+                                                   profile_id=code)
+        program_profile_list.append(program_profile)
+        profiles[code] = profile
+    
+    Profile.objects.bulk_create(profiles.values())
+    Program.profiles.through.objects.bulk_create(program_profile_list)
+
+def register_courses(data: dict[Union[str, int]]) -> None:
+    schedulers = []
+    courses = {}
+    schedules = {}
+    scheduler_profiles_list = []
+    test = {}
+    
     for course_data in data:
-        course, created = Course.objects.get_or_create(course_code=course_data["course_code"],
-                                                       defaults={"course_name": course_data["course_name"],
-                                                                 "hp": course_data["hp"],
-                                                                 "level": course_data["level"],
-                                                                 "vof": course_data["vof"]
-                                                        })
-        # if not course:
-        #     course = Course(course_code=course_data["course_code"],
-        #                     course_name=course_data["course_name"],
-        #                     hp=course_data["hp"],
-        #                     level=course_data["level"],
-        #                     vof=course_data["vof"],
-        #                     )
-        schedule, created = Schedule.objects.get_or_create(block=course_data["block"],
-                                        semester=course_data["semester"],
-                                        period=course_data["period"]
-                                                           )
-        if created:
-            schedule = Schedule.objects.get(block=course_data["block"],
-                                            semester=course_data["semester"],
-                                            period=course_data["period"])
+        semester = course_data["semester"]
+        period = course_data["period"]
+        block = course_data["block"]
 
-        profile = Profile.objects.get(profile_code=course_data["profile_code"])
-        # create instance of course in Scheduler
-        scheduler, created = Scheduler.objects.get_or_create(course=course,
-                              program=program, 
-                              schedule=schedule,
-                              )
-        if created:
-            scheduler = Scheduler.objects.get(course=course,
-                                               program=program,
-                                               schedule=schedule)
-        scheduler.profiles.add(profile)
-        scheduler.save()
+        if (course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}") in test:
+            scheduler_id = test[course_data["program_code"], course_data["course_code"], f"{semester}.{period}.{block}"]
+        else:
+            course = Course(course_code=course_data["course_code"],
+                            course_name=course_data["course_name"],
+                            hp=course_data["hp"],
+                            level=course_data["level"],
+                            vof=course_data["vof"]
+                            )
 
-        if "*" in course.hp and schedule.period == 2:
-            first_part = Scheduler.objects.get(course=course,
-                                               program=program,
-                                               profiles=profile,
-                                               schedule__period=1,
-                                               schedule__semester=schedule.semester
-                                               )
+            semester = course_data["semester"]
+            period = course_data["period"]
+            block = course_data["block"]
+            schedule_id = f"{semester}.{period}.{block}"
+
+            schedule = Schedule(id=schedule_id,
+                                block=block,
+                                semester=semester,
+                                period=period
+                                )
+            courses[course.course_code] = course
+            schedules[schedule.id] = schedule
+
+            # profile = Profile.objects.get(profile_code=course_data["profile_code"])
+            # create instance of course in Scheduler
+            scheduler = Scheduler(course=course,
+                                  program_id=course_data["program_code"], # TODO HERE IS THE BUG, should not add everytime
+                                  schedule=schedule
+                                  )
+
             
-            second_part = Scheduler.objects.get(course=course,
-                                                program=program,
-                                                profiles=profile,
-                                                schedule__period=2,
-                                                schedule__semester=schedule.semester
-                                                )
-            first_part.linked = second_part
-            second_part.linked = first_part
-            first_part.save()
-            second_part.save()
+            schedulers.append(scheduler)
 
-# def register_profiles(program: ProgramPlan):
-#     profiles = program.profiles()
-#     
-#     for name, code in profiles.items():
-#         profile_courses = program.courses(code)
-#         courses = []
-#         for course in profile_courses:
-#             profile_course = Course(
-#                 course_code = course["course_code"], 
-#                 course_name = course["course_name"],
-#                 hp = course["hp"],
-#                 level = course["level"],
-#                 vof = course["vof"],
-#             )
-#             profile_course.save()
-#             courses.append(profile_course)
-#             
-#         profile = Profile(name, code)
-#         new_program = Program(program.program_code, program.program_name)
-#         new_program.save()
-#         profile.save()
-#         profile.profile_courses.add(*courses)
-#         profile.save()
-#         new_program.program_profiles.add(profile)
-#         new_program.save()
-def register_profiles(program: any, profile_data: list[(str, str)]):
-    for name, code in profile_data:
-        print(code, name)
-        profile, created = Profile.objects.get_or_create(profile_code=code,
-                                                         defaults={"profile_name": name}
-                                                         )
-        program.profiles.add(profile)
-        program.save()
+            scheduler_id = scheduler.scheduler_id
+            test[scheduler.program_id, scheduler.course_id, scheduler.schedule_id] = scheduler_id
 
-def register_schedule(): # TODO no need for this with get_or_create is present in register_courses()
-        for semester in range(7, 10):
-            for period in range(1, 3):
-                for block in [*range(1, 5), "-"]:
-                    schedule_exist = Schedule.objects.filter(semester=f"Termin {semester}",
-                                                             period=period, 
-                                                             block=block)
-                    if not schedule_exist:
-                        schedule = Schedule(semester=f"Termin {semester}", 
-                                            period=f"Period {period}", 
-                                            block=block)
-                        schedule.save()
-
-# def register_schedule(program: ProgramPlan):
-#     program_schedule = program.planned_courses()
-#     program_code = Program.objects.get(program_code=program.program_code)
-#     for semester in program_schedule:
-#         for term_name, terms in semester.items():
-#             for periods in terms:
-#                 for period_name, courses in periods.items():
-#                     for course in courses:
-#                         db_course = Course.objects.get(course_code=course["course_code"])
-#                         block = course["block"]
-#                         if isinstance(block, int):
-#                             block = 0
-#                         schedule = Schedule(course_code=db_course, period=period_name[-1], semester=term_name, block=block, program_code=program_code)
-#                         schedule.save()
-
-
-def add_courses(program: ProgramPlan, courses: list[Course]):
-    program_add = Program.objects.get(program_code=program.program_code.upper())
-    program_add.program_courses.add(*courses)
-    program_add.save()
-        
-def get_program_courses(program: any):
-    return map(lambda row : row.course, Scheduler.objects.filter(program=program))
+        scheduler_profile = Scheduler.profiles.through(profile_id=course_data["profile_code"],
+                                                       scheduler_id=scheduler_id)
+        scheduler_profiles_list.append(scheduler_profile)
+        # scheduler.profiles.add( course_data["profile_code"])
     
-    return map(lambda course : course.to_dict, courses)
-
-def get_profile_courses(profile: any): # TODO fix typing
-    courses = map(lambda row : row.course, Scheduler.objects.filter(profile=profile))
+    Course.objects.bulk_create(courses.values())
+    Schedule.objects.bulk_create(schedules.values())                            
+    Scheduler.objects.bulk_create(schedulers)
+    Scheduler.profiles.through.objects.bulk_create(scheduler_profiles_list, ignore_conflicts=True)
     
-    return map(lambda course : course.to_dict, courses)
+    linked_course_instances = []
+    for course_instance in Scheduler.objects.all():
+        if "*" in course_instance.course.hp and course_instance.schedule.period == 2:
+            first_part = Scheduler.objects.get(course=course_instance.course,
+                                               program=course_instance.program,
+                                               schedule__period=1,
+                                               schedule__semester=course_instance.schedule.semester
+                                               )
+
+            first_part.linked = course_instance
+            course_instance.linked = first_part
+            linked_course_instances.extend([first_part, course_instance])
+    Scheduler.objects.bulk_update(linked_course_instances, ["linked"])
 
 def get_courses_term(program: any, semester: str, profile=None): # TODO fix typing, döpa om funktion
     period_1 = list(Scheduler.objects.filter(program=program, 
@@ -267,3 +183,37 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
                                              schedule__period=2))
 
     return {1: period_1, 2: period_2}
+
+def register_course_details(data):
+    examinations = []
+    course_fields_list = []
+    updated_courses = []
+    create_fields = []
+    
+    for course_data in data:
+        course_code = course_data["course_code"]
+        course = Course.objects.get(course_code=course_code)
+        for examination in course_data["examination"]:
+            exam = Examination(
+                code=examination["examination_code"],
+                course=course,
+                hp=examination["hp"],
+                name=examination["name"],
+                grading=examination["grading"]
+            )
+            examinations.append(exam)
+        
+        updated_course = Course.objects.filter(course_code=course_code)
+
+        for field in course_data["main_field"]:
+            main_field = MainField(field_name=field)
+            course_fields = Course.main_fields.through(course_id=course_code, mainfield_id=main_field.field_name)
+            course_fields_list.append(course_fields)
+            create_fields.append(main_field)
+            
+        updated_course.update(examinator=course_data["examinator"])
+        updated_course.update(campus=course_data["location"])
+        
+    MainField.objects.bulk_create(create_fields, ignore_conflicts=True) 
+    Course.main_fields.through.objects.bulk_create(course_fields_list, ignore_conflicts=True)
+    Examination.objects.bulk_create(examinations)
