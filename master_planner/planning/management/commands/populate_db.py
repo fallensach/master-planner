@@ -79,73 +79,7 @@ class Command(BaseCommand):
                               profile=profile
                               )        
         scheduler.save()
-
-    def scrape_data(self, options):
-        # fill Schedule
-        # register_schedule()
-
-        user = User.objects.create_user(username="admin",  
-                                        password="123",
-                                        is_superuser=True,
-                                        is_staff=True)
-        user.save()
-
-        account = Account.objects.create(user=user)
-
-        # fetch data and insert programs in db
-        if options['debug']:
-            program_data = [('6CMJU', 'Civilingenjörsprogram i mjukvaruteknik'), 
-                            ('6CDDD', 'Civilingenjörsprogram i datateknik'),
-                            ('6CYYY', 'Civilingenjörsprogram i teknisk fysik och elektroteknik')]
-        else:
-            print("start to fetch program data")
-            program_data = fetch_programs()
-        register_programs(program_data)
-        
-        course_data = []
-        profile_data = []
-        #
-        # # scrape program data, add courses and profiles
-        # def extract_data(program_code):
-        #     print(f"extracting course and profile data for {program_code}")
-        #     prog_scraper = ProgramPlan(program_code)
-        #     return prog_scraper.courses(), prog_scraper.profiles()
-        #
-        # def extract_data_thread(program_code):
-        #     courses, profiles = extract_data(program_code)
-        #     # Acquire a lock before modifying the shared lists
-        #     with lock:
-        #         course_data.extend(courses)
-        #         profile_data.extend(profiles)
-        #
-        #    # Create a lock to synchronize access to the shared lists
-        # lock = threading.Lock()
-        #
-        # # Create and start 17 threads
-        # threads = []
-        # for code, name in program_data:
-        #     thread = threading.Thread(target=extract_data_thread, args=(code,))
-        #     thread.start()
-        #     threads.append(thread)
-        #
-        # # Wait for all threads to complete
-        # for thread in threads:
-        #     thread.join()
-        st = time.time() 
-        for program_code, name in program_data:
-            
-            print(f"extracting course and profile data for {program_code}")
-            prog_plan = ProgramPlan(program_code)
-            course_data.extend(prog_plan.courses())
-            profile_data.extend(prog_plan.profiles())
-            
-        register_profiles(profile_data)
-        register_courses(course_data)
-        
-        et = time.time()
-        print(f'No concurrency: {et - st}')
-        input("FREEZE")
-        
+ 
     def scrape_data_concurrent(self, options):
         # fill Schedule
         # register_schedule()
@@ -185,12 +119,11 @@ class Command(BaseCommand):
         register_profiles(profile_data)
         register_courses(course_data)
         
-        test_list = []
+        courses = []
         
         threads = []
         for course in Course.objects.all():
-            print("THREADING")
-            thread = threading.Thread(target=scrape_course, args=[course.course_code])
+            thread = threading.Thread(target=scrape_course, args=[course.course_code, courses])
             threads.append(thread)
          
         for thread in threads:
@@ -198,11 +131,9 @@ class Command(BaseCommand):
             
         for thread in threads:
             thread.join()    
+        
+        register_course_details(courses)
             
-        et = time.time()
-        print(f'With concurrency: {et - st}')
-        input("")
-
     def handle(self, *args, **options):
         #self.scrape_data(options)
         self.scrape_data_concurrent(options)
@@ -213,9 +144,9 @@ def scrape(program_code, course_data, profile_data):
     course_data.extend(prog_scraper.courses())
     profile_data.extend(prog_scraper.profiles())
 
-def scrape_course(course_code: str):
+def scrape_course(course_code: str, courses: list[Course]):
     print(f'Fetching: {course_code}')
     course = fetch_course_info(course_code)
-    register_course_details(course, course_code)
-
+    courses.append(course)
+    
     

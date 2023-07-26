@@ -184,34 +184,36 @@ def get_courses_term(program: any, semester: str, profile=None): # TODO fix typi
 
     return {1: period_1, 2: period_2}
 
-def register_course_details(data, course_code):
+def register_course_details(data):
     examinations = []
-    fields = []
-    created: bool
+    course_fields_list = []
+    updated_courses = []
+    create_fields = []
     
-    print(f'Adding examination: {course_code}')
-    for examination in data["examination"]:
+    for course_data in data:
+        course_code = course_data["course_code"]
         course = Course.objects.get(course_code=course_code)
-        exam = Examination(
-            code=examination["code"],
-            course=course,
-            hp=examination["hp"],
-            name=examination["name"],
-            grading=examination["grading"]
-        )
-        examinations.append(exam)
+        for examination in course_data["examination"]:
+            exam = Examination(
+                code=examination["examination_code"],
+                course=course,
+                hp=examination["hp"],
+                name=examination["name"],
+                grading=examination["grading"]
+            )
+            examinations.append(exam)
         
-    for field in data["main_field"]:
-        main_field, created = MainField.objects.get_or_create(field_name=field)
-        fields.append(main_field)
+        updated_course = Course.objects.filter(course_code=course_code)
+
+        for field in course_data["main_field"]:
+            main_field = MainField(field_name=field)
+            course_fields = Course.main_fields.through(course_id=course_code, mainfield_id=main_field.field_name)
+            course_fields_list.append(course_fields)
+            create_fields.append(main_field)
+            
+        updated_course.update(examinator=course_data["examinator"])
+        updated_course.update(campus=course_data["location"])
         
-    updated_course = Course.objects.filter(course_code=course_code)
-    course = Course.objects.get(course_code=course_code)
-    course.main_fields.add(*fields)
-    updated_course.update(examinator=data["examinator"])
-    updated_course.update(campus=data["location"])
-        
-    if created:
-        MainField.objects.bulk_create(fields)
-    
+    MainField.objects.bulk_create(create_fields, ignore_conflicts=True) 
+    Course.main_fields.through.objects.bulk_create(course_fields_list, ignore_conflicts=True)
     Examination.objects.bulk_create(examinations)
