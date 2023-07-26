@@ -27,7 +27,7 @@ def home(request):
     account = Account.objects.get(user=request.user)
 
     if account.program is None:
-        return redirect("setup")
+        return redirect("overview")
 
     user_program = account.program
     profiles = [(profile.profile_code, profile.profile_name) for profile in user_program.profiles.all()]
