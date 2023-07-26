@@ -18,6 +18,22 @@ api = NinjaAPI()
 def overview(request):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
+    
+    
+    account = Account.objects.get(user=request.user)
+    courses = Course.objects.filter(scheduler__in=account.choices.all())
+    fields = Course.main_fields.through.objects.filter(course_id__in=courses)
+    points = {"main_fields": {}}
+    for field in fields:
+        hp = Course.objects.get(course_code=field.course_id).hp
+        hp = hp.replace("*", "")
+        if field.mainfield_id in points["main_fields"]:
+            points["main_fields"][field.mainfield_id] += int(hp)
+        else:
+            points["main_fields"][field.mainfield_id] = int(hp)
+            
+    print(points)
+   
     return 200, {"message": "placeholder"}
 
 @api.post('account/choice', url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
@@ -161,3 +177,5 @@ def get_extra_course_info(request, course_code):
              "main_field": ["matematik"]
                 }"""
     return extra_info
+
+    
