@@ -1,0 +1,13 @@
+
+<div class="w-full p-5 rounded-lg">
+    <div class="flex items-center justify-between mb-4">
+        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Termin {{semester}}</h5>
+   </div>
+   <div class="flow-root">
+        <ul role="list" class="lg:space-x-10 md:space-y-3 sm:space-y-3 lg:space-y-0 flex lg:flex-row md:flex-col sm:flex-col w-full dark:divide-gray-700">
+            <div class="bg-white px-5 rounded-md shadow border border-slate-400">
+                {% include 'card_list_entry.html' %}
+            </div>
+        </ul>
+   </div>
+</div>

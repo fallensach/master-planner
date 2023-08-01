@@ -1,69 +1,70 @@
 {% extends 'base.html' %}
 {% block content %}
 <input id="chosen-term" value="7" class="hidden">
-<main class="flex w-full justify-between p-10 space-x-10 h-full">
-    <container class="rounded-md grid grid-cols-3 bg-white h-full w-full">
-        <div class="p-5 overflow-y-scroll">
-            <p class="text-2xl font-bold"> Termin 7 </p>
-            <p class="font-semibold text-xl"> Period 1 </p>
-            <div id="semester-7-p1" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
+<main class=" w-full p-10 h-full">
+    <container class="flex flex-col rounded-md h-full bg-gray-50 w-full">
+    <p class="text-2xl font-bold p-3"> Översikt </p>
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="all-terms-tab" data-tabs-target="#all-terms" type="button" role="tab" aria-controls="allt-terms" aria-selected="false">Alla teminer</button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="term-7-tab" data-tabs-target="#term-7" type="button" role="tab" aria-controls="term-7" aria-selected="false">Termin 7</button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="term-8-tab" data-tabs-target="#term-8" type="button" role="tab" aria-controls="term-8" aria-selected="false">Termin 8</button>
+                </li>
+                <li role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="term-9-tab" data-tabs-target="#term-9" type="button" role="tab" aria-controls="term-9" aria-selected="false">Termin 9</button>
+                </li>
+                <li role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="program-tab" data-tabs-target="#program" type="button" role="tab" aria-controls="program" aria-selected="false">Byt program</button>
+                </li>
+            </ul>
+        </div>
+        <div id="myTabContent" class="flex overflow-hidden py-2 flex-col"> 
+            <div class="hidden p-4 rounded-lg flex-1 dark:bg-gray-800 overflow-auto" id="all-terms" role="tabpanel" aria-labelledby="all-terms-tab">
+                <div class="text-sm space-y-3 divide-y-2 divide-gray-200 text-gray-500 dark:text-gray-400">
+                    <div class="rounded-md shadow border border-slate-400">
+                        {% include 'examination_requirements.html' %}
+                    </div>
+                    <div class="flex space-x-3">
+                        {% include 'overview_card.html' with semester=7 %}
+                    </div>
+                    <div class="flex space-x-3">
+                        {% include 'overview_card.html' with semester=7 %}
+                    </div>
+                    <div class="flex">
+                        {% include 'overview_card.html' with semester=7 %}
+                    </div>
+                </div>
             </div>
-            <p class="font-semibold text-xl"> Period 2 </p>
-            <div id="semester-7-p2" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
+            <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="term-7" role="tabpanel" aria-labelledby="term-7-tab">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {% include 'overview_card.html' with semester=7 %}
+                </div>
+            </div>
+            <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="term-8" role="tabpanel" aria-labelledby="term-8-tab">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {% include 'overview_card.html' with semester=8 %}
+                </div>
+            </div>
+            <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="term-9" role="tabpanel" aria-labelledby="term-9-tab">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {% include 'overview_card.html' with semester=9 %}
+                </div>
+            </div>
+            <div class="hidden p-4 rounded-lg dark:bg-gray-800" id="program" role="tabpanel" aria-labelledby="program-tab">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {% include 'setup.html' %}
+                </div>
             </div>
         </div>
-        <div class="p-5 overflow-y-scroll">
-            <p class="text-2xl font-bold"> Termin 8 </p>
-            <p class="font-semibold text-xl"> Period 1 </p>
-            <div id="semester-8-p1" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
-            </div>
-            <p class="font-semibold text-xl"> Period 2 </p>
-            <div id="semester-8-p2" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
-            </div>
-        </div>
-        <div class="p-5 overflow-y-scroll">
-            <p class="text-2xl font-bold"> Termin 9 </p>
-            <p class="font-semibold text-xl"> Period 1 </p>
-            <div id="semester-9-p1" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
-            </div>
-            <p class="font-semibold text-xl"> Period 2 </p>
-            <div id="semester-9-p2" class="space-y-3">
-                <p class="m-3"> inga kurser valda </p>
-            </div>
-        </div>
+
     </container>
 
-    <div class="flex justify-center rounded-md h-full bg-white">
-        {% include 'setup.html' %}
-    </div>
 </main>
 {% endblock content %}
 
 
-<div class="rounded-xl ">
-    <div class="p-3 shadow-md bg-yellow-400 w-fit space-y-3 rounded-xl">
-        <div class="text-lg text-center w-fit font-semibold break-words">
-            <p> Informationssäkerhet </p>
-            <p class="text-sm"> TDDE23 </p>
-        </div>
-        <div class="text-center flex space-x-3 justify-center text-sm text-gray-700 font-semibold ">
-            <span>
-                <p>Hp</p>
-                <p>5</p>
-            </span> 
-            <span>
-                <p>Block</p>
-                <p>3</p>
-            </span> 
-            <span>
-                <p>Nivå</p>
-                <p>A1X</p>
-            </span> 
-        </div>
-    </div>
-</div>
