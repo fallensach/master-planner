@@ -37,6 +37,7 @@ if PRODUCTION:
     DEBUG = os.getenv('DEBUG')
 else:
     ALLOWED_HOSTS = []
+    SECRET_KEY = 123
  
 DEBUG = True
 
