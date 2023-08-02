@@ -21,7 +21,6 @@ $(document).ready(async function () {
     }
     get_courses_semester(semester)
     await load_chosen_courses(semester);
-    console.log("finished loading");
 });
 
 
@@ -178,11 +177,10 @@ function add_course_table(courses, my_courses, period) {
 
 }
 
-function load_course_info(course_code, scheduler_id, container_type) {
+async function load_course_info(course_code, scheduler_id, container_type) {
     var course_container = $("#course-info-container-" + scheduler_id + "-" + container_type);
     var info_container = $("#info-container-" + scheduler_id + "-" + container_type);
     var examination_container = $("#examination-container-" + scheduler_id + "-" + container_type);
-    var loading = $("#courses-loader-" + scheduler_id);
     
     if (info_container.children().length == 0) {
         $.ajax({
@@ -194,27 +192,32 @@ function load_course_info(course_code, scheduler_id, container_type) {
                 
                 info_container.append(course_info_div(response));
                 examination_container.append(course_examination(response, scheduler_id, container_type));
-                loading.remove();
+                course_container.slideToggle(200);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 // The error callback function to handle any errors
                 console.log("AJAX request failed: " + textStatus, errorThrown);
             }
           });
+    } else {
+        toggle_details(course_container);
     }
 
-    if (course_container.is(":visible")) {
-        course_container.slideToggle(500);
-    } else {
-        course_container.slideToggle(500);
-    }
     
 }
 
+function toggle_details(course_container) {
+    if (course_container.is(":visible")) {
+        course_container.slideToggle(200);
+    } else {
+        course_container.slideToggle(200);
+    }
+}
+
 function course_info_div(response) {
-    var courseCode = response.course_code;
-    var courseName = response.course_name;
-    var fields = response.main_field;
+    var courseCode = response.course.course_code;
+    var courseName = response.course.course_name;
+    var fields = response.main_fields;
     var examinator = response.examinator;
 
     var info_1 = $('<div>', {
@@ -258,7 +261,7 @@ function course_info_div(response) {
 }
 
 function course_examination(response, scheduler_id, container_type) {
-    var examination = response.examination
+    var examination = response.examinations
     var courseCode = response.course_code;
     var container = $("#examination-container-" + scheduler_id + "-" + container_type);
     container.append($('<p>', { text: "Examinationsmoment", class: "font-bold font-xl"}));
@@ -272,13 +275,14 @@ function course_examination(response, scheduler_id, container_type) {
     $('<th>').text('Hp').appendTo(trHead);
     $('<th>').text('Betygsskala').appendTo(trHead);
 
-    for (var exam in examination) {
+    $.each(examination, function (i) { 
         var trBody = $('<tr>').appendTo(tbody);
-        for (data in examination[exam]) {
-            $('<td>').text(examination[exam][data]).appendTo(trBody);
-        }
+        trBody.append($('<td>').text(examination[i]["code"]));
+        trBody.append($('<td>').text(examination[i]["name"]));
+        trBody.append($('<td>').text(examination[i]["hp"]));
+        trBody.append($('<td>').text(examination[i]["grading"]));
         tbody.append(trBody);
-    }
+    });
 
     container.append($('<div>', { 
         class: "flex font-bold font-xl",
@@ -415,12 +419,8 @@ function expand_div(scheduler_id, container_type) {
     var infoContainer = $('<div>').attr('id', 'info-container-' + scheduler_id + "-" + container_type).addClass('flex flex-col p-5 border-r-2 w-1/2 border-black/25');
     var examinationContainer = $('<div>').attr('id', 'examination-container-' + scheduler_id + "-" + container_type).addClass('flex flex-col p-5 space-y-2');
     
-    var loadingButton = $('<button>').addClass('btn');
-    var loadingSpinner = $('<span>').addClass('loading loading-spinner');
-    var loadingText = $('<span>').text('Laddar');
-    var coursesLoader = $('<span>').attr('id', 'courses-loader-' + scheduler_id).addClass('hidden').append(loadingButton.append(loadingSpinner).append(loadingText));
     
-    var courseInfo = courseInfoContainer.append($('<div>').addClass('flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg').append(coursesLoader).append(infoContainer).append(examinationContainer));
+    var courseInfo = courseInfoContainer.append($('<div>').addClass('flex border-x-2 border-x-stone-100 border-t-2 border-t-stone-200 p-5 shadow-md bg-white mb-5 rounded-b-lg').append(infoContainer).append(examinationContainer));
     
     var finalRow = td.append(courseInfo);
     dropdown.append(finalRow);
@@ -492,27 +492,34 @@ function toggle_period(period) {
     var period_btn = $("#period-" + period + "-btn");
     var period_1_toggled = $("#period-" + 1 + "-btn").data("toggled");
     var period_2_toggled = $("#period-" + 2 + "-btn").data("toggled");
+    var period_2 = $("#toggle-period-2");
 
     var toggled = period_btn.data("toggled");
 
     if (period_1_toggled && period_2_toggled) {
         // Close the table
-        period_table.slideToggle();
+        period_table.slideToggle(200);
         period_btn.data("toggled", false);
         period_btn.removeAttr("class");
         period_btn.addClass("bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white");
 
+        if (period != 2) {
+            period_2.removeAttr("style")
+        }
+
     } else if (period == 1 && period_2_toggled && !toggled) {
-        period_table.slideToggle();
+        period_table.slideToggle(200);
+        period_btn.data("toggled", true);
+        period_btn.removeAttr("class");
+        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
+        period_2.css("visibility", "collapse")
+
+    } else if (period == 2 && period_1_toggled && !toggled) {
+        period_table.slideToggle(200);
         period_btn.data("toggled", true);
         period_btn.removeAttr("class");
         period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
 
-    } else if (period == 2 && period_1_toggled && !toggled) {
-        period_table.slideToggle();
-        period_btn.data("toggled", true);
-        period_btn.removeAttr("class");
-        period_btn.addClass("bg-slate-800 p-3 text-white transition ease-in-out");
     }
 }
 

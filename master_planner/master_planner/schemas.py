@@ -37,13 +37,14 @@ class MySchedulerSchema(ModelSchema):
 class ExaminationSchema(ModelSchema):
     class Config:
         model = Examination
-        model_fields = ["hp", "name", "grading", "code", "course"]
+        model_fields = ["hp", "name", "grading", "code"] 
 
 class ExaminationDetails(Schema):
     examinations: List[ExaminationSchema]
     examinator: str
     location: str
     main_fields: List[str]
+    course: CourseSchema
 
 class HpSchema(Schema):
     total: int

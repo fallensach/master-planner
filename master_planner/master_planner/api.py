@@ -152,7 +152,8 @@ def get_extra_course_info(request, course_code):
     data = {"examinations": [], 
             "main_fields": [],
             "examinator": course.examinator,
-            "location": course.campus
+            "location": course.campus,
+            "course": course
             }
 
     for field in list(main_fields):
