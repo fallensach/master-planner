@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from planning.models import Schedule, Course, Scheduler
+from planning.models import Schedule, Course, Scheduler, Examination
 from django.db.models import Sum, F, ExpressionWrapper, Case, When, Value, IntegerField
 from django.db.models.functions import Cast, Replace
 from planning.management.commands.scrappy.courses import fetch_course_info
@@ -141,23 +141,34 @@ def get_semester_courses(request, profile, semester):
     return 200, data
 
 
-@api.get('get_extra_course_info/{course_code}')
+@api.get('get_extra_course_info/{course_code}', response={200: ExaminationDetails, 401: Error})
 def get_extra_course_info(request, course_code):
-    extra_info = fetch_course_info(course_code)
-    # TODO when detailed course infor stored in db, fix error handling and enable tests
-    # try:
+    if not request.user.is_authenticated:
+        return 401, {"message": "Unauthorized access"}
+
     course = Course.objects.get(course_code=course_code)
-    # except Course.DoesNotExist:
-        # return 406, {"message": "No course with that course code"}
-    extra_info["course_code"] = course.course_code
-    extra_info["course_name"] = course.course_name
-    """    
-    return  {"examination": [{"code": "lab",
-                              "name":  "laboration",
-                              "scope": "6",
-                              "grading": "u/g"}],
-             "examinator": "cyrille",
-             "location": "valla",
-             "main_field": ["matematik"]
-                }"""
-    return extra_info
+    main_fields = course.main_fields.all()
+    examination = Examination.objects.filter(course=course).all()
+    data = {"examinations": [], 
+            "main_fields": [],
+            "examinator": course.examinator,
+            "location": course.campus
+            }
+
+    for field in list(main_fields):
+        data["main_fields"].append(field.field_name)
+    
+    for exam in list(examination):
+        data["examinations"].append(exam)
+        
+    return data
+
+"""    
+return  {"examination": [{"code": "lab",
+                            "name":  "laboration",
+                            "scope": "6",
+                            "grading": "u/g"}],
+            "examinator": "cyrille",
+            "location": "valla",
+            "main_field": ["matematik"]
+            }"""
