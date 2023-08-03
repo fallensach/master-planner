@@ -46,11 +46,11 @@ function buildRequirements(requirements) {
         advancedHp = $(`#overview-${semester}-advanced-hp`);
         basicHp = $(`#overview-${semester}-basic-hp`);
 
-        totalTermHp.text(requirements[semester]["hp"]["total"]);
-        advancedHp.text(requirements[semester]["hp"]["a_level"]);
-        basicHp.text(requirements[semester]["hp"]["g_level"]);
-        periodOneHp.text(requirements[semester]["periods"]["period_1"]["hp"]["total"]);    
-        periodTwoHp.text(requirements[semester]["periods"]["period_2"]["hp"]["total"]);    
+        totalTermHp.text(requirements["semester_" + semester]["hp"]["total"]);
+        advancedHp.text(requirements["semester_" + semester]["hp"]["a_level"]);
+        basicHp.text(requirements["semester_" + semester]["hp"]["g_level"]);
+        periodOneHp.text(requirements["semester_" + semester]["periods"]["period_1"]["total"]);    
+        periodTwoHp.text(requirements["semester_" + semester]["periods"]["period_2"]["total"]);    
 
         if (requirements[semester]["overlap"].length > 0) {
             term.append(createWarning(semester));
