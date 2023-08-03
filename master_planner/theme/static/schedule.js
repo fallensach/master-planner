@@ -221,7 +221,7 @@ function course_info_div(response) {
     var examinator = response.examinator;
 
     var info_1 = $('<div>', {
-    class: 'flex space-x-2',
+    class: 'flex space-x-2 items-center',
     append: [
         $('<p>', { class: 'text-xl font-bold', text: courseCode }),
         $('<p>', { text: courseName })
@@ -391,7 +391,7 @@ function replace_period_table(period, semester_data) {
     table_body.empty();
 
     $.each(semester_data[`period_${period}`], function(key, value) {
-        var course_row = $('<tr>', {class: "bg-white text-left hover:bg-slate-200 transition ease-in-out"}).appendTo(table_body);
+        var course_row = $('<tr>', {class: "bg-white text-left hover:bg-slate-200 font-bold transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-left font-mono"}),
