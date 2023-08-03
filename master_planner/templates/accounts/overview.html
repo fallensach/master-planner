@@ -1,31 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
 <input id="chosen-term" value="7" class="hidden">
-<main class="flex w-full justify-between p-10 space-x-10 h-full">
-    <container class="rounded-md bg-white h-full w-full">
-        <div>
-            <p class="font-bold text-2xl"> Period 1 </p>
-            <div class="grid grid-cols-4"> 
-                <div class="w-36 h-36 bg-black">
-
+<main class=" w-full p-10 h-full">
+    <container class="flex flex-col rounded-md h-full bg-gray-50 w-full">
+    <p class="text-3xl font-bold p-3"> Översikt </p>
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="all-terms-tab" data-tabs-target="#all-terms" type="button" role="tab" aria-controls="allt-terms" aria-selected="false">Alla teminer</button>
+                </li>
+                <li role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="program-tab" data-tabs-target="#program" type="button" role="tab" aria-controls="program" aria-selected="false">Byt program</button>
+                </li>
+            </ul>
+        </div>
+        <div id="myTabContent" class="flex overflow-hidden py-2 flex-col"> 
+            <div class="hidden p-4 rounded-lg flex-1 dark:bg-gray-800 overflow-auto" id="all-terms" role="tabpanel" aria-labelledby="all-terms-tab">
+                <div class="text-sm space-y-3 divide-y-2 divide-gray-200 text-gray-500 dark:text-gray-400">
+                    <div class="rounded-md shadow border border-slate-400">
+                        {% include 'examination_requirements.html' %}
+                    </div>
+                    <div class="flex space-x-3">
+                        {% include 'overview_card.html' with semester=7 %}
+                    </div>
+                    <div class="flex space-x-3">
+                        {% include 'overview_card.html' with semester=8 %}
+                    </div>
+                    <div class="flex">
+                        {% include 'overview_card.html' with semester=9 %}
+                    </div>
                 </div>
-                <div class="w-36 h-36 bg-black">
-
-                </div>
-                
-                <div class="w-36 h-36 bg-black">
-
-                </div>
-                <div class="w-36 h-36 bg-black">
-
+            </div>
+            <div class="hidden p-4 rounded-lg dark:bg-gray-800" id="program" role="tabpanel" aria-labelledby="program-tab">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {% include 'setup.html' %}
                 </div>
             </div>
         </div>
+
     </container>
 
-    <div class="flex justify-center rounded-md h-full w-full bg-white">
-        {% include 'setup.html' %}
-    </div>
 </main>
 {% endblock content %}
+
 

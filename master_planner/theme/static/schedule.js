@@ -221,7 +221,7 @@ function course_info_div(response) {
     var examinator = response.examinator;
 
     var info_1 = $('<div>', {
-    class: 'flex space-x-2',
+    class: 'flex items-center space-x-2',
     append: [
         $('<p>', { class: 'text-xl font-bold', text: courseCode }),
         $('<p>', { text: courseName })
@@ -262,7 +262,7 @@ function course_info_div(response) {
 
 function course_examination(response, scheduler_id, container_type) {
     var examination = response.examinations
-    var courseCode = response.course_code;
+    var courseCode = response.course.course_code;
     var container = $("#examination-container-" + scheduler_id + "-" + container_type);
     container.append($('<p>', { text: "Examinationsmoment", class: "font-bold font-xl"}));
     var table = $('<table>').appendTo(container);
@@ -391,7 +391,7 @@ function replace_period_table(period, semester_data) {
     table_body.empty();
 
     $.each(semester_data[`period_${period}`], function(key, value) {
-        var course_row = $('<tr>', {class: "bg-white text-left hover:bg-slate-200 transition ease-in-out"}).appendTo(table_body);
+        var course_row = $('<tr>', {class: "bg-white text-left hover:bg-slate-200 font-bold transition ease-in-out"}).appendTo(table_body);
         course_row.append(
             course_checkbox(value["scheduler_id"]),
             $("<td>", {text: value["course"]["course_code"], class: "text-left font-mono"}),
