@@ -4,27 +4,67 @@ $(document).ready(function () {
 
 
 function loadRequirements() {
-    fields = $("#semester-field-reqs");
-    profiles = $("#semester-profile-reqs");
-    term = $("#overview-7-card");
+    url = "../api/account/overview";
 
-    for (var i = 0; i < 10; i++) {
-        field = reqListItem("Informatik", 30);
-        profile = reqListItem("Ai och maskininlörning", 12);
-        fields.append(field)
-        profiles.append(profile)
-    }
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (overviewData) {
+           buildRequirements(overviewData); 
+        }
+    });
 
-    term.append(createWarning("7"))
 
 }
 
-function reqListItem(fieldName, hp) {
-    const li = $('<li>').addClass('flex space-x-3 items-center');
+function buildRequirements(requirements) {
+    fields = $("#semester-field-reqs");
+    profiles = $("#semester-profile-reqs");
+    overviewTotalHp = $("#overview-total-hp");
+    overviewAdvancedHp = $("#overview-advanced-hp");
+    overviewBasicHp = $("#overview-basic-hp");
+
+    overviewTotalHp.text(`Hp: ${requirements["total_hp"]}`);
+    overviewAdvancedHp.text(`Avancerad: ${requirements["a_level"]}`);
+    overviewBasicHp.text(`Grund: ${requirements["g_level"]}`);
+
+    $.each(requirements["field"], function (fieldName, hp) { 
+        fieldReq = reqListItem(fieldName, hp);
+        fields.append(fieldReq);
+    });
+
+    $.each(requirements["profile"], function (profileName, hp) { 
+        profileReq = reqListItem(profileName, hp);
+        profiles.append(profileReq)
+    });
+
+    for (var semester = 7; semester < 10; semester++) {
+        term = $(`#overview-${semester}-card`);
+        totalTermHp = $(`#overview-${semester}-total-hp`);
+        periodOneHp = $(`#overview-${semester}-period-1-hp`);
+        periodTwoHp = $(`#overview-${semester}-period-2-hp`);
+        advancedHp = $(`#overview-${semester}-advanced-hp`);
+        basicHp = $(`#overview-${semester}-basic-hp`);
+
+        totalTermHp.text(requirements[semester]["hp"]["total"]);
+        advancedHp.text(requirements[semester]["hp"]["a_level"]);
+        basicHp.text(requirements[semester]["hp"]["g_level"]);
+        periodOneHp.text(requirements[semester]["periods"]["period_1"]["hp"]["total"]);    
+        periodTwoHp.text(requirements[semester]["periods"]["period_2"]["hp"]["total"]);    
+
+        if (requirements[semester]["overlap"].length > 0) {
+            term.append(createWarning(semester));
+        }
+    }
+
+}
+
+function reqListItem(reqType, hp) {
+    const li = $('<li>').addClass('flex space-x-5 pt-3 items-center');
     const span = $('<span>').addClass('flex space-x-5 justify-between items-center w-full text-base font-normal leading-tight text-gray-600 dark:text-gray-400');
-    const p1 = $('<p>').text(fieldName);
+    const p1 = $('<p>').text(reqType);
     const p2 = $('<p>').text(hp);
-    p2.addClass('text-lg')
+    p2.addClass('text-lg text-center')
 
     span.append(p1, p2);
     li.append(span);
