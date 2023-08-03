@@ -1,5 +1,5 @@
 from ninja import NinjaAPI
-from planning.models import Schedule, Course, Scheduler, Examination
+from planning.models import Schedule, Course, Scheduler, Examination, SchedulersProfiles
 from planning.models import Schedule, Course, Scheduler
 from django.db.models import Sum, F, Q, ExpressionWrapper, Case, When, Value, IntegerField, Count
 from django.db.models.functions import Cast, Replace, Substr
@@ -75,10 +75,8 @@ def overview(request):
         overlapping_choices = (account_instance
                                .choices
                                .filter(query)
-                               # .values_list('schedule__semester', 
-                               #              'scheduler_id'
-                               #              )
                                )
+
         overlapping_dict = {7: [], 8: [], 9: []}
         for scheduler_instance in overlapping_choices:
             overlapping_dict[scheduler_instance.schedule.semester].append(scheduler_instance)
@@ -156,11 +154,12 @@ def choice(request, data: ChoiceSchema):
                     
     return 200, {"scheduler_id": -1}
     
-@api.get('account/choices', response={200: Semesters, 401: Error})
-def choice(request):
+@api.get('account/choices/{profile_code}', response={200: Semesters, 401: Error})
+def choice(request, profile_code):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
     account = Account.objects.get(user=request.user)
+    
     course_choices = {}
     total_hp = 0
     level_hp = account.level_hp()
@@ -170,8 +169,8 @@ def choice(request):
         semester_hp = 0
         periods = {}
         for period in range(1, 3):
-            semester_period = account.choices.filter(schedule__semester=semester, schedule__period=period)
-            period_hp = semester_period.aggregate(
+            choices = account.choices.filter(schedule__semester=semester, schedule__period=period)
+            period_hp = choices.aggregate(
                 hp=Sum(
                     Case(
                         When(course__hp__endswith='*', then=Cast(F('course__hp'), IntegerField()) / 2),
@@ -181,13 +180,38 @@ def choice(request):
                     output_field=IntegerField()
                     )
                 )
+            if profile_code == "free":
+                choices_vof = SchedulersProfiles.objects.filter(scheduler__in=choices,
+                                                                profile_id=profile_code,
+                                                                scheduler__schedule__semester=semester,
+                                                                scheduler__schedule__period=period)
+            else:
+                profile_choices = SchedulersProfiles.objects.values_list("scheduler").filter(scheduler__in=choices,
+                                                                         profile_id=profile_code, 
+                                                                         scheduler__schedule__semester=semester,
+                                                                         scheduler__schedule__period=period)                                   
+                          
+                choices_vof = SchedulersProfiles.objects.filter(Q(scheduler__in=choices,
+                                                                  profile_id=profile_code, 
+                                                                  scheduler__schedule__semester=semester,
+                                                                  scheduler__schedule__period=period
+                                                                  )
+                                                                |
+                                                                Q(scheduler__in=choices,
+                                                                    profile_id="free", 
+                                                                    scheduler__schedule__semester=semester,
+                                                                    scheduler__schedule__period=period
+                                                                    )
+                                                                ).exclude(scheduler__in=profile_choices,
+                                                                           profile_id="free")
+
             if period_hp["hp"] == None:
                 period_hp["hp"] = 0
-
+            
             periods[f"period_{period}"] = {"hp": {"total": period_hp["hp"], 
                                                   "a_level": level_hp[semester, period, "a_level"], 
                                                   "g_level": level_hp[semester, period, "g_level"]}, 
-                                           "courses": list(semester_period)}
+                                           "courses": list(choices_vof)}
 
             semester_hp += period_hp["hp"]
 
@@ -210,20 +234,19 @@ def get_semester_courses(request, profile, semester):
     program = Account.objects.get(user=request.user).program
     
 
-    period1 = Scheduler.objects.filter(program=program, 
-                                       profiles=profile, 
-                                       schedule__semester=semester,
-                                       schedule__period=1)
-    period2 = Scheduler.objects.filter(program=program, 
-                                       profiles=profile, 
-                                       schedule__semester=semester,
-                                       schedule__period=2)
-        
+    period1 = SchedulersProfiles.objects.filter(scheduler__program=program, 
+                                       profile=profile, 
+                                       scheduler__schedule__semester=semester,
+                                       scheduler__schedule__period=1)
+    period2 = SchedulersProfiles.objects.filter(scheduler__program=program, 
+                                       profile=profile, 
+                                       scheduler__schedule__semester=semester,
+                                       scheduler__schedule__period=2)
+    
     data = {"period_1": list(period1),
             "period_2": list(period2)}
-    
+    # print(data)
     return 200, data
-
 
 @api.get('get_extra_course_info/{course_code}', response={200: ExaminationDetails, 401: Error})
 def get_extra_course_info(request, course_code):
@@ -241,21 +264,4 @@ def get_extra_course_info(request, course_code):
             "course": course
             }
 
-    # for field in list(main_fields):
-    #     data["main_fields"].append(field.field_name)
-    
-    # for exam in list(examination):
-    #     data["examinations"].append(exam)
-    
-    # print(test)
     return data
-
-"""    
-return  {"examination": [{"code": "lab",
-                            "name":  "laboration",
-                            "scope": "6",
-                            "grading": "u/g"}],
-            "examinator": "cyrille",
-            "location": "valla",
-            "main_field": ["matematik"]
-            }"""

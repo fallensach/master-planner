@@ -1,6 +1,6 @@
-from ninja import ModelSchema, Schema
+from ninja import ModelSchema, Schema, Field
 from ninja.orm import create_schema
-from planning.models import Schedule, Course, Scheduler, Examination
+from planning.models import Schedule, Course, Scheduler, Examination, SchedulersProfiles
 from planning.management.commands.scrappy.courses import fetch_course_info
 from typing import List, Dict
 import uuid
@@ -14,18 +14,29 @@ class ScheduleSchema(ModelSchema):
 class CourseSchema(ModelSchema):
     class Config:
         model = Course
-        model_fields = ["course_code", "course_name", "hp", "level", "vof", "examinator"]
+        model_fields = ["course_code", "course_name", "hp", "level", "examinator"]
         
 class SchedulerSchema(ModelSchema):
     course: CourseSchema
     schedule: ScheduleSchema
+
     class Config:
         model = Scheduler
-        model_fields = ["scheduler_id", "program", "schedule"]
+        model_fields = ["scheduler_id"]
+
+class ExtendedSchedulerSchema(ModelSchema):
+    scheduler_id: uuid.UUID = Field(..., alias="scheduler.scheduler_id")
+    course: CourseSchema = Field(..., alias="scheduler.course")
+    schedule: ScheduleSchema = Field(..., alias="scheduler.schedule")
+    class Config:
+        model = SchedulersProfiles
+        model_fields = ["vof"]
 
 class SemesterCourses(Schema):
-    period_1: List[SchedulerSchema]
-    period_2: List[SchedulerSchema]
+    period_1: List[ExtendedSchedulerSchema]
+    period_2: List[ExtendedSchedulerSchema]
+
+
 
 class MySchedulerSchema(ModelSchema):
     course: CourseSchema
@@ -53,7 +64,7 @@ class HpSchema(Schema):
 
 class MyCourseSchema(Schema):
     hp: HpSchema
-    courses: List[SchedulerSchema]
+    courses: List[ExtendedSchedulerSchema]
 
 class MyPeriodSchema(Schema):
     period_1: MyCourseSchema

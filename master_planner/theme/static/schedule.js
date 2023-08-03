@@ -71,7 +71,8 @@ function add_course(scheduler_id) {
 function load_chosen_courses(semester) {
     const my_courses_1 = $("#my-courses-1");
     const my_courses_2 = $("#my-courses-2");
-    const url = "/api/account/choices";
+    const profile_code = $("#profile-code").val();
+    const url = "/api/account/choices/" + profile_code;
     $.ajax({
         type: "GET",
         url: url,
@@ -165,7 +166,7 @@ function add_course_table(courses, my_courses, period) {
                     $("<td>", {text: course_data["course"]["hp"], class: "text-center"}),
                     $("<td>", {text: course_data["schedule"]["block"], class: "text-center"}),
                     $("<td>", {text: course_data["course"]["level"], class: "text-center"}),
-                    $("<td>", {text: course_data["course"]["vof"], class: "text-center"}),
+                    $("<td>", {text: course_data["vof"], class: "text-center"}),
                     make_expand_btn(course_data["course"]["course_code"], course_data["scheduler_id"], "my"),
                     $("<td>", {append: [remove_course_btn], class: "text-center"}),
                     ]
@@ -374,6 +375,7 @@ function get_courses_semester(semester, sort=false) {
             type: "GET",
             url: url,
             success: function (semester_data) {
+                console.log(semester_data)
                 all_courses = semester_data;
                 highlight_semester(semester); 
                 $("#chosen-term").val(semester);
@@ -404,7 +406,7 @@ function replace_period_table(period, semester_data) {
             $("<td>", {text: value["course"]["hp"]}),
             $("<td>", {text: value["schedule"]["block"]}),
             $("<td>", {text: value["course"]["level"]}),
-            $("<td>", {text: value["course"]["vof"]}),
+            $("<td>", {text: value["vof"]}),
             make_expand_btn(value["course"]["course_code"], value["scheduler_id"], "all"),
         );
         table_body.append(course_row);
