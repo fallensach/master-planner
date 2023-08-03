@@ -2,7 +2,7 @@ from ninja import ModelSchema, Schema
 from ninja.orm import create_schema
 from planning.models import Schedule, Course, Scheduler, Examination
 from planning.management.commands.scrappy.courses import fetch_course_info
-from typing import List
+from typing import List, Dict
 import uuid
 
 
@@ -86,6 +86,27 @@ class Error(Schema):
     
 class LinkedScheduler(Schema):
     scheduler_id: int
+
+class PeriodSchema(Schema):
+    period_1: HpSchema
+    period_2: HpSchema
+
+class SemesterOverviewSchema(Schema):
+    overlap: List[SchedulerSchema]
+    periods: PeriodSchema
+    hp: HpSchema
+
+class OverviewSchema(Schema):
+    total_hp: int
+    a_level: int
+    g_level: int
+    field: Dict[str, int]
+    profile: Dict[str, int]
+    semester_7: SemesterOverviewSchema
+    semester_8: SemesterOverviewSchema
+    semester_9: SemesterOverviewSchema
+
+
 
 class NoContent(Schema):
     message: str

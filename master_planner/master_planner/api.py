@@ -13,7 +13,7 @@ import pprint
 
 api = NinjaAPI()
 
-@api.get('account/overview')
+@api.get('account/overview', response={200: OverviewSchema, 401: Error})
 def overview(request):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
@@ -34,6 +34,7 @@ def overview(request):
                                                     )
                                        )
                              )
+    print(total_hp_by_mainfield)
     total_hp_by_mainfield = dict(total_hp_by_mainfield)
 
     distinct_choice_ids = account_instance.choices.values_list("scheduler_id").distinct()
@@ -58,6 +59,7 @@ def overview(request):
                                      )
                            )
     total_hp_by_profile = dict(total_hp_by_profile)
+    del total_hp_by_profile["Ingen profil"]
 
     overlapping_schedules = (account_instance.choices
                              .values('schedule__semester', 'schedule__period', 'schedule__block')
@@ -73,13 +75,13 @@ def overview(request):
         overlapping_choices = (account_instance
                                .choices
                                .filter(query)
-                               .values_list('schedule__semester', 
-                                            'scheduler_id'
-                                            )
+                               # .values_list('schedule__semester', 
+                               #              'scheduler_id'
+                               #              )
                                )
         overlapping_dict = {7: [], 8: [], 9: []}
-        for sem, id in overlapping_choices:
-            overlapping_dict[sem].append(id)
+        for scheduler_instance in overlapping_choices:
+            overlapping_dict[scheduler_instance.schedule.semester].append(scheduler_instance)
     else:
         overlapping_dict = {7: [], 8: [], 9: []}
 
@@ -95,20 +97,20 @@ def overview(request):
         periods = {}
         for period in range(1, 3):
             total_hp_in_period = level_hp[semester, period, "a_level"]+level_hp[semester, period, "g_level"]
-            periods[f"period_{period}"] = {"hp": {"total": total_hp_in_period, 
-                                                  "a_level": level_hp[semester, period, "a_level"], 
-                                                  "g_level": level_hp[semester, period, "g_level"]}, 
 
-                                           }
+            periods[f"period_{period}"] = {"total": total_hp_in_period, 
+                                           "a_level": level_hp[semester, period, "a_level"], 
+                                           "g_level": level_hp[semester, period, "g_level"]}
+
         total_hp_in_semester = level_hp[semester, 'a_level']+level_hp[semester, 'g_level']
-        response[semester] = {'overlap': overlapping_dict[semester],
-                              'hp': {'total': total_hp_in_semester,
-                                     'a_level': level_hp[semester, 'a_level'],
-                                     'g_level': level_hp[semester, 'g_level']
-                                     },
-                              'periods': periods
-                              }
-
+        response[f"semester_{semester}"] = {'overlap': overlapping_dict[semester],
+                                            'hp': {'total': total_hp_in_semester,
+                                                   'a_level': level_hp[semester, 'a_level'],
+                                                   'g_level': level_hp[semester, 'g_level']
+                                                   },
+                                            'periods': periods
+                                            }
+    print(response)
     return 200, response
 
 @api.post('account/choice', url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
