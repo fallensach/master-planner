@@ -54,8 +54,19 @@ class TestGetters(TestCase):
                            "program_code": "6CMJU",
                            "level": "A1X",
                            "block": 4,
-                           "vof": "v",
+                           "vof": "o",
                            "profile_code": "AAAA",
+                           "period" : 1,
+                           "semester": 7
+                           },
+                          {"course_code": "AAAA",
+                           "course_name": "test_course_1",
+                           "hp": "6",
+                           "program_code": "6CMJU",
+                           "level": "A1X",
+                           "block": 4,
+                           "vof": "f",
+                           "profile_code": "BBBB",
                            "period" : 1,
                            "semester": 7
                            }])
@@ -68,7 +79,6 @@ class TestGetters(TestCase):
     def test_courses(self):
 
         response = self.client.get('/api/courses/AAAA/7')
-
         self.assertEqual(response.status_code, 200)
         period_1 = response.json().get("period_1")
         period_2 = response.json().get("period_2")
