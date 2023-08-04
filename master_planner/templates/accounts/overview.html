@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<input id="chosen-term" value="7" class="hidden">
 <main class=" w-full p-10 h-full">
     <container class="flex flex-col rounded-md h-full bg-gray-50 w-full">
     <p class="text-3xl font-bold p-3"> Översikt </p>
@@ -17,7 +16,7 @@
         <div id="myTabContent" class="flex overflow-hidden py-2 flex-col"> 
             <div class="hidden p-4 rounded-lg flex-1 dark:bg-gray-800 overflow-auto" id="all-terms" role="tabpanel" aria-labelledby="all-terms-tab">
                 <div class="text-sm space-y-3 divide-y-2 divide-gray-200 text-gray-500 dark:text-gray-400">
-                    <div class="rounded-md shadow border border-slate-400">
+                    <div class="rounded-md shadow border border-slate-400 bg-white">
                         {% include 'examination_requirements.html' %}
                     </div>
                     <div class="flex space-x-3">
