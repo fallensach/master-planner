@@ -34,7 +34,6 @@ def overview(request):
                                                     )
                                        )
                              )
-    print(total_hp_by_mainfield)
     total_hp_by_mainfield = dict(total_hp_by_mainfield)
 
     distinct_choice_ids = account_instance.choices.values_list("scheduler_id").distinct()
@@ -71,15 +70,29 @@ def overview(request):
         query = reduce(or_, (Q(schedule__semester=schedule['schedule__semester'],
                                schedule__period=schedule['schedule__period'],
                                schedule__block=schedule['schedule__block']) for schedule in overlapping_schedules)) 
-
         overlapping_choices = (account_instance
-                               .choices
-                               .filter(query)
-                               )
+                           .choices
+                           .filter(query)
+                           .values_list("schedule__semester",
+                                        "schedule__period",
+                                        "schedule__block",
+                                        "scheduler_id")
+                           )
 
-        overlapping_dict = {7: [], 8: [], 9: []}
-        for scheduler_instance in overlapping_choices:
-            overlapping_dict[scheduler_instance.schedule.semester].append(scheduler_instance)
+        overlapping_dict = {7: {}, 8: {}, 9: {}}
+        # for scheduler_instance in overlapping_choices:
+        #     overlapping_dict[scheduler_instance.schedule.semester].append(scheduler_instance)
+        for sem, *period_block, scheduler_id in overlapping_choices:
+            period_block = tuple(period_block)
+            if period_block in overlapping_dict[sem]:
+                overlapping_dict[sem][period_block].append(Scheduler.objects.get(scheduler_id=scheduler_id))
+            else:
+                overlapping_dict[sem].update({period_block: [Scheduler.objects.get(scheduler_id=scheduler_id)]})
+        
+        for sem, courses in overlapping_dict.items():
+            overlapping_dict[sem] = list(courses.values())
+
+
     else:
         overlapping_dict = {7: [], 8: [], 9: []}
 
@@ -108,7 +121,6 @@ def overview(request):
                                                    },
                                             'periods': periods
                                             }
-    print(response)
     return 200, response
 
 @api.post('account/choice', url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
