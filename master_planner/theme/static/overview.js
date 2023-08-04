@@ -5,8 +5,9 @@ function loadRequirements() {
         type: "GET",
         url: url,
         success: function (overviewData) {
-           buildRequirements(overviewData);
-           showWarningsMyCourses(overviewData);
+            console.log('Loading overlaps')
+            buildRequirements(overviewData);
+            showWarningsMyCourses(overviewData);
         }
     });
 
@@ -47,11 +48,25 @@ function buildRequirements(requirements) {
         periodOneHp.text(requirements["semester_" + semester]["periods"]["period_1"]["total"]);    
         periodTwoHp.text(requirements["semester_" + semester]["periods"]["period_2"]["total"]);    
 
-        if (requirements["semester_" + semester]["overlap"].length > 0) {
-            term.append(createWarning(semester, requirements["semester_" + semester]["overlap"]));
+        overlaps = requirements["semester_" + semester]["overlap"]
+        blocks = []
+        if (overlaps.length > 0) {
+            $.each(overlaps, function (indexInArray, block) {
+                mainContainer = $('<div>').append($('<p>').text(`Block ${block[0]['schedule']['block']}`).addClass('font-semibold'))
+                courseDivContainer = $('<div>').addClass('grid grid-cols-3 gap-3')
+                $.each(block, function (indexInArray, scheduler) { 
+                    courseDiv = $('<div>').addClass('bg-red-500 text-center text-white p-2 rounded-lg').append(
+                        $('<p>').text(scheduler.course.course_code)
+                        ).addClass('font-semibold')
+                    courseDivContainer.append(courseDiv)
+                });
+                mainContainer.append(courseDivContainer);
+                blocks.push(mainContainer);
+            });
+
+            term.append(createWarning(semester, blocks))
         }
     }
-
 }
 
 function reqListItem(reqType, hp) {
@@ -73,13 +88,14 @@ function createWarning(semester, schedulers) {
     .addClass('p-4 flex flex-col text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800')
     .attr('role', 'alert');
 
-    const alertHeader = $('<div>').addClass('flex items-center');
+    const alertHeader = $('<div>').addClass('flex flex-col');
 
-    const alertTitle = $('<h3>').addClass('text-lg font-medium').text('Varning schemakrock');
+    const alertTitle = $('<h3>').addClass('text-lg font-bold').text('Varning schemakrock');
+    const warningText = $('<p>').text('Följande kurser nedan krockar med varandra')
 
-    alertHeader.append($('<span>').addClass('sr-only').text('Info'), alertTitle);
+    alertHeader.append($('<span>').addClass('sr-only').text('Info'), alertTitle, warningText);
 
-    const alertTextContainer = $('<div>').addClass('grid grid-cols-3 gap-3').append(createCourseConflicts(schedulers))
+    const alertTextContainer = $('<div>').addClass('flex flex-col space-y-3').append(schedulers)
 
     const alertMessage = $('<div>').addClass('mt-2 mb-4 text-sm h-full').append(alertTextContainer);
 
@@ -117,8 +133,11 @@ function createCourseConflicts(schedulers) {
 function showWarningsMyCourses(schedulers) {
     semester = localStorage.getItem('term');
     $.each(schedulers[`semester_${semester}`]['overlap'], function (index, scheduler) { 
-        myCourseRow = $(`#my-course-${scheduler.scheduler_id}`);
-        myCourseRow.removeClass('bg-white');
-        myCourseRow.addClass('bg-red-200');
+        $.each(scheduler, function (indexInArray, schedule) { 
+            myCourseRow = $(`#my-course-${schedule.scheduler_id}`);
+            myCourseRow.removeClass('bg-white hover:bg-slate-200');
+            myCourseRow.addClass('bg-red-200 hover:bg-red-100');
+        });
+
     });
 }

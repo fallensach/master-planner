@@ -29,7 +29,6 @@ $(document).ready(async function () {
     }
     get_courses_semester(semester);
     await load_chosen_courses(semester);
-    loadRequirements();
 });
 
 function scroll_home(home) {
@@ -93,6 +92,9 @@ async function load_chosen_courses(semester) {
             load_term_hp(picked_courses);
             check_course_boxes(picked_courses["semester_" + semester]["periods"]);
             load_total_term_card(picked_courses);
+            console.log("Loading courses");
+            loadRequirements();
+
         }
     });
 }
@@ -386,7 +388,6 @@ function get_courses_semester(semester, sort=false) {
                 highlight_semester_card(`semester-${semester}-card`, semester);
                 replace_period_table(1, semester_data);
                 replace_period_table(2, semester_data);
-                load_chosen_courses(semester)
             }
         });
     }
