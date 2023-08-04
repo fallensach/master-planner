@@ -64,15 +64,14 @@ function check_course_boxes(periods) {
     }
 }
 
-function add_course(scheduler_id) {
+async function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
-
+    semester = localStorage.getItem('term');
     if (checkbox.is(":checked")) {
-        add_course_db(scheduler_id);
-
+        await add_course_db(scheduler_id);
+        load_chosen_courses(semester);
     } else {
-        delete_course_db(scheduler_id);
-
+        await delete_course_db(scheduler_id);
     }
 }
 
@@ -310,33 +309,31 @@ function course_examination(response, scheduler_id, container_type) {
     return container
 }
 
-function add_course_db(scheduler_id) {
+async function add_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
     const url = "/api/account/choice";
-    const semester = $("#chosen-term").val();
 
     $.ajax({
         type: "POST",
         url: url,
         data: payload,
         success: function (response) {
-            load_chosen_courses(semester);
             $("#check-" + response["scheduler_id"]).prop("checked", true);
         }
     });
 }
 
-function delete_course_db(scheduler_id) {
+async function delete_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
     const url = "/api/account/choice";
-    const semester = $("#chosen-term").val();
+    semester = localStorage.getItem('term');
 
     $.ajax({
         type: "DELETE",
         url: url,
         data: payload,
         success: function (response) {
-            load_chosen_courses(semester);
+            load_chosen_courses(semester)
             $("#check-" + response["scheduler_id"]).prop("checked", false);
             $("#check-" + scheduler_id).prop("checked", false);
         }
