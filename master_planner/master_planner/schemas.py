@@ -103,7 +103,7 @@ class PeriodSchema(Schema):
     period_2: HpSchema
 
 class SemesterOverviewSchema(Schema):
-    overlap: List[SchedulerSchema]
+    overlap: List[List[SchedulerSchema]]
     periods: PeriodSchema
     hp: HpSchema
 
