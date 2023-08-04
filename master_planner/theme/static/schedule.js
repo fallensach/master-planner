@@ -79,6 +79,7 @@ async function load_chosen_courses(semester) {
     const my_courses_2 = $("#my-courses-2");
     const profile_code = $("#profile-code").val();
     const url = "/api/account/choices/" + profile_code;
+    localStorage.setItem('term', semester);
     $.ajax({
         type: "GET",
         url: url,
@@ -343,7 +344,7 @@ async function delete_course_db(scheduler_id) {
 }
 
 function sort_courses(tag, id) {
-    var semester = $("#chosen-term").val();
+    var semester = localStorage.getItem('term'); 
     th = $("#" + id);
     th.data("ascend", !th.data("ascend"));
 
@@ -371,7 +372,6 @@ function sort_courses(tag, id) {
 
 function get_courses_semester(semester, sort=false) {
     profile_code = $("#profile-code").val();
-    localStorage.setItem('term', semester);
     if (sort) {
         replace_period_table(1, all_courses);
         replace_period_table(2, all_courses);
