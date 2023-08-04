@@ -13,21 +13,22 @@ import pprint
 
 api = NinjaAPI()
 
-@api.get('account/overview', response={200: OverviewSchema, 401: Error})
+@api.get("account/overview", response={200: OverviewSchema, 401: Error})
 def overview(request):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
 
-    account_instance = Account.objects.get(user=request.user)
+    account_instance = Account.objects.select_related("program").get(user=request.user)
+
     total_hp_by_mainfield = (account_instance.choices
-                             .values_list('course__main_fields__field_name')
+                             .values_list("course__main_fields__field_name")
                              .distinct()
                              .annotate(total_hp=Sum(
                                                     Case(
-                                                        When(course__hp__endswith='*', 
-                                                             then=Cast(F('course__hp'), IntegerField()) / 2
+                                                        When(course__hp__endswith="*", 
+                                                             then=Cast(F("course__hp"), IntegerField()) / 2
                                                              ),
-                                                        default=Cast(F('course__hp'), IntegerField()),
+                                                        default=Cast(F("course__hp"), IntegerField()),
                                                         output_field=IntegerField()
                                                         ),
                                                     output_field=IntegerField()
@@ -36,21 +37,35 @@ def overview(request):
                              )
     total_hp_by_mainfield = dict(total_hp_by_mainfield)
 
-    distinct_choice_ids = account_instance.choices.values_list("scheduler_id").distinct()
+    distinct_scheduler_ids = account_instance.choices.values_list("scheduler_id").distinct()
+    distinct_course_codes = account_instance.choices.values_list("course_id").distinct()
+    print("scheduler:", distinct_scheduler_ids)
+    print("course:", distinct_course_codes)
+
+    filtered_choices = (Scheduler
+                        .objects
+                        .filter(scheduler_id__in=distinct_scheduler_ids,
+                                program=account_instance.program)
+                        .values_list("profiles")
+                        .distinct()
+                       )
+    print("filter", filtered_choices)
     
     total_hp_by_profile = (Scheduler
                            .objects
-                           .filter(scheduler_id__in=distinct_choice_ids,
+                           .filter(course_id__in=distinct_course_codes,
                                    program=account_instance.program
                                    )
-                           .values_list('profiles__profile_name')
+                           .exclude(~Q(scheduler_id__in=distinct_scheduler_ids),
+                                       profiles__in=filtered_choices)
+                           .values_list("profiles__profile_name")
                            .distinct()
                            .annotate(total_hp=Sum(
                                                   Case(
-                                                      When(course__hp__endswith='*', 
-                                                           then=Cast(F('course__hp'), IntegerField()) / 2
+                                                      When(course__hp__endswith="*", 
+                                                           then=Cast(F("course__hp"), IntegerField()) / 2
                                                            ),
-                                                      default=Cast(F('course__hp'), IntegerField()),
+                                                      default=Cast(F("course__hp"), IntegerField()),
                                                       output_field=IntegerField()
                                                       ),
                                                   output_field=IntegerField()
@@ -58,26 +73,31 @@ def overview(request):
                                      )
                            )
     total_hp_by_profile = dict(total_hp_by_profile)
-    del total_hp_by_profile["Ingen profil"]
+    if "Ingen profil" in total_hp_by_profile:
+        del total_hp_by_profile["Ingen profil"]
 
     overlapping_schedules = (account_instance.choices
-                             .values('schedule__semester', 'schedule__period', 'schedule__block')
-                             .annotate(count=Count('scheduler_id'))
+                             .values("schedule__semester", "schedule__period", "schedule__block")
+                             .annotate(count=Count("scheduler_id"))
                              .filter(count__gt=1)
                              )
     
     if overlapping_schedules:
-        query = reduce(or_, (Q(schedule__semester=schedule['schedule__semester'],
-                               schedule__period=schedule['schedule__period'],
-                               schedule__block=schedule['schedule__block']) for schedule in overlapping_schedules)) 
+
+
+        query = reduce(or_, (Q(schedule__semester=schedule["schedule__semester"],
+                               schedule__period=schedule["schedule__period"],
+                               schedule__block=schedule["schedule__block"]) for schedule in overlapping_schedules)) 
+
         overlapping_choices = (account_instance
-                           .choices
-                           .filter(query)
-                           .values_list("schedule__semester",
-                                        "schedule__period",
-                                        "schedule__block",
-                                        "scheduler_id")
-                           )
+                               .choices
+                               .filter(query)
+                               .order_by("schedule")
+                               .values_list("schedule__semester",
+                                            "schedule__period",
+                                            "schedule__block",
+                                            "scheduler_id")
+                               )
 
         overlapping_dict = {7: {}, 8: {}, 9: {}}
         # for scheduler_instance in overlapping_choices:
@@ -93,15 +113,17 @@ def overview(request):
             overlapping_dict[sem] = list(courses.values())
 
 
+
     else:
         overlapping_dict = {7: [], 8: [], 9: []}
+    
 
     level_hp = account_instance.level_hp()
-    response = {'field': total_hp_by_mainfield,
-                'profile': total_hp_by_profile,
-                'total_hp': level_hp['a_level']+level_hp['g_level'],
-                'a_level': level_hp['a_level'],
-                'g_level': level_hp['g_level']
+    response = {"field": total_hp_by_mainfield,
+                "profile": total_hp_by_profile,
+                "total_hp": level_hp["a_level"]+level_hp["g_level"],
+                "a_level": level_hp["a_level"],
+                "g_level": level_hp["g_level"]
                 }
 
     for semester in range(7, 10):
@@ -113,17 +135,17 @@ def overview(request):
                                            "a_level": level_hp[semester, period, "a_level"], 
                                            "g_level": level_hp[semester, period, "g_level"]}
 
-        total_hp_in_semester = level_hp[semester, 'a_level']+level_hp[semester, 'g_level']
-        response[f"semester_{semester}"] = {'overlap': overlapping_dict[semester],
-                                            'hp': {'total': total_hp_in_semester,
-                                                   'a_level': level_hp[semester, 'a_level'],
-                                                   'g_level': level_hp[semester, 'g_level']
+        total_hp_in_semester = level_hp[semester, "a_level"]+level_hp[semester, "g_level"]
+        response[f"semester_{semester}"] = {"overlap": overlapping_dict[semester],
+                                            "hp": {"total": total_hp_in_semester,
+                                                   "a_level": level_hp[semester, "a_level"],
+                                                   "g_level": level_hp[semester, "g_level"]
                                                    },
-                                            'periods': periods
+                                            "periods": periods
                                             }
     return 200, response
 
-@api.post('account/choice', url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
+@api.post("account/choice", url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
 def choice(request, data: ChoiceSchema):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
@@ -145,7 +167,7 @@ def choice(request, data: ChoiceSchema):
     return 200, {"scheduler_id": -1}
     
 
-@api.delete('account/choice', url_name="delete_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
+@api.delete("account/choice", url_name="delete_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
 def choice(request, data: ChoiceSchema):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
@@ -166,7 +188,7 @@ def choice(request, data: ChoiceSchema):
                     
     return 200, {"scheduler_id": -1}
     
-@api.get('account/choices/{profile_code}', response={200: Semesters, 401: Error})
+@api.get("account/choices/{profile_code}", response={200: Semesters, 401: Error})
 def choice(request, profile_code):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
@@ -185,8 +207,8 @@ def choice(request, profile_code):
             period_hp = choices.aggregate(
                 hp=Sum(
                     Case(
-                        When(course__hp__endswith='*', then=Cast(F('course__hp'), IntegerField()) / 2),
-                        default=Cast(F('course__hp'), IntegerField()),
+                        When(course__hp__endswith="*", then=Cast(F("course__hp"), IntegerField()) / 2),
+                        default=Cast(F("course__hp"), IntegerField()),
                         output_field=IntegerField()
                         ),
                     output_field=IntegerField()
@@ -239,7 +261,7 @@ def choice(request, profile_code):
                             }
     return 200, course_choices
 
-@api.get('courses/{profile}/{semester}', response={200: SemesterCourses, 401: Error})
+@api.get("courses/{profile}/{semester}", response={200: SemesterCourses, 401: Error})
 def get_semester_courses(request, profile, semester):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
@@ -260,13 +282,13 @@ def get_semester_courses(request, profile, semester):
     # print(data)
     return 200, data
 
-@api.get('get_extra_course_info/{course_code}', response={200: ExaminationDetails, 401: Error})
+@api.get("get_extra_course_info/{course_code}", response={200: ExaminationDetails, 401: Error})
 def get_extra_course_info(request, course_code):
     if not request.user.is_authenticated:
         return 401, {"message": "Unauthorized access"}
 
     course = Course.objects.get(course_code=course_code)
-    main_fields = course.main_fields.all().values_list('field_name', flat=True)
+    main_fields = course.main_fields.all().values_list("field_name", flat=True)
     examination = Examination.objects.filter(course=course).all()
 
     data = {"examinations": list(examination), 
