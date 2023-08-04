@@ -25,7 +25,7 @@ class Course(models.Model):
 class Examination(models.Model):
     id = models.AutoField(primary_key=True)
     hp = models.CharField(max_length=5)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=200)
     grading = models.CharField(max_length=15)
     code = models.CharField(max_length=10)
     course = models.ForeignKey(Course,on_delete=models.CASCADE, null=True)
