@@ -1,11 +1,19 @@
-
 var header;
 var sticky;
 var all_courses;
 
 $(document).ready(async function () {
     var programs = JSON.parse($("#programs").text());
-    const semester = $("#chosen-term").val();
+
+    if (localStorage.getItem('term') != null) {
+        semester = localStorage.getItem('term');
+        console.log("Exists")
+    } else {
+        const semester = $("#chosen-term").val();
+        localStorage.setItem("term", semester);
+        console.log("Setting storage")
+    }
+
     $("#id_program").autocomplete({
         source: programs,
         delay: 100,
@@ -19,10 +27,10 @@ $(document).ready(async function () {
     if (home != null) {
         home.onscroll = function() {scroll_home(home)};
     }
-    get_courses_semester(semester)
+    get_courses_semester(semester);
     await load_chosen_courses(semester);
+    loadRequirements();
 });
-
 
 function scroll_home(home) {
     header = document.querySelector("#pickable-courses");
@@ -68,7 +76,7 @@ function add_course(scheduler_id) {
     }
 }
 
-function load_chosen_courses(semester) {
+async function load_chosen_courses(semester) {
     const my_courses_1 = $("#my-courses-1");
     const my_courses_2 = $("#my-courses-2");
     const profile_code = $("#profile-code").val();
@@ -84,8 +92,8 @@ function load_chosen_courses(semester) {
             add_course_table(term_p_1, my_courses_1, 1);
             add_course_table(term_p_2, my_courses_2, 2);
             load_term_hp(picked_courses);
-            check_course_boxes(picked_courses["semester_" + semester]["periods"])
-            load_total_term_card(picked_courses)
+            check_course_boxes(picked_courses["semester_" + semester]["periods"]);
+            load_total_term_card(picked_courses);
         }
     });
 }
@@ -364,6 +372,7 @@ function sort_courses(tag, id) {
 
 function get_courses_semester(semester, sort=false) {
     profile_code = $("#profile-code").val();
+    localStorage.setItem('term', semester);
     if (sort) {
         replace_period_table(1, all_courses);
         replace_period_table(2, all_courses);
@@ -375,10 +384,9 @@ function get_courses_semester(semester, sort=false) {
             type: "GET",
             url: url,
             success: function (semester_data) {
-                console.log(semester_data)
                 all_courses = semester_data;
-                highlight_semester(semester); 
-                $("#chosen-term").val(semester);
+                highlight_semester(semester);
+                highlight_semester_card(`semester-${semester}-card`, semester);
                 replace_period_table(1, semester_data);
                 replace_period_table(2, semester_data);
                 load_chosen_courses(semester)
@@ -530,7 +538,6 @@ function highlight_semester_card(card_id, semester) {
     const term_8_card = $("#semester-8-card");
     const term_9_card = $("#semester-9-card");
     const highlight_card = $("#" + card_id);
-    $("#chosen-term").val(semester);
 
     var cards = [term_7_card, term_8_card, term_9_card];
 

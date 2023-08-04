@@ -1,8 +1,3 @@
-$(document).ready(function () {
-    loadRequirements();
-})
-
-
 function loadRequirements() {
     url = "../api/account/overview";
 
@@ -10,10 +5,10 @@ function loadRequirements() {
         type: "GET",
         url: url,
         success: function (overviewData) {
-           buildRequirements(overviewData); 
+           buildRequirements(overviewData);
+           showWarningsMyCourses(overviewData);
         }
     });
-
 
 }
 
@@ -52,8 +47,8 @@ function buildRequirements(requirements) {
         periodOneHp.text(requirements["semester_" + semester]["periods"]["period_1"]["total"]);    
         periodTwoHp.text(requirements["semester_" + semester]["periods"]["period_2"]["total"]);    
 
-        if (requirements[semester]["overlap"].length > 0) {
-            term.append(createWarning(semester));
+        if (requirements["semester_" + semester]["overlap"].length > 0) {
+            term.append(createWarning(semester, requirements["semester_" + semester]["overlap"]));
         }
     }
 
@@ -72,7 +67,7 @@ function reqListItem(reqType, hp) {
     return li
 }
 
-function createWarning(semester) {
+function createWarning(semester, schedulers) {
     const alertContent = $('<div>')
     .attr('id', 'alert-additional-content-' + semester)
     .addClass('p-4 flex flex-col text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800')
@@ -84,7 +79,9 @@ function createWarning(semester) {
 
     alertHeader.append($('<span>').addClass('sr-only').text('Info'), alertTitle);
 
-    const alertMessage = $('<div>').addClass('mt-2 mb-4 text-sm h-full').text('Du har en eller flera schemakrockar i denna termin.');
+    const alertTextContainer = $('<div>').addClass('grid grid-cols-3 gap-3').append(createCourseConflicts(schedulers))
+
+    const alertMessage = $('<div>').addClass('mt-2 mb-4 text-sm h-full').append(alertTextContainer);
 
     const alertButtons = $('<div>').addClass('flex');
     const viewSchemaBtn = $('<button>')
@@ -92,19 +89,36 @@ function createWarning(semester) {
     .addClass('text-white bg-red-800 hover:bg-red-900 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800')
     .html('<svg class="-ml-0.5 mr-2 h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14"><path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>Visa schema');
 
-    const dismissBtn = $('<button>')
-    .attr('type', 'button')
-    .addClass('text-red-800 bg-transparent border border-red-800 hover:bg-red-900 hover:text-white focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:hover:bg-red-600 dark:border-red-600 dark:text-red-500 dark:hover:text-white dark:focus:ring-red-800')
-    .attr('data-dismiss-target', '#alert-additional-content-' + semester)
-    .attr('aria-label', 'Close')
-    .text('Avvisa');
 
     viewSchemaBtn.click(function () { 
-       window.location.href = '../home'; 
+        localStorage.setItem('term', semester);
+        window.location.href = '../home/';
     });
 
-    alertButtons.append(viewSchemaBtn, dismissBtn);
+    alertButtons.append(viewSchemaBtn);
     alertContent.append(alertHeader, alertMessage, alertButtons);
 
     return alertContent
+}
+
+function createCourseConflicts(schedulers) {
+    courses = []
+    $.each(schedulers, function (index, scheduler) {
+        courseDiv = $('<div>').append(
+            $('<p>').text(scheduler.course.course_code)
+            ).addClass('bg-green-500 font-semibold')
+        
+        courses.push(courseDiv);
+    });
+    
+    return courses;
+}
+
+function showWarningsMyCourses(schedulers) {
+    semester = localStorage.getItem('term');
+    $.each(schedulers[`semester_${semester}`]['overlap'], function (index, scheduler) { 
+        myCourseRow = $(`#my-course-${scheduler.scheduler_id}`);
+        myCourseRow.removeClass('bg-white');
+        myCourseRow.addClass('bg-red-200');
+    });
 }
