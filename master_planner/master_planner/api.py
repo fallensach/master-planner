@@ -83,6 +83,7 @@ def overview(request):
                              )
     
     if overlapping_schedules:
+<<<<<<< HEAD
         query = reduce(or_, (Q(schedule__semester=schedule["schedule__semester"],
                                schedule__period=schedule["schedule__period"],
                                schedule__block=schedule["schedule__block"]) for schedule in overlapping_schedules)) 
@@ -140,7 +141,6 @@ def overview(request):
                                                    },
                                             "periods": periods
                                             }
-    
     return 200, response
 
 @api.post("account/choice", url_name="post_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
