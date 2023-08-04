@@ -83,7 +83,7 @@ def overview(request):
                              )
     
     if overlapping_schedules:
-<<<<<<< HEAD
+
         query = reduce(or_, (Q(schedule__semester=schedule["schedule__semester"],
                                schedule__period=schedule["schedule__period"],
                                schedule__block=schedule["schedule__block"]) for schedule in overlapping_schedules)) 
