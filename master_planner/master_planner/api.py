@@ -84,6 +84,7 @@ def overview(request):
     
     if overlapping_schedules:
 
+
         query = reduce(or_, (Q(schedule__semester=schedule["schedule__semester"],
                                schedule__period=schedule["schedule__period"],
                                schedule__block=schedule["schedule__block"]) for schedule in overlapping_schedules)) 
@@ -110,6 +111,7 @@ def overview(request):
         
         for sem, courses in overlapping_dict.items():
             overlapping_dict[sem] = list(courses.values())
+
 
 
     else:
