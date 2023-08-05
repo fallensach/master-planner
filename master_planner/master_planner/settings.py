@@ -36,7 +36,7 @@ if PRODUCTION:
     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
     DEBUG = os.getenv('DEBUG')
 else:
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['*']
     SECRET_KEY = 123
  
 DEBUG = True
