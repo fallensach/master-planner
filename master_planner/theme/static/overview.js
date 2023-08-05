@@ -5,7 +5,6 @@ function loadRequirements() {
         type: "GET",
         url: url,
         success: function (overviewData) {
-            console.log('Loading overlaps')
             buildRequirements(overviewData);
             showWarningsMyCourses(overviewData);
         }
