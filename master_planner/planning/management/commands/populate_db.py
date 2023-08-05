@@ -34,10 +34,10 @@ class Command(BaseCommand):
         program.profiles.add(profile)
         program.save()
 
-        user = User.objects.create_user(username="admin",  
-                                        password="123",
-                                        is_superuser=True,
-                                        is_staff=True)
+        user = Account.objects.create_user(username="admin",  
+                                           password="123",
+                                           is_superuser=True,
+                                           is_staff=True)
         user.save()
 
         account = Account(user=user, program=program)
@@ -84,13 +84,11 @@ class Command(BaseCommand):
         # fill Schedule
         # register_schedule()
 
-        user = User.objects.create_user(username="admin",  
-                                        password="123",
-                                        is_superuser=True,
-                                        is_staff=True)
-        user.save()
+        account = Account.objects.create_user(username="admin",  
+                                              password="123",
+                                              is_superuser=True,
+                                              is_staff=True)
 
-        account = Account.objects.create(user=user)
 
         # fetch data and insert programs in db
         if options['debug']:
@@ -121,16 +119,19 @@ class Command(BaseCommand):
         
         courses = []
         
-        threads = []
+        # threads = []
+        # for course in Course.objects.all():
+        #     thread = threading.Thread(target=scrape_course, args=[course.course_code, courses])
+        #     threads.append(thread)
+        #  
+        # for thread in threads:
+        #     thread.start()
+        #     
+        # for thread in threads:
+        #     thread.join()    
+
         for course in Course.objects.all():
-            thread = threading.Thread(target=scrape_course, args=[course.course_code, courses])
-            threads.append(thread)
-         
-        for thread in threads:
-            thread.start()
-            
-        for thread in threads:
-            thread.join()    
+            scrape_course(course.course_code, courses)
         
         register_course_details(courses)
             

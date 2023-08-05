@@ -159,6 +159,8 @@ INTERNAL_IPS = [
 ]
 TAILWIND_APP_NAME = 'theme'
 
+AUTH_USER_MODEL = 'accounts.Account'
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Node for windows, python sometimes cant find the path
 if platform == "win32":

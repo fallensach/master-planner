@@ -18,7 +18,7 @@ def overview(request):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
 
-    account_instance = Account.objects.select_related("program").get(user=request.user)
+    account_instance = request.user
 
     total_hp_by_mainfield = (account_instance.choices
                              .values_list("course__main_fields__field_name")
@@ -92,7 +92,7 @@ def overview(request):
         overlapping_choices = (account_instance
                                .choices
                                .filter(query)
-                               .order_by("schedule")
+                               .order_by("schedule__block")
                                .values_list("schedule__semester",
                                             "schedule__period",
                                             "schedule__block",
@@ -149,7 +149,7 @@ def overview(request):
 def choice(request, data: ChoiceSchema):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
-    account = Account.objects.get(user=request.user)
+    account = request.user
     
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
@@ -171,7 +171,7 @@ def choice(request, data: ChoiceSchema):
 def choice(request, data: ChoiceSchema):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
-    account = Account.objects.get(user=request.user)
+    account = request.user
     
     try:
         scheduler = Scheduler.objects.get(scheduler_id=data.scheduler_id)
@@ -192,7 +192,7 @@ def choice(request, data: ChoiceSchema):
 def choice(request, profile_code):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
-    account = Account.objects.get(user=request.user)
+    account = request.user
     
     course_choices = {}
     total_hp = 0
@@ -265,7 +265,7 @@ def choice(request, profile_code):
 def get_semester_courses(request, profile, semester):
     if not request.user.is_authenticated:
         return 401, {"message": "authentication failed"}
-    program = Account.objects.get(user=request.user).program
+    program = request.user.program
     
 
     period1 = SchedulersProfiles.objects.filter(scheduler__program=program, 
