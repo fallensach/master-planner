@@ -1,10 +1,9 @@
 from django.db import models, IntegrityError
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from planning.models import Program, Scheduler
 
-class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True)
+class Account(AbstractUser):
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
     choices = models.ManyToManyField(Scheduler, blank=True)
 
     def __str__(self):
@@ -46,19 +45,4 @@ class Account(models.Model):
         
         return result_dict
 
-    def field_hp(self):
-        pass
-
-    def profile_hp(self):
-        pass
-
-def register_account(username: str, email: str, password: str):
-    try:
-        user = User.objects.create_user(username=username, password=password, email=email)
-        account = Account(user=user)
-        account.save()
-        return True
-    
-    except IntegrityError:
-        return False
     

@@ -24,7 +24,7 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
     
-    account = Account.objects.get(user=request.user)
+    account = user=request.user
 
     if account.program is None:
         return redirect("overview")
