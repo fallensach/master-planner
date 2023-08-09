@@ -7,7 +7,7 @@ class Account(AbstractUser):
     choices = models.ManyToManyField(Scheduler, blank=True)
 
     def __str__(self):
-        return str(self.user)
+        return str(self.username)
 
     def level_hp(self, profile: str=None) -> dict[float]:
         result_dict = {}
