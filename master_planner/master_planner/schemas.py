@@ -36,7 +36,8 @@ class SemesterCourses(Schema):
     period_1: List[ExtendedSchedulerSchema]
     period_2: List[ExtendedSchedulerSchema]
 
-
+class AllSemesterCourses(Schema):
+   semesters: dict[str, SemesterCourses] 
 
 class MySchedulerSchema(ModelSchema):
     course: CourseSchema

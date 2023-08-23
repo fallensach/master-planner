@@ -1,15 +1,12 @@
 from ninja import NinjaAPI
-from planning.models import Schedule, Course, Scheduler, Examination, SchedulersProfiles
-from planning.models import Schedule, Course, Scheduler
-from django.db.models import Sum, F, Q, ExpressionWrapper, Case, When, Value, IntegerField, Count
-from django.db.models.functions import Cast, Replace, Substr
+from planning.models import Course, Scheduler, Examination, SchedulersProfiles
+from planning.models import Course, Scheduler
+from django.db.models import Sum, F, Q, Case, When, IntegerField, Count
+from django.db.models.functions import Cast
 from planning.management.commands.scrappy.courses import fetch_course_info
-from accounts.models import Account
-from typing import List
 from .schemas import *
 from functools import reduce
 from operator import or_
-import pprint
 
 api = NinjaAPI()
 
@@ -39,8 +36,6 @@ def overview(request):
 
     distinct_scheduler_ids = account_instance.choices.values_list("scheduler_id").distinct()
     distinct_course_codes = account_instance.choices.values_list("course_id").distinct()
-    print("scheduler:", distinct_scheduler_ids)
-    print("course:", distinct_course_codes)
 
     filtered_choices = (Scheduler
                         .objects
@@ -49,7 +44,6 @@ def overview(request):
                         .values_list("profiles")
                         .distinct()
                        )
-    print("filter", filtered_choices)
     
     total_hp_by_profile = (Scheduler
                            .objects
@@ -279,8 +273,32 @@ def get_semester_courses(request, profile, semester):
     
     data = {"period_1": list(period1),
             "period_2": list(period2)}
-    # print(data)
     return 200, data
+
+@api.get("courses/{profile}", response={200: AllSemesterCourses, 401: Error})
+def get_profile_courses(request, profile):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentication failed"}
+    program = request.user.program
+    
+    courses = {"semesters": None}
+    semesters = {}
+    for semester in range(7, 10):
+        period1 = SchedulersProfiles.objects.filter(scheduler__program=program, 
+                                        profile=profile,
+                                        scheduler__schedule__semester=semester,
+                                        scheduler__schedule__period=1)
+        period2 = SchedulersProfiles.objects.filter(scheduler__program=program, 
+                                        profile=profile, 
+                                        scheduler__schedule__semester=semester,
+                                        scheduler__schedule__period=2)
+        sem_courses = {"period_1": list(period1),
+                "period_2": list(period2)}
+        semesters[semester] = sem_courses
+
+    courses["semesters"] = semesters
+    
+    return 200, courses
 
 @api.get("get_extra_course_info/{course_code}", response={200: ExaminationDetails, 401: Error})
 def get_extra_course_info(request, course_code):
