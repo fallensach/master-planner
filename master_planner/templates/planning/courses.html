@@ -13,12 +13,14 @@
                         <button id="semester-btn-9" onclick="get_courses_semester(this.value); highlight_semester_card('semester-' + this.value + '-card')" class="bg-slate-200 p-3 text-black/75 transition ease-in-out hover:bg-slate-500 hover:text-white" value="9" type="submit">Termin 9</button>
                     </div>
                 </div>
-                
-                <form action="{% url 'home' %}" method="POST" class="flex h-full">
-                    {% csrf_token %}
-                    {{ form.profiles }}
-                    <button class="bg-slate-600 text-white p-3 transition ease-in-out duration-300 hover:bg-slate-900 rounded-br-lg rounded-tr-lg" name="pick_profile" type="submit">Välj profil</button>
-                </form>
+                <div class="flex flex-col">
+                    <label for="profile" class="text-lg font-bold">Välj inriktning</label>
+                    <div>
+                        <select class="h-full" id="profile-selection">
+                        </select>  
+                        <button id="profile-select-btn" onclick="selectProfile()" class="bg-slate-600 text-white p-3 transition ease-in-out duration-300 hover:bg-slate-900 rounded-br-lg rounded-tr-lg" name="pick_profile" >Välj profil</button>
+                    </div>
+                </div>
                 <div>
                     <p class="font-bold text-lg"> Välj period: </p>
                     <div class="flex border-2 border-black/10 rounded-lg overflow-hidden">
@@ -96,7 +98,7 @@
         
         <div class="inline-flex pb-2">
             <p class="text-2xl font-bold">Profil Vald: &nbsp</p>
-            <p class="text-2xl"> {{ profile_name }} </p>
+            <p id="profile-name" class="text-2xl"></p>
         </div>
         <div id="tables-container" class="flex flex-col">
             <div id="period-1">

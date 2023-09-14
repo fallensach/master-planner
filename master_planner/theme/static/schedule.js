@@ -5,11 +5,11 @@ var all_courses;
 $(document).ready(function () {
     var programs = JSON.parse($("#programs").text());
 
-    if (localStorage.getItem('term') == null) {
-        localStorage.setItem("term", 7);
+    if (sessionStorage.getItem('term') == null) {
+        sessionStorage.setItem("term", 7);
     }
      
-    semester = localStorage.getItem("term");
+    semester = sessionStorage.getItem("term");
 
     $("#id_program").autocomplete({
         source: programs,
@@ -25,16 +25,54 @@ $(document).ready(function () {
         home.onscroll = function() {scroll_home(home)};
     }
     if (sessionStorage.getItem("storageExists") == null) {
+
+        sessionStorage.setItem("profile", "free");
+        loadProfilesData()
         load_profile_courses();
         load_chosen_courses();
-        get_chosen_courses(semester);
-        get_courses_semester(semester);
     } else {
+        loadProfilesData()
         get_courses_semester(semester);
-        get_chosen_courses(semester);
     }
 
 });
+
+function loadProfilesData() {
+    url = "/api/profiles"
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (profiles) {
+            sessionStorage.setItem("profiles", JSON.stringify(profiles.profiles));
+            initProfiles()
+        }
+    });
+}
+
+function initProfiles() {
+    profileOptions = $("#profile-selection");
+    var profiles = JSON.parse(sessionStorage.getItem("profiles"));
+    $.each(profiles, function (indexInArray, profile) { 
+        var option = $("<option>", {
+            text: profile.profile_name,
+            value: profile.profile_code,
+        });
+
+        profileOptions.append(option)
+        if (profile.profile_code == sessionStorage.getItem("profile")) {
+            profileName = profile.profile_name;
+            $("#profile-name").text(profileName);
+        }
+    });
+}
+
+function selectProfile() {
+    var profileOptions = document.querySelector("#profile-selection");
+    sessionStorage.setItem("profile", profileOptions.value);
+
+    load_profile_courses()
+}
+
 
 function scroll_home(home) {
     header = document.querySelector("#pickable-courses");
@@ -70,7 +108,7 @@ function check_course_boxes(periods) {
 
 async function add_course(scheduler_id) {
     var checkbox = $("#check-" + scheduler_id);
-    semester = localStorage.getItem('term');
+    semester = sessionStorage.getItem('term');
     if (checkbox.is(":checked")) {
         add_course_db(scheduler_id);
     } else {
@@ -79,13 +117,14 @@ async function add_course(scheduler_id) {
 }
 
 function load_chosen_courses() {
-    const profile_code = $("#profile-code").val();
+    const profile_code = sessionStorage.getItem("profile");
     const url = "/api/account/choices/" + profile_code;
-    semester = localStorage.getItem("term");
+    semester = sessionStorage.getItem("term");
     $.ajax({
         type: "GET",
         url: url,
         success: function (picked_courses) {
+            console.log(picked_courses)
             sessionStorage.setItem("chosenCourses", JSON.stringify(picked_courses));
             get_chosen_courses(semester)
         }
@@ -95,7 +134,7 @@ function load_chosen_courses() {
 function get_chosen_courses(semester) {
     const my_courses_1 = $("#my-courses-1");
     const my_courses_2 = $("#my-courses-2");
-    localStorage.setItem('term', semester);
+    sessionStorage.setItem('term', semester);
     picked_courses = JSON.parse(sessionStorage.getItem("chosenCourses"));
     my_courses_1.empty();
     my_courses_2.empty();
@@ -329,7 +368,7 @@ function course_examination(response, scheduler_id, container_type) {
 
 function add_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
-    semester = localStorage.getItem("term");
+    semester = sessionStorage.getItem("term");
     const url = "/api/account/choice";
 
     $.ajax({
@@ -346,7 +385,7 @@ function add_course_db(scheduler_id) {
 function delete_course_db(scheduler_id) {
     var payload = JSON.stringify({"scheduler_id": scheduler_id});
     const url = "/api/account/choice";
-    semester = localStorage.getItem('term');
+    semester = sessionStorage.getItem('term');
 
     $.ajax({
         type: "DELETE",
@@ -354,7 +393,6 @@ function delete_course_db(scheduler_id) {
         data: payload,
         success: function (response) {
             load_chosen_courses(semester);
-            get_chosen_courses(semester);
             $("#check-" + response["scheduler_id"]).prop("checked", false);
             $("#check-" + scheduler_id).prop("checked", false);
         }
@@ -362,7 +400,7 @@ function delete_course_db(scheduler_id) {
 }
 
 function sort_courses(tag, id) {
-    var semester = localStorage.getItem('term'); 
+    var semester = sessionStorage.getItem('term'); 
     th = $("#" + id);
     th.data("ascend", !th.data("ascend"));
     all_courses = JSON.parse(sessionStorage.getItem("semesters"));
@@ -388,8 +426,8 @@ function sort_courses(tag, id) {
     get_courses_semester(semester, true)
 }
 
-function load_profile_courses() {
-    profile_code = $("#profile-code").val();
+async function load_profile_courses() {
+    profile_code = sessionStorage.getItem("profile")
     const url = "/api/courses/" + profile_code;
     $.ajax({
         type: "GET",
@@ -398,6 +436,7 @@ function load_profile_courses() {
             sessionStorage.setItem("semesters", JSON.stringify(semester_data));
             sessionStorage.setItem("storageExists", true);
             all_courses = semester_data;
+            get_courses_semester(sessionStorage.getItem("term"))
         }
     });
 }

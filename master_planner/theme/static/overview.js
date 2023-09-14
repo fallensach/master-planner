@@ -131,7 +131,7 @@ function createCourseConflicts(schedulers) {
 }
 
 function showWarningsMyCourses(schedulers) {
-    semester = localStorage.getItem('term');
+    semester = sessionStorage.getItem('term');
     $.each(schedulers[`semester_${semester}`]['overlap'], function (index, scheduler) { 
         $.each(scheduler, function (indexInArray, schedule) { 
             myCourseRow = $(`#my-course-${schedule.scheduler_id}`);
