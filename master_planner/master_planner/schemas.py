@@ -1,11 +1,18 @@
 from ninja import ModelSchema, Schema, Field
 from ninja.orm import create_schema
-from planning.models import Schedule, Course, Scheduler, Examination, SchedulersProfiles
+from planning.models import Schedule, Course, Scheduler, Examination, SchedulersProfiles, Profile
 from planning.management.commands.scrappy.courses import fetch_course_info
 from typing import List, Dict
 import uuid
 
+class ProfileSchema(ModelSchema):
+    class Config:
+        model = Profile
+        model_fields = ["profile_name", "profile_code"]
 
+class ProfilesSchema(Schema):
+    profiles: list[ProfileSchema]
+        
 class ScheduleSchema(ModelSchema):
     class Config:
         model = Schedule 
@@ -97,7 +104,7 @@ class Error(Schema):
     message: str 
     
 class LinkedScheduler(Schema):
-    scheduler_id: int
+    scheduler_id: str
 
 class PeriodSchema(Schema):
     period_1: HpSchema

@@ -1,6 +1,7 @@
 from ninja import NinjaAPI
 from planning.models import Course, Scheduler, Examination, SchedulersProfiles
 from planning.models import Course, Scheduler
+from accounts.models import Account
 from django.db.models import Sum, F, Q, Case, When, IntegerField, Count
 from django.db.models.functions import Cast
 from planning.management.commands.scrappy.courses import fetch_course_info
@@ -9,6 +10,15 @@ from functools import reduce
 from operator import or_
 
 api = NinjaAPI()
+
+@api.get("profiles", response={200: ProfilesSchema, 401: Error})
+def get_profiles(request):
+    if not request.user.is_authenticated:
+        return 401, {"message": "authentiation failed"}
+    
+    profiles = request.user.program.profiles.all()
+    print(profiles)
+    return {"profiles": list(profiles)}
 
 @api.get("account/overview", response={200: OverviewSchema, 401: Error})
 def overview(request):
@@ -67,8 +77,8 @@ def overview(request):
                                      )
                            )
     total_hp_by_profile = dict(total_hp_by_profile)
-    if "Ingen profil" in total_hp_by_profile:
-        del total_hp_by_profile["Ingen profil"]
+    if "Ingen inriktning vald" in total_hp_by_profile:
+        del total_hp_by_profile["Ingen inriktning vald"]
 
     overlapping_schedules = (account_instance.choices
                              .values("schedule__semester", "schedule__period", "schedule__block")
@@ -152,13 +162,12 @@ def choice(request, data: ChoiceSchema):
 
     account.choices.add(scheduler)
     account.save()
-    
     if scheduler.linked:
         account.choices.add(scheduler.linked)
         account.save()
-        return 200, {"scheduler_id": scheduler.linked.scheduler_id}
+        return 200, {"scheduler_id": str(scheduler.linked.scheduler_id)}
          
-    return 200, {"scheduler_id": -1}
+    return 200, {"scheduler_id": "-1"}
     
 
 @api.delete("account/choice", url_name="delete_choice", response={200: LinkedScheduler, 406: Error, 401: Error})
@@ -178,9 +187,9 @@ def choice(request, data: ChoiceSchema):
     if scheduler.linked:
         account.choices.remove(scheduler.linked)
         account.save()
-        return 200, {"scheduler_id": scheduler.linked.scheduler_id}
+        return 200, {"scheduler_id": str(scheduler.linked.scheduler_id)}
                     
-    return 200, {"scheduler_id": -1}
+    return 200, {"scheduler_id": "-1"}
     
 @api.get("account/choices/{profile_code}", response={200: Semesters, 401: Error})
 def choice(request, profile_code):
@@ -217,7 +226,7 @@ def choice(request, profile_code):
                 profile_choices = SchedulersProfiles.objects.values_list("scheduler").filter(scheduler__in=choices,
                                                                          profile_id=profile_code, 
                                                                          scheduler__schedule__semester=semester,
-                                                                         scheduler__schedule__period=period)                                   
+                                                                         scheduler__schedule__period=period)     
                           
                 choices_vof = SchedulersProfiles.objects.filter(Q(scheduler__in=choices,
                                                                   profile_id=profile_code, 
@@ -297,7 +306,6 @@ def get_profile_courses(request, profile):
         semesters[semester] = sem_courses
 
     courses["semesters"] = semesters
-    
     return 200, courses
 
 @api.get("get_extra_course_info/{course_code}", response={200: ExaminationDetails, 401: Error})
