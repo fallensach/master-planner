@@ -13,8 +13,8 @@ function loadRequirements() {
 }
 
 function buildRequirements(requirements) {
-    fields = $("#semester-field-reqs");
-    profiles = $("#semester-profile-reqs");
+    fields = $("#semester-field-reqs").empty();
+    profiles = $("#semester-profile-reqs").empty();
     overviewTotalHp = $("#overview-total-hp");
     overviewAdvancedHp = $("#overview-advanced-hp");
     overviewBasicHp = $("#overview-basic-hp");
@@ -30,11 +30,12 @@ function buildRequirements(requirements) {
 
     $.each(requirements["profile"], function (profileName, hp) { 
         profileReq = reqListItem(profileName, hp);
-        profiles.append(profileReq)
+        profiles.append(profileReq);
     });
 
     for (var semester = 7; semester < 10; semester++) {
-        term = $(`#overview-${semester}-card`);
+        term = $(`#warning-${semester}-overview`);
+        term.empty()
         totalTermHp = $(`#overview-${semester}-total-hp`);
         periodOneHp = $(`#overview-${semester}-period-1-hp`);
         periodTwoHp = $(`#overview-${semester}-period-2-hp`);
@@ -130,7 +131,7 @@ function createCourseConflicts(schedulers) {
 }
 
 function showWarningsMyCourses(schedulers) {
-    semester = localStorage.getItem('term');
+    semester = sessionStorage.getItem('term');
     $.each(schedulers[`semester_${semester}`]['overlap'], function (index, scheduler) { 
         $.each(scheduler, function (indexInArray, schedule) { 
             myCourseRow = $(`#my-course-${schedule.scheduler_id}`);

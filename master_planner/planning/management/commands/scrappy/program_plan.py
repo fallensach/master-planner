@@ -24,6 +24,9 @@ class ProgramPlan:
             self.soup = BeautifulSoup(r.content, "html.parser")
         else:
             raise requests.exceptions.HTTPError(f"Given program {program_code} does not exist.")
+
+        year = self.admission_years()[2020]
+        self.url = f"https://studieinfo.liu.se/program/{year}"
         self.program_code = program_code
         self.program_name = self.program_n()
         
@@ -42,6 +45,11 @@ class ProgramPlan:
         line = course_raw.text.split()
         temp = [line[0], ' '.join(line[1:-4])]
         temp.extend(line[-4:])
+        if len(temp[2]) > 3:
+            temp[1:2] = [" ".join(temp[1:3])]
+            temp.pop(2)      
+            temp.insert(4, "-") 
+            
         course_map = {
             "course_code": temp[0],
             "course_name": temp[1],
@@ -211,7 +219,7 @@ class ProgramPlan:
                          profile_id[1:], 
                          [self.program_code]*len(profile_id))]
         
-        profiles.append(("Ingen profil", "free", self.program_code))
+        profiles.append(("Ingen inriktning", "free", self.program_code))
         
         return profiles
 
@@ -224,11 +232,7 @@ class ProgramPlan:
 
 def main():
     plan = ProgramPlan("6CDDD")
-    # plan.courses()
-    for course in plan.courses():
-        if course["course_code"] == "TDDE01":
-            pprint.pprint(course)
-    # plan.program_name()
-
+    plan.courses()
+    
 if __name__ == "__main__":
     main()
