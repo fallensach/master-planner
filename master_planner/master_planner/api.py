@@ -77,8 +77,8 @@ def overview(request):
                                      )
                            )
     total_hp_by_profile = dict(total_hp_by_profile)
-    if "Ingen inriktning vald" in total_hp_by_profile:
-        del total_hp_by_profile["Ingen inriktning vald"]
+    if "Ingen inriktning" in total_hp_by_profile:
+        del total_hp_by_profile["Ingen inriktning"]
 
     overlapping_schedules = (account_instance.choices
                              .values("schedule__semester", "schedule__period", "schedule__block")
