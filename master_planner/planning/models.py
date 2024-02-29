@@ -5,7 +5,7 @@ import uuid
 
     
 class MainField(models.Model):
-    field_name = models.CharField(max_length=15, primary_key=True)
+    field_name = models.CharField(max_length=50, primary_key=True)
 
     def __str__(self):
         return self.field_name
