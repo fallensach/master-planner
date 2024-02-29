@@ -16,7 +16,7 @@ class Course(models.Model):
     course_name = models.CharField(max_length=120)
     hp = models.CharField(max_length=5, default=1)
     level = models.CharField(max_length=20)
-    campus = models.CharField(max_length=20, null=True)
+    campus = models.CharField(max_length=100, null=True)
     main_fields = models.ManyToManyField(MainField)
 
     def __str__(self):
